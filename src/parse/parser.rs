@@ -118,31 +118,48 @@ impl Parser {
     }
 }
 
-// TODO Enable tests.
-// #[cfg(test)]
-// mod tests {
-//     use super::Parser;
-//     use crate::{expression::Expression, parse::error::ParseError};
+#[cfg(test)]
+mod tests {
+    use super::Parser;
+    use crate::{expression::Expression, parse::error::ParseError};
+    use async_stream::stream;
+    use futures::pin_mut;
 
-//     async fn parse(string: &str) -> Result<Option<Expression>, ParseError> {
-//         let mut parser = Parser::new();
+    async fn parse(string: &str) -> Result<Option<Expression>, ParseError> {
+        let mut parser = Parser::new();
+        // TODO Can we covnert &str into Stream directly?
+        let stream = stream! {
+            for line in string.lines() {
+                yield Ok(line.trim().to_owned());
+            }
+        };
 
-//         parser.parse_expression(&mut string.as_bytes()).await
-//     }
+        pin_mut!(stream);
 
-//     #[tokio::test]
-//     async fn parse_expression() {
-//         assert_eq!(
-//             parse("foo").await.unwrap(),
-//             Some(Expression::Symbol("foo".into()))
-//         );
-//     }
+        parser.parse_expression::<ParseError>(&mut stream).await
+    }
 
-//     #[tokio::test]
-//     async fn parse_array() {
-//         assert_eq!(
-//             parse("(foo)").await.unwrap(),
-//             Some(Expression::Array(vec![Expression::Symbol("foo".into())]))
-//         );
-//     }
-// }
+    #[tokio::test]
+    async fn parse_symbol() {
+        assert_eq!(
+            parse("foo").await.unwrap(),
+            Some(Expression::Symbol("foo".into()))
+        );
+    }
+
+    #[tokio::test]
+    async fn skip_comment() {
+        assert_eq!(
+            parse(";comment\nfoo").await.unwrap(),
+            Some(Expression::Symbol("foo".into()))
+        );
+    }
+
+    #[tokio::test]
+    async fn parse_array() {
+        assert_eq!(
+            parse("(foo)").await.unwrap(),
+            Some(Expression::Array(vec![Expression::Symbol("foo".into())]))
+        );
+    }
+}
