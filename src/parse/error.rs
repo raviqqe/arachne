@@ -1,8 +1,11 @@
-use std::error::Error;
-use std::fmt;
-use std::fmt::{Display, Formatter};
-use std::io;
-use std::string::FromUtf8Error;
+use std::{
+    convert::Infallible,
+    error::Error,
+    fmt,
+    fmt::{Display, Formatter},
+    io,
+    string::FromUtf8Error,
+};
 
 #[derive(Debug)]
 pub enum ParseError {
@@ -37,6 +40,12 @@ impl From<io::Error> for ParseError {
 
 impl From<FromUtf8Error> for ParseError {
     fn from(error: FromUtf8Error) -> Self {
+        Self::Other(error.into())
+    }
+}
+
+impl From<Infallible> for ParseError {
+    fn from(error: Infallible) -> Self {
         Self::Other(error.into())
     }
 }
