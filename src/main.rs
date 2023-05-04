@@ -12,7 +12,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     loop {
         let expression = parse_expression(&mut stdin).await?;
 
-        if let Some(expression) = expression {
+        if let Some(_expression) = expression {
             todo!();
         } else {
             break;

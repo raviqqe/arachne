@@ -1,5 +1,7 @@
+mod error;
+
 use crate::expression::Expression;
-use std::error::Error;
+use error::ParseError;
 use std::marker::Unpin;
 use tokio::io::AsyncReadExt;
 
@@ -9,10 +11,11 @@ const SYMBOL_CAPACITY: usize = 8;
 // TODO Support UTF-8.
 pub async fn parse_expression(
     reader: &mut (impl AsyncReadExt + Unpin),
-) -> Result<Option<Expression>, Box<dyn Error>> {
+) -> Result<Option<Expression>, ParseError> {
     loop {
         match reader.read_u8().await? {
             b'(' => return Ok(Some(parse_parentheses(reader).await?)),
+            b')' => return Err(ParseError::ClosedParenthesis),
             b';' => {
                 parse_comment(reader).await?;
                 continue;
@@ -24,15 +27,15 @@ pub async fn parse_expression(
 }
 
 async fn parse_parentheses(
-    reader: &mut (impl AsyncReadExt + Unpin),
-) -> Result<Expression, Box<dyn Error>> {
+    _reader: &mut (impl AsyncReadExt + Unpin),
+) -> Result<Expression, ParseError> {
     todo!();
 }
 
 async fn parse_symbol(
     reader: &mut (impl AsyncReadExt + Unpin),
     character: u8,
-) -> Result<Expression, Box<dyn Error>> {
+) -> Result<Expression, ParseError> {
     let mut symbol = Vec::with_capacity(SYMBOL_CAPACITY);
 
     symbol.push(character);
@@ -46,7 +49,7 @@ async fn parse_symbol(
     }
 }
 
-async fn parse_comment(reader: &mut (impl AsyncReadExt + Unpin)) -> Result<(), Box<dyn Error>> {
+async fn parse_comment(reader: &mut (impl AsyncReadExt + Unpin)) -> Result<(), ParseError> {
     while reader.read_u8().await? != b'\n' {}
 
     Ok(())
