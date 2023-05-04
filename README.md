@@ -4,8 +4,28 @@
 
 ### Core
 
+#### Quote
+
 ```lisp
-(use "path/to/module.arcn")
+'(foo bar) ; -> (foo bar)
+```
+
+#### Let binding
+
+```lisp
+(let foo bar)
+```
+
+#### Lambda expression
+
+```lisp
+(fn (x y) (+ 42 2045))
+```
+
+#### Macro expression
+
+```lisp
+(macro (x y) (+ 42 2045))
 ```
 
 ### Standard libraries
