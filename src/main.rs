@@ -18,6 +18,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     loop {
         let expression = parse_expression(&mut stdin)?;
+
+        if let Some(expression) = expression {
+            todo!();
+        } else {
+            break;
+        }
     }
 
     Ok(())
