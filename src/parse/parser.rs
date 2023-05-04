@@ -1,8 +1,10 @@
 use super::error::ParseError;
 use crate::expression::Expression;
 use async_recursion::async_recursion;
-use std::{io, marker::Unpin};
-use tokio::io::AsyncBufReadExt;
+use futures::Stream;
+use futures::StreamExt;
+use std::error::Error;
+use std::marker::Unpin;
 
 const SPECIAL_CHARACTERS: &str = "(); \t\n";
 const SYMBOL_CAPACITY: usize = 8;
@@ -22,9 +24,9 @@ impl Parser {
         }
     }
 
-    pub async fn parse_expression(
+    pub async fn parse_expression<E: Error + 'static>(
         &mut self,
-        reader: &mut (impl AsyncBufReadExt + Unpin),
+        reader: &mut (impl Stream<Item = Result<String, E>> + Unpin),
     ) -> Result<Option<Expression>, ParseError> {
         loop {
             if let Some(character) = self.read_character(reader).await? {
@@ -45,9 +47,9 @@ impl Parser {
     }
 
     #[async_recursion(?Send)]
-    async fn parse_parentheses(
+    async fn parse_parentheses<E: Error + 'static>(
         &mut self,
-        reader: &mut (impl AsyncBufReadExt + Unpin),
+        reader: &mut (impl Stream<Item = Result<String, E>> + Unpin),
     ) -> Result<Expression, ParseError> {
         let mut vector = Vec::with_capacity(ARRAY_CAPACITY);
 
@@ -61,9 +63,9 @@ impl Parser {
         }
     }
 
-    async fn parse_symbol(
+    async fn parse_symbol<E: Error + 'static>(
         &mut self,
-        reader: &mut (impl AsyncBufReadExt + Unpin),
+        reader: &mut (impl Stream<Item = Result<String, E>> + Unpin),
         character: char,
     ) -> Result<Expression, ParseError> {
         let mut string = String::with_capacity(SYMBOL_CAPACITY);
@@ -85,9 +87,9 @@ impl Parser {
         }
     }
 
-    async fn parse_comment(
+    async fn parse_comment<E: Error + 'static>(
         &mut self,
-        reader: &mut (impl AsyncBufReadExt + Unpin),
+        reader: &mut (impl Stream<Item = Result<String, E>> + Unpin),
     ) -> Result<(), ParseError> {
         while !matches!(self.read_character(reader).await?, Some('\n') | None) {}
 
@@ -95,15 +97,18 @@ impl Parser {
     }
 
     // TODO Support UTF-8.
-    async fn read_character(
+    async fn read_character<E: Error + 'static>(
         &mut self,
-        reader: &mut (impl AsyncBufReadExt + Unpin),
+        reader: &mut (impl Stream<Item = Result<String, E>> + Unpin),
     ) -> Result<Option<char>, ParseError> {
         if self.buffer.len() == self.offset {
-            if let Err(error) = reader.read_line(&mut self.buffer).await {
-                if error.kind() != io::ErrorKind::UnexpectedEof {
-                    return Err(error.into());
+            match reader.next().await {
+                None => return Ok(None),
+                Some(Ok(string)) => {
+                    self.buffer.extend(string.chars());
+                    self.buffer.push('\n');
                 }
+                Some(Err(error)) => return Err(ParseError::Other(error.into())),
             }
         }
 
