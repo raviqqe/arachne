@@ -2,7 +2,7 @@ use super::error::ParseError;
 use crate::expression::Expression;
 use async_recursion::async_recursion;
 use std::{io, marker::Unpin};
-use tokio::io::AsyncReadExt;
+use tokio::io::AsyncBufReadExt;
 
 const SPECIAL_CHARACTERS: &str = "(); \t\n";
 const SYMBOL_CAPACITY: usize = 8;
@@ -11,18 +11,20 @@ const BUFFER_CAPACITY: usize = 8;
 
 pub struct Parser {
     buffer: String,
+    offset: usize,
 }
 
 impl Parser {
     pub fn new() -> Self {
         Self {
             buffer: String::with_capacity(BUFFER_CAPACITY),
+            offset: 0,
         }
     }
 
     pub async fn parse_expression(
         &mut self,
-        reader: &mut (impl AsyncReadExt + Unpin),
+        reader: &mut (impl AsyncBufReadExt + Unpin),
     ) -> Result<Option<Expression>, ParseError> {
         loop {
             if let Some(character) = self.read_character(reader).await? {
@@ -45,7 +47,7 @@ impl Parser {
     #[async_recursion(?Send)]
     async fn parse_parentheses(
         &mut self,
-        reader: &mut (impl AsyncReadExt + Unpin),
+        reader: &mut (impl AsyncBufReadExt + Unpin),
     ) -> Result<Expression, ParseError> {
         let mut vector = Vec::with_capacity(ARRAY_CAPACITY);
 
@@ -61,7 +63,7 @@ impl Parser {
 
     async fn parse_symbol(
         &mut self,
-        reader: &mut (impl AsyncReadExt + Unpin),
+        reader: &mut (impl AsyncBufReadExt + Unpin),
         character: char,
     ) -> Result<Expression, ParseError> {
         let mut string = String::with_capacity(SYMBOL_CAPACITY);
@@ -85,7 +87,7 @@ impl Parser {
 
     async fn parse_comment(
         &mut self,
-        reader: &mut (impl AsyncReadExt + Unpin),
+        reader: &mut (impl AsyncBufReadExt + Unpin),
     ) -> Result<(), ParseError> {
         while !matches!(self.read_character(reader).await?, Some('\n') | None) {}
 
@@ -95,21 +97,46 @@ impl Parser {
     // TODO Support UTF-8.
     async fn read_character(
         &mut self,
-        reader: &mut (impl AsyncReadExt + Unpin),
+        reader: &mut (impl AsyncBufReadExt + Unpin),
     ) -> Result<Option<char>, ParseError> {
-        if let Some(character) = self.buffer.pop() {
-            Ok(Some(character))
-        } else {
-            match reader.read_u8().await {
-                Ok(byte) => Ok(Some(char::try_from(byte)?)),
-                Err(error) => {
-                    if error.kind() == io::ErrorKind::UnexpectedEof {
-                        Ok(None)
-                    } else {
-                        Err(error.into())
-                    }
+        if self.buffer.len() == self.offset {
+            if let Err(error) = reader.read_line(&mut self.buffer).await {
+                if error.kind() != io::ErrorKind::UnexpectedEof {
+                    return Err(error.into());
                 }
             }
         }
+
+        self.offset += 1;
+
+        Ok(self.buffer.chars().nth(self.offset - 1))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Parser;
+    use crate::{expression::Expression, parse::error::ParseError};
+
+    async fn parse(string: &str) -> Result<Option<Expression>, ParseError> {
+        let mut parser = Parser::new();
+
+        parser.parse_expression(&mut string.as_bytes()).await
+    }
+
+    #[tokio::test]
+    async fn parse_expression() {
+        assert_eq!(
+            parse("foo").await.unwrap(),
+            Some(Expression::Symbol("foo".into()))
+        );
+    }
+
+    #[tokio::test]
+    async fn parse_array() {
+        assert_eq!(
+            parse("(foo)").await.unwrap(),
+            Some(Expression::Array(vec![Expression::Symbol("foo".into())]))
+        );
     }
 }

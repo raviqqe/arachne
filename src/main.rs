@@ -3,11 +3,11 @@ mod parse;
 
 use parse::Parser;
 use std::error::Error;
-use tokio::io::stdin;
+use tokio::io::{stdin, BufReader};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let mut stdin = stdin();
+    let mut stdin = BufReader::new(stdin());
     let mut parser = Parser::new();
 
     loop {
