@@ -1,23 +1,21 @@
 mod expression;
 mod parse;
 
-use parse::Parser;
+use futures::{pin_mut, StreamExt};
+use parse::parse;
 use std::error::Error;
-use tokio::io::{stdin, BufReader};
+use tokio::io::{stdin, AsyncBufReadExt, BufReader};
+use tokio_stream::wrappers::LinesStream;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let mut stdin = BufReader::new(stdin());
-    let mut parser = Parser::new();
+    let mut lines = LinesStream::new(BufReader::new(stdin()).lines());
+    let expressions = parse(&mut lines);
 
-    loop {
-        let expression = parser.parse_expression(&mut stdin).await?;
+    pin_mut!(expressions);
 
-        if let Some(expression) = expression {
-            println!("{:?}", expression)
-        } else {
-            break;
-        }
+    while let Some(result) = expressions.next().await {
+        println!("{:?}", result?);
     }
 
     Ok(())
