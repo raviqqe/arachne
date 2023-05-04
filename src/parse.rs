@@ -25,3 +25,53 @@ pub fn parse<E: Error + 'static>(
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::parse;
+    use crate::{expression::Expression, parse::error::ParseError};
+    use async_stream::stream;
+    use futures::{pin_mut, StreamExt};
+    use std::io;
+
+    async fn parse_string(string: &str) -> Result<Vec<Expression>, ParseError> {
+        // TODO Can we covnert &str into Stream directly?
+        let stream = stream! {
+            for line in string.lines() {
+                yield Ok::<_, io::Error>(line.trim().to_owned());
+            }
+        };
+
+        pin_mut!(stream);
+
+        parse(&mut stream)
+            .collect::<Vec<_>>()
+            .await
+            .into_iter()
+            .collect()
+    }
+
+    #[tokio::test]
+    async fn parse_symbol() {
+        assert_eq!(
+            parse_string("foo").await.unwrap(),
+            vec![Expression::Symbol("foo".into())]
+        );
+    }
+
+    #[tokio::test]
+    async fn skip_comment() {
+        assert_eq!(
+            parse_string(";comment\nfoo").await.unwrap(),
+            vec![Expression::Symbol("foo".into())]
+        );
+    }
+
+    #[tokio::test]
+    async fn parse_array() {
+        assert_eq!(
+            parse_string("(foo)").await.unwrap(),
+            vec![Expression::Array(vec![Expression::Symbol("foo".into())])]
+        );
+    }
+}

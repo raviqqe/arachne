@@ -114,6 +114,7 @@ impl Parser {
 
         self.offset += 1;
 
+        // TODO This is O(n).
         Ok(self.buffer.chars().nth(self.offset - 1))
     }
 }
