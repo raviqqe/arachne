@@ -96,7 +96,6 @@ impl Parser {
         Ok(())
     }
 
-    // TODO Support UTF-8.
     async fn read_character<E: Error + 'static>(
         &mut self,
         reader: &mut (impl Stream<Item = Result<String, E>> + Unpin),
