@@ -2,8 +2,8 @@
 
 ## Specification
 
-```json
-
+```lisp
+(use "path/to/module.arcn")
 ```
 
 ## References
