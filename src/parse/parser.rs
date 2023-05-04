@@ -104,7 +104,7 @@ impl Parser {
             match reader.next().await {
                 None => return Ok(None),
                 Some(Ok(string)) => {
-                    self.buffer.extend(string.chars());
+                    self.buffer.push_str(&string);
                     self.buffer.push('\n');
                 }
                 Some(Err(error)) => return Err(ParseError::Other(error.into())),
