@@ -44,7 +44,7 @@ where `foo` is `42`.
 (get x 2) ; -> 42
 ```
 
-where `x` is `'(1 2 3)`
+where `x` is `'(1 42 3)`
 
 #### Set
 
@@ -54,7 +54,15 @@ where `x` is `'(1 2 3)`
 
 where `x` is `'(1 2 3)`
 
+#### Comment
+
+```lisp
+; This is a comment.
+```
+
 ### Standard libraries
+
+#### Module import
 
 ```lisp
 (use "path/to/module.arc")
