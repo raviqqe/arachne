@@ -10,6 +10,10 @@
 
 ### Standard libraries
 
+```lisp
+(use "path/to/module.arc")
+```
+
 > WIP
 
 ## References
