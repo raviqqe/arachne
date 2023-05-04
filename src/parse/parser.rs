@@ -1,10 +1,8 @@
 use super::error::ParseError;
 use crate::expression::Expression;
 use async_recursion::async_recursion;
-use futures::Stream;
-use futures::StreamExt;
-use std::error::Error;
-use std::marker::Unpin;
+use futures::{Stream, StreamExt};
+use std::{error::Error, marker::Unpin};
 
 const SPECIAL_CHARACTERS: &str = "(); \t\n";
 const SYMBOL_CAPACITY: usize = 8;
