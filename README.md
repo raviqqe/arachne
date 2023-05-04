@@ -11,6 +11,15 @@
 (quote (foo bar)) ; -> (foo bar)
 ```
 
+#### Unquote
+
+```lisp
+,foo ; -> 42
+(unquote foo) ; -> 42
+```
+
+where `foo` is `42`.
+
 #### Let binding
 
 ```lisp
