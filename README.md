@@ -2,12 +2,13 @@
 
 ## Specification
 
-### Core
+### Language
 
 #### Quote
 
 ```lisp
 '(foo bar) ; -> (foo bar)
+(quote (foo bar)) ; -> (foo bar)
 ```
 
 #### Let binding
