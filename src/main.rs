@@ -5,19 +5,12 @@ use parse::parse_expression;
 use std::error::Error;
 use tokio::io::stdin;
 
-#[derive(Debug, Default)]
-enum Expression {
-    #[default]
-    None,
-    Symbol(String),
-}
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let stdin = stdin();
+    let mut stdin = stdin();
 
     loop {
-        let expression = parse_expression(&mut stdin)?;
+        let expression = parse_expression(&mut stdin).await?;
 
         if let Some(expression) = expression {
             todo!();
