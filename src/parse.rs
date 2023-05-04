@@ -1,5 +1,6 @@
 mod error;
 mod parser;
+mod utility;
 
 use self::error::ParseError;
 use crate::expression::Expression;
@@ -29,18 +30,14 @@ pub fn parse<E: Error + 'static>(
 #[cfg(test)]
 mod tests {
     use super::parse;
-    use crate::{expression::Expression, parse::error::ParseError};
-    use async_stream::stream;
+    use crate::{
+        expression::Expression,
+        parse::{error::ParseError, utility::lines_stream},
+    };
     use futures::{pin_mut, StreamExt};
-    use std::io;
 
     async fn parse_string(string: &str) -> Result<Vec<Expression>, ParseError> {
-        // TODO Can we convert &str into Stream directly?
-        let stream = stream! {
-            for line in string.lines() {
-                yield Ok::<_, io::Error>(line.trim().to_owned());
-            }
-        };
+        let stream = lines_stream(string);
 
         pin_mut!(stream);
 
