@@ -7,6 +7,7 @@ use std::string::FromUtf8Error;
 #[derive(Debug)]
 pub enum ParseError {
     ClosedParenthesis,
+    EndOfFile,
     Other(Box<dyn Error>),
 }
 
@@ -16,7 +17,10 @@ impl Display for ParseError {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         match self {
             Self::ClosedParenthesis => {
-                write!(formatter, "stray closed parenthesis")
+                write!(formatter, "unexpected closed parenthesis")
+            }
+            Self::EndOfFile => {
+                write!(formatter, "unexpected end of file")
             }
             Self::Other(error) => {
                 write!(formatter, "{}", error)
