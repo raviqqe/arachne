@@ -2,9 +2,15 @@
 
 ## Specification
 
+### Core
+
 ```lisp
 (use "path/to/module.arcn")
 ```
+
+### Standard libraries
+
+> WIP
 
 ## References
 
