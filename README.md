@@ -38,6 +38,22 @@ where `foo` is `42`.
 (macro (x y) (+ 42 2045))
 ```
 
+#### Get
+
+```lisp
+(get x 2) ; -> 42
+```
+
+where `x` is `'(1 2 3)`
+
+#### Set
+
+```lisp
+(set x 2 42) ; -> (1 42 3)
+```
+
+where `x` is `'(1 2 3)`
+
 ### Standard libraries
 
 ```lisp
