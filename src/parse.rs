@@ -60,6 +60,39 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn parse_symbols_separated_by_space() {
+        assert_eq!(
+            parse_string("foo bar").await.unwrap(),
+            vec![
+                Expression::Symbol("foo".into()),
+                Expression::Symbol("bar".into())
+            ]
+        );
+    }
+
+    #[tokio::test]
+    async fn parse_symbols_separated_by_newline() {
+        assert_eq!(
+            parse_string("foo\nbar").await.unwrap(),
+            vec![
+                Expression::Symbol("foo".into()),
+                Expression::Symbol("bar".into())
+            ]
+        );
+    }
+
+    #[tokio::test]
+    async fn parse_symbols_separated_by_tab() {
+        assert_eq!(
+            parse_string("foo\tbar").await.unwrap(),
+            vec![
+                Expression::Symbol("foo".into()),
+                Expression::Symbol("bar".into())
+            ]
+        );
+    }
+
+    #[tokio::test]
     async fn skip_comment() {
         assert_eq!(
             parse_string(";comment\nfoo").await.unwrap(),
