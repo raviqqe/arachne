@@ -1,17 +1,15 @@
 # Arachne
 
-## Specification
+## Language
 
-### Language
-
-#### Quote
+### Quote
 
 ```lisp
 '(foo bar) ; -> (foo bar)
 (quote (foo bar)) ; -> (foo bar)
 ```
 
-#### Unquote
+### Unquote
 
 ```lisp
 ,foo ; -> 42
@@ -20,25 +18,25 @@
 
 where `foo` is `42`.
 
-#### Let binding
+### Let binding
 
 ```lisp
 (let foo bar)
 ```
 
-#### Lambda expression
+### Lambda expression
 
 ```lisp
 (fn (x y) (+ 42 2045))
 ```
 
-#### Macro expression
+### Macro expression
 
 ```lisp
 (macro (x y) (+ 42 2045))
 ```
 
-#### Get
+### Get
 
 ```lisp
 (get x 2) ; -> 42
@@ -46,7 +44,7 @@ where `foo` is `42`.
 
 where `x` is `'(1 42 3)`
 
-#### Set
+### Set
 
 ```lisp
 (set x 2 42) ; -> (1 42 3)
@@ -54,15 +52,15 @@ where `x` is `'(1 42 3)`
 
 where `x` is `'(1 2 3)`
 
-#### Comment
+### Comment
 
 ```lisp
 ; This is a comment.
 ```
 
-### Standard libraries
+## Prelude library
 
-#### Module import
+### Module import
 
 ```lisp
 (use "path/to/module.arc")
