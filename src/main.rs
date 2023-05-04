@@ -3,6 +3,7 @@ mod parse;
 
 use parse::parse_expression;
 use std::error::Error;
+use tokio::io::Stdin;
 
 #[derive(Debug, Default)]
 enum Expression {
@@ -13,7 +14,11 @@ enum Expression {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    let stdin = Stdin::new();
+
     loop {
-        parse_expression()?
+        let expression = parse_expression(&mut stdin)?;
     }
+
+    Ok(())
 }
