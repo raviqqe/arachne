@@ -125,7 +125,7 @@ mod tests {
 
     async fn parse(string: &str) -> Result<Option<Expression>, ParseError> {
         let mut parser = Parser::new();
-        // TODO Can we covnert &str into Stream directly?
+        // TODO Can we convert &str into Stream directly?
         let stream = stream! {
             for line in string.lines() {
                 yield Ok(line.trim().to_owned());

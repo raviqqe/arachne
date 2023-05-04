@@ -35,7 +35,7 @@ mod tests {
     use std::io;
 
     async fn parse_string(string: &str) -> Result<Vec<Expression>, ParseError> {
-        // TODO Can we covnert &str into Stream directly?
+        // TODO Can we convert &str into Stream directly?
         let stream = stream! {
             for line in string.lines() {
                 yield Ok::<_, io::Error>(line.trim().to_owned());
