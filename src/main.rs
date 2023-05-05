@@ -3,7 +3,7 @@ mod interpret;
 mod parse;
 
 use futures::{pin_mut, StreamExt};
-use interpret::interpret_naive;
+use interpret::naive::interpret;
 use parse::parse;
 use std::error::Error;
 use tokio::io::{stdin, AsyncBufReadExt, BufReader};
@@ -16,7 +16,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     pin_mut!(expressions);
 
-    let outputs = interpret_naive(&mut expressions);
+    let outputs = interpret(&mut expressions);
 
     pin_mut!(outputs);
 
