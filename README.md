@@ -2,7 +2,7 @@
 
 ## Types
 
-- Symbols (e.g. `42`, `foo`)
+- Symbols (e.g. `true`, `42`, `x`)
 - Arrays (e.g. `(x y z)`)
 
 ## Primitives
