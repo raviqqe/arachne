@@ -2,41 +2,39 @@ use super::error::ParseError;
 use crate::expression::Expression;
 use async_recursion::async_recursion;
 use futures::{Stream, StreamExt};
-use std::{error::Error, marker::Unpin};
+use std::{collections::VecDeque, error::Error, marker::Unpin};
 
 const SPECIAL_CHARACTERS: &str = "(); \t\n";
 const SYMBOL_CAPACITY: usize = 8;
 const ARRAY_CAPACITY: usize = 8;
-const BUFFER_CAPACITY: usize = 8;
+const BUFFER_CAPACITY: usize = 2 << 6;
 
 pub struct Parser {
-    buffer: String,
-    offset: usize,
+    buffer: VecDeque<char>,
 }
 
 impl Parser {
     pub fn new() -> Self {
         Self {
-            buffer: String::with_capacity(BUFFER_CAPACITY),
-            offset: 0,
+            buffer: VecDeque::with_capacity(BUFFER_CAPACITY),
         }
     }
 
     pub async fn parse_expression<E: Error + 'static>(
         &mut self,
-        reader: &mut (impl Stream<Item = Result<String, E>> + Unpin),
+        lines: &mut (impl Stream<Item = Result<String, E>> + Unpin),
     ) -> Result<Option<Expression>, ParseError> {
         loop {
-            if let Some(character) = self.read_character(reader).await? {
+            if let Some(character) = self.read_character(lines).await? {
                 match character {
-                    '(' => return Ok(Some(self.parse_parentheses(reader).await?)),
+                    '(' => return Ok(Some(self.parse_parentheses(lines).await?)),
                     ')' => return Err(ParseError::ClosedParenthesis),
                     ';' => {
-                        self.parse_comment(reader).await?;
+                        self.parse_comment(lines).await?;
                         continue;
                     }
                     ' ' | '\t' | '\n' => continue,
-                    character => return Ok(Some(self.parse_symbol(reader, character).await?)),
+                    character => return Ok(Some(self.parse_symbol(lines, character).await?)),
                 }
             } else {
                 return Ok(None);
@@ -47,12 +45,12 @@ impl Parser {
     #[async_recursion(?Send)]
     async fn parse_parentheses<E: Error + 'static>(
         &mut self,
-        reader: &mut (impl Stream<Item = Result<String, E>> + Unpin),
+        lines: &mut (impl Stream<Item = Result<String, E>> + Unpin),
     ) -> Result<Expression, ParseError> {
         let mut vector = Vec::with_capacity(ARRAY_CAPACITY);
 
         loop {
-            match self.parse_expression(reader).await {
+            match self.parse_expression(lines).await {
                 Err(ParseError::ClosedParenthesis) => return Ok(Expression::Array(vector)),
                 Err(error) => return Err(error),
                 Ok(None) => return Err(ParseError::EndOfFile),
@@ -63,7 +61,7 @@ impl Parser {
 
     async fn parse_symbol<E: Error + 'static>(
         &mut self,
-        reader: &mut (impl Stream<Item = Result<String, E>> + Unpin),
+        lines: &mut (impl Stream<Item = Result<String, E>> + Unpin),
         character: char,
     ) -> Result<Expression, ParseError> {
         let mut string = String::with_capacity(SYMBOL_CAPACITY);
@@ -71,7 +69,7 @@ impl Parser {
         string.push(character);
 
         loop {
-            let character = self.read_character(reader).await?;
+            let character = self.read_character(lines).await?;
 
             if character
                 .map(|character| SPECIAL_CHARACTERS.contains(character))
@@ -87,32 +85,29 @@ impl Parser {
 
     async fn parse_comment<E: Error + 'static>(
         &mut self,
-        reader: &mut (impl Stream<Item = Result<String, E>> + Unpin),
+        lines: &mut (impl Stream<Item = Result<String, E>> + Unpin),
     ) -> Result<(), ParseError> {
-        while !matches!(self.read_character(reader).await?, Some('\n') | None) {}
+        while !matches!(self.read_character(lines).await?, Some('\n') | None) {}
 
         Ok(())
     }
 
     async fn read_character<E: Error + 'static>(
         &mut self,
-        reader: &mut (impl Stream<Item = Result<String, E>> + Unpin),
+        lines: &mut (impl Stream<Item = Result<String, E>> + Unpin),
     ) -> Result<Option<char>, ParseError> {
-        if self.buffer.len() == self.offset {
-            match reader.next().await {
-                None => return Ok(None),
-                Some(Ok(string)) => {
-                    self.buffer.push_str(&string);
-                    self.buffer.push('\n');
-                }
-                Some(Err(error)) => return Err(ParseError::Other(error.into())),
+        if self.buffer.is_empty() {
+            if let Some(result) = lines.next().await {
+                self.buffer.extend(
+                    result
+                        .map_err(|error| ParseError::Other(error.into()))?
+                        .chars(),
+                );
+                self.buffer.push_back('\n');
             }
         }
 
-        self.offset += 1;
-
-        // TODO This is O(n).
-        Ok(self.buffer.chars().nth(self.offset - 1))
+        Ok(self.buffer.pop_front())
     }
 }
 
