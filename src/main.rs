@@ -3,11 +3,35 @@ mod interpret;
 mod parse;
 
 use futures::{pin_mut, StreamExt};
-use interpret::naive::interpret;
+use interpret::{mlir, naive};
 use parse::parse;
 use std::error::Error;
 use tokio::io::{stdin, AsyncBufReadExt, BufReader};
 use tokio_stream::wrappers::LinesStream;
+
+macro_rules! interpret_fn {
+    ($name: ident, $stream_fn: expr) => {
+        async fn $name() -> Result<(), Box<dyn Error>> {
+            let mut lines = LinesStream::new(BufReader::new(stdin()).lines());
+            let expressions = parse(&mut lines);
+
+            pin_mut!(expressions);
+
+            let outputs = $stream_fn(&mut expressions);
+
+            pin_mut!(outputs);
+
+            while let Some(result) = outputs.next().await {
+                println!("{}", result?);
+            }
+
+            Ok(())
+        }
+    };
+}
+
+interpret_fn!(interpret_naive, naive::interpret);
+interpret_fn!(interpret_mlir, mlir::interpret);
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -26,23 +50,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     } else if matches.get_one("naive").copied().unwrap_or_default() {
         interpret_naive().await
     } else {
-        todo!("real interpreter")
+        interpret_mlir().await
     }
-}
-
-async fn interpret_naive() -> Result<(), Box<dyn Error>> {
-    let mut lines = LinesStream::new(BufReader::new(stdin()).lines());
-    let expressions = parse(&mut lines);
-
-    pin_mut!(expressions);
-
-    let outputs = interpret(&mut expressions);
-
-    pin_mut!(outputs);
-
-    while let Some(result) = outputs.next().await {
-        println!("{}", result?);
-    }
-
-    Ok(())
 }
