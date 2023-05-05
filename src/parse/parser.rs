@@ -22,19 +22,19 @@ impl Parser {
 
     pub async fn parse_expression<E: Error + 'static>(
         &mut self,
-        stream: &mut (impl Stream<Item = Result<String, E>> + Unpin),
+        lines: &mut (impl Stream<Item = Result<String, E>> + Unpin),
     ) -> Result<Option<Expression>, ParseError> {
         loop {
-            if let Some(character) = self.read_character(stream).await? {
+            if let Some(character) = self.read_character(lines).await? {
                 match character {
-                    '(' => return Ok(Some(self.parse_parentheses(stream).await?)),
+                    '(' => return Ok(Some(self.parse_parentheses(lines).await?)),
                     ')' => return Err(ParseError::ClosedParenthesis),
                     ';' => {
-                        self.parse_comment(stream).await?;
+                        self.parse_comment(lines).await?;
                         continue;
                     }
                     ' ' | '\t' | '\n' => continue,
-                    character => return Ok(Some(self.parse_symbol(stream, character).await?)),
+                    character => return Ok(Some(self.parse_symbol(lines, character).await?)),
                 }
             } else {
                 return Ok(None);
@@ -45,12 +45,12 @@ impl Parser {
     #[async_recursion(?Send)]
     async fn parse_parentheses<E: Error + 'static>(
         &mut self,
-        stream: &mut (impl Stream<Item = Result<String, E>> + Unpin),
+        lines: &mut (impl Stream<Item = Result<String, E>> + Unpin),
     ) -> Result<Expression, ParseError> {
         let mut vector = Vec::with_capacity(ARRAY_CAPACITY);
 
         loop {
-            match self.parse_expression(stream).await {
+            match self.parse_expression(lines).await {
                 Err(ParseError::ClosedParenthesis) => return Ok(Expression::Array(vector)),
                 Err(error) => return Err(error),
                 Ok(None) => return Err(ParseError::EndOfFile),
@@ -61,7 +61,7 @@ impl Parser {
 
     async fn parse_symbol<E: Error + 'static>(
         &mut self,
-        stream: &mut (impl Stream<Item = Result<String, E>> + Unpin),
+        lines: &mut (impl Stream<Item = Result<String, E>> + Unpin),
         character: char,
     ) -> Result<Expression, ParseError> {
         let mut string = String::with_capacity(SYMBOL_CAPACITY);
@@ -69,7 +69,7 @@ impl Parser {
         string.push(character);
 
         loop {
-            let character = self.read_character(stream).await?;
+            let character = self.read_character(lines).await?;
 
             if character
                 .map(|character| SPECIAL_CHARACTERS.contains(character))
@@ -85,19 +85,19 @@ impl Parser {
 
     async fn parse_comment<E: Error + 'static>(
         &mut self,
-        stream: &mut (impl Stream<Item = Result<String, E>> + Unpin),
+        lines: &mut (impl Stream<Item = Result<String, E>> + Unpin),
     ) -> Result<(), ParseError> {
-        while !matches!(self.read_character(stream).await?, Some('\n') | None) {}
+        while !matches!(self.read_character(lines).await?, Some('\n') | None) {}
 
         Ok(())
     }
 
     async fn read_character<E: Error + 'static>(
         &mut self,
-        stream: &mut (impl Stream<Item = Result<String, E>> + Unpin),
+        lines: &mut (impl Stream<Item = Result<String, E>> + Unpin),
     ) -> Result<Option<char>, ParseError> {
         if self.buffer.is_empty() {
-            if let Some(result) = stream.next().await {
+            if let Some(result) = lines.next().await {
                 self.buffer.extend(
                     result
                         .map_err(|error| ParseError::Other(error.into()))?
