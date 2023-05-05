@@ -11,14 +11,12 @@ const BUFFER_CAPACITY: usize = 2 << 6;
 
 pub struct Parser {
     buffer: VecDeque<char>,
-    offset: usize,
 }
 
 impl Parser {
     pub fn new() -> Self {
         Self {
             buffer: VecDeque::with_capacity(BUFFER_CAPACITY),
-            offset: 0,
         }
     }
 
@@ -98,7 +96,7 @@ impl Parser {
         &mut self,
         reader: &mut (impl Stream<Item = Result<String, E>> + Unpin),
     ) -> Result<Option<char>, ParseError> {
-        if self.buffer.len() == self.offset {
+        if self.buffer.is_empty() {
             match reader.next().await {
                 None => return Ok(None),
                 Some(Ok(string)) => {
@@ -108,8 +106,6 @@ impl Parser {
                 Some(Err(error)) => return Err(ParseError::Other(error.into())),
             }
         }
-
-        self.offset += 1;
 
         Ok(self.buffer.pop_front())
     }
