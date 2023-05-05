@@ -11,6 +11,26 @@ use tokio_stream::wrappers::LinesStream;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    let matches = clap::Command::new(clap::crate_name!())
+        .version(clap::crate_version!())
+        .arg(
+            clap::Arg::new("naive")
+                .long("naive")
+                .help("Use naive implementation")
+                .action(clap::ArgAction::SetTrue),
+        )
+        .get_matches();
+
+    if matches.subcommand().is_some() {
+        todo!("format subcommand")
+    } else if matches.get_one("naive").copied().unwrap_or_default() {
+        interpret_naive().await
+    } else {
+        todo!("real interpreter")
+    }
+}
+
+async fn interpret_naive() -> Result<(), Box<dyn Error>> {
     let mut lines = LinesStream::new(BufReader::new(stdin()).lines());
     let expressions = parse(&mut lines);
 
