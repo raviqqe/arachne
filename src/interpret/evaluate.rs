@@ -24,7 +24,6 @@ fn evaluate_option(expression: &Expression) -> Option<Expression> {
                         }
                         "set" => {
                             let [array, index, value, ..] = rest() else { return None; };
-
                             let mut vector = evaluate_array(array)?.to_vec();
 
                             if let Some(element) =
