@@ -1,7 +1,9 @@
 mod expression;
+mod interpret;
 mod parse;
 
 use futures::{pin_mut, StreamExt};
+use interpret::interpret;
 use parse::parse;
 use std::error::Error;
 use tokio::io::{stdin, AsyncBufReadExt, BufReader};
@@ -14,7 +16,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     pin_mut!(expressions);
 
-    while let Some(result) = expressions.next().await {
+    let outputs = interpret(&mut expressions);
+
+    pin_mut!(outputs);
+
+    while let Some(result) = outputs.next().await {
         println!("{:?}", result?);
     }
 

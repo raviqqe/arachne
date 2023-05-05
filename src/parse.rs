@@ -2,7 +2,7 @@ mod error;
 mod parser;
 mod utility;
 
-use self::error::ParseError;
+pub use self::error::ParseError;
 use crate::expression::Expression;
 use async_stream::try_stream;
 use futures::Stream;
