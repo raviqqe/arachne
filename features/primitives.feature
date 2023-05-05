@@ -92,11 +92,11 @@ Feature: Primitives
     """
 
     Examples:
-      | lhs   | rhs   | result |
-      | 0     | 0     | true   |
-      | 0     | 1     | false  |
-      | 0     | ()    | false  |
-      | ()    | ()    | true   |
-      | ()    | (1)   | false  |
-      | (1)   | (1)   | true   |
-      | (1 2) | (1 2) | true   |
+      | lhs         | rhs         | result |
+      | 0           | 0           | true   |
+      | 0           | 1           | false  |
+      | 0           | (array)     | false  |
+      | (array)     | (array)     | true   |
+      | (array)     | (array 1)   | false  |
+      | (array 1)   | (array 1)   | true   |
+      | (array 1 2) | (array 1 2) | true   |
