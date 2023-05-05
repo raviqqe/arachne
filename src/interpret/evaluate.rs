@@ -206,4 +206,55 @@ mod tests {
             );
         }
     }
+
+    mod eq {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn check_equal_symbols() {
+            assert_eq!(
+                evaluate(&vec!["eq".into(), "0".into(), "0".into()].into()),
+                "true".into(),
+            );
+        }
+
+        #[test]
+        fn check_symbols_not_equal() {
+            assert_eq!(
+                evaluate(&vec!["eq".into(), "0".into(), "1".into()].into()),
+                "false".into(),
+            );
+        }
+
+        #[test]
+        fn check_equal_arrays() {
+            assert_eq!(
+                evaluate(
+                    &vec![
+                        "eq".into(),
+                        vec!["array".into()].into(),
+                        vec!["array".into()].into(),
+                    ]
+                    .into()
+                ),
+                "true".into(),
+            );
+        }
+
+        #[test]
+        fn check_arrays_not_equal() {
+            assert_eq!(
+                evaluate(
+                    &vec![
+                        "eq".into(),
+                        vec!["array".into()].into(),
+                        vec!["array".into(), "1".into()].into(),
+                    ]
+                    .into()
+                ),
+                "false".into(),
+            );
+        }
+    }
 }
