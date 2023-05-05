@@ -16,26 +16,20 @@
 ### Get
 
 ```lisp
-(get x 2) ; -> 42
+(get (array 1 42 3) 2) ; -> 42
 ```
-
-where `x` is `'(1 42 3)`
 
 ### Set
 
 ```lisp
-(set x 2 42) ; -> (1 42 3)
+(set (array 1 2 3) 2 42) ; -> (1 42 3)
 ```
-
-where `x` is `'(1 2 3)`
 
 ### Length
 
 ```lisp
-(len x) ; -> 3
+(len (array 1 2 3)) ; -> 3
 ```
-
-where `x` is `'(1 2 3)`
 
 ### Equal
 
