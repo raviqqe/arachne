@@ -16,6 +16,7 @@ fn evaluate_option(expression: &Expression) -> Option<Expression> {
 
                     match symbol.as_str() {
                         "array" => Some(rest().to_vec().into()),
+                        "eq" => Some((arguments.get(0)? == arguments.get(1)?).to_string().into()),
                         "get" => evaluate_array(arguments.get(0)?)?
                             .get((evaluate_integer(arguments.get(1)?)? - 1) as usize)
                             .cloned(),
