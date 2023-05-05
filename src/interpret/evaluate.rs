@@ -15,7 +15,7 @@ fn evaluate_option(expression: &Expression) -> Option<Expression> {
                     let arguments = rest().iter().map(evaluate).collect::<Vec<_>>();
 
                     match symbol.as_str() {
-                        "array" => Some(Expression::Array(rest().iter().cloned().collect())),
+                        "array" => Some(rest().iter().cloned().collect::<Vec<_>>().into()),
                         "get" => evaluate_array(arguments.get(0)?)?
                             .get((evaluate_integer(arguments.get(1)?)? - 1) as usize)
                             .cloned(),
@@ -29,12 +29,11 @@ fn evaluate_option(expression: &Expression) -> Option<Expression> {
 
                             vector[index] = arguments.get(2)?.clone();
 
-                            Some(Expression::Array(vector))
+                            Some(vector.into())
                         }
-                        "len" => Some(Expression::Symbol(format!(
-                            "{}",
-                            evaluate_array(arguments.get(0)?)?.len()
-                        ))),
+                        "len" => {
+                            Some(format!("{}", evaluate_array(arguments.get(0)?)?.len()).into())
+                        }
                         _ => None,
                     }
                 }
@@ -59,7 +58,7 @@ fn evaluate_array(expression: &Expression) -> Option<&[Expression]> {
 }
 
 fn nil() -> Expression {
-    Expression::Array(vec![])
+    vec![].into()
 }
 
 #[cfg(test)]
