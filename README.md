@@ -46,21 +46,14 @@
 
 ## Prelude library
 
-### Quote
+### If expression
 
 ```lisp
-'(foo bar) ; -> (foo bar)
-(quote (foo bar)) ; -> (foo bar)
+(if
+  condition-1 body-1
+  condition-2 body-2
+  else-body)
 ```
-
-### Unquote
-
-```lisp
-,foo ; -> 42
-(unquote foo) ; -> 42
-```
-
-where `foo` is `42`.
 
 ### Let binding
 
@@ -79,6 +72,22 @@ where `foo` is `42`.
 ```lisp
 (macro (x y) (+ 42 2045))
 ```
+
+### Quote
+
+```lisp
+'(foo bar) ; -> (foo bar)
+(quote (foo bar)) ; -> (foo bar)
+```
+
+### Unquote
+
+```lisp
+,foo ; -> 42
+(unquote foo) ; -> 42
+```
+
+where `foo` is `42`.
 
 ### Module import
 
