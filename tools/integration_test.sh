@@ -8,4 +8,5 @@ bundler install
 
 export PATH=$PWD/target/release:$PATH
 
+cargo build --release
 cucumber --publish-quiet "$@"

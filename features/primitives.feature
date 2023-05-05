@@ -4,7 +4,7 @@ Feature: Primitives
     """
 		(array)
     """
-		When I successfully run `arachne` interactively
+		When I run `arachne` interactively
 		And I pipe in the file "main.arc"
     Then the stdout should contain exactly:
     """
