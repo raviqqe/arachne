@@ -59,3 +59,22 @@ Feature: Primitives
       |          | 2     | 42    | (() 42) |
       | 1        | 1     | 42    | (42)    |
       | 1 2      | 2     | 42    | (1 42)  |
+
+  Scenario Outline: Get a length
+    Given a file named "main.arc" with:
+    """
+    (len (array <elements>))
+    """
+    When I run `arachne` interactively
+    And I pipe in the file "main.arc"
+    Then the stdout should contain exactly:
+    """
+    <result>
+    """
+
+    Examples:
+      | elements | result |
+      |          | 0      |
+      | 1        | 1      |
+      | 1 2      | 2      |
+      | 1 2 3    | 3      |
