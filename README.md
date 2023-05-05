@@ -1,5 +1,11 @@
 # Arachne
 
+## Syntax
+
+- Atoms (e.g. `true`, `42`, `x`)
+- Arrays (e.g. `(x y z)`)
+- Comments (e.g. `; This is a comment.`)
+
 ## Types
 
 - Symbols (e.g. `true`, `42`, `x`)
@@ -36,12 +42,6 @@
 ```lisp
 (eq 1 1) ; -> true
 (eq 1 2) ; -> false
-```
-
-### Comment
-
-```lisp
-; This is a comment.
 ```
 
 ## Prelude library
