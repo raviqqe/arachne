@@ -1,6 +1,7 @@
 mod error;
+mod evaluate;
 
-use self::error::InterpretError;
+use self::{error::InterpretError, evaluate::evaluate};
 use crate::expression::Expression;
 use async_stream::try_stream;
 use futures::{Stream, StreamExt};
@@ -13,7 +14,7 @@ pub fn interpret<E: Error + Into<InterpretError> + 'static>(
         while let Some(result) = expressions.next().await {
             let expression = result?;
 
-            yield format!("{:?}", expression);
+            yield format!("{:?}", evaluate(&expression));
         }
     }
 }
