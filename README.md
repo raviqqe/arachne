@@ -50,8 +50,8 @@
 
 ```lisp
 (if
-  condition-1 body-1
-  condition-2 body-2
+  (condition-1 body-1)
+  (condition-2 body-2)
   else-body)
 ```
 
