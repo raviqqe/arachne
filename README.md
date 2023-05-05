@@ -1,6 +1,11 @@
 # Arachne
 
-## Language
+## Types
+
+- Symbols (e.g. `42`, `foo`)
+- Arrays (e.g. `(x y z)`)
+
+## Primitives
 
 ### Quote
 
