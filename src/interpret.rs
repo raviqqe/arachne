@@ -7,7 +7,7 @@ use async_stream::try_stream;
 use futures::{Stream, StreamExt};
 use std::error::Error;
 
-pub fn interpret_primitives<E: Error + Into<InterpretError> + 'static>(
+pub fn interpret_naive<E: Error + Into<InterpretError> + 'static>(
     expressions: &mut (impl Stream<Item = Result<Expression, E>> + Unpin),
 ) -> impl Stream<Item = Result<Expression, InterpretError>> + '_ {
     try_stream! {
