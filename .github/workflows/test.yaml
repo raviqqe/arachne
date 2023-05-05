@@ -21,5 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: Swatinem/rust-cache@v2
       - uses: ruby/setup-ruby@v1
       - run: tools/integration_test.sh
