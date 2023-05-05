@@ -69,17 +69,14 @@ impl Parser {
         string.push(character);
 
         loop {
-            let character = self.read_character(lines).await?;
+            let Some(character) = self.read_character(lines).await? else { return Ok(string.into()) };
 
-            if character
-                .map(|character| SPECIAL_CHARACTERS.contains(character))
-                .unwrap_or(true)
-            {
-                self.buffer.extend(character);
+            if SPECIAL_CHARACTERS.contains(character) {
+                self.buffer.push_front(character);
                 return Ok(Expression::Symbol(string));
             }
 
-            string.extend(character);
+            string.push(character);
         }
     }
 
