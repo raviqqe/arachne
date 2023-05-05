@@ -11,11 +11,10 @@ fn evaluate_option(expression: &Expression) -> Option<Expression> {
             [] => None,
             [predicate, ..] => match evaluate(predicate) {
                 Expression::Symbol(symbol) => {
-                    let rest = || &array[1..];
-                    let arguments = rest().iter().map(evaluate).collect::<Vec<_>>();
+                    let arguments = array[1..].iter().map(evaluate).collect::<Vec<_>>();
 
                     match symbol.as_str() {
-                        "array" => Some(rest().to_vec().into()),
+                        "array" => Some(arguments.into()),
                         "eq" => Some((arguments.get(0)? == arguments.get(1)?).to_string().into()),
                         "get" => evaluate_array(arguments.get(0)?)?
                             .get((evaluate_integer(arguments.get(1)?)? - 1) as usize)
