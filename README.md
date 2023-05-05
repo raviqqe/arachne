@@ -7,11 +7,10 @@
 
 ## Primitives
 
-### Quote
+### Array
 
 ```lisp
-'(foo bar) ; -> (foo bar)
-(quote (foo bar)) ; -> (foo bar)
+(array 1 2) ; -> (1 2)
 ```
 
 ### Get
@@ -52,6 +51,13 @@ where `x` is `'(1 2 3)`
 ```
 
 ## Prelude library
+
+### Quote
+
+```lisp
+'(foo bar) ; -> (foo bar)
+(quote (foo bar)) ; -> (foo bar)
+```
 
 ### Unquote
 
