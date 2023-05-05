@@ -31,7 +31,11 @@ impl Display for Expression {
             Expression::Array(array) => {
                 write!(formatter, "(")?;
 
-                for expression in array {
+                for (index, expression) in array.iter().enumerate() {
+                    if index != 0 {
+                        write!(formatter, " ")?;
+                    }
+
                     write!(formatter, "{}", expression)?;
                 }
 
@@ -40,5 +44,24 @@ impl Display for Expression {
                 Ok(())
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn format_symbol() {
+        assert_eq!(Expression::from("foo").to_string(), "foo");
+    }
+
+    #[test]
+    fn format_array() {
+        assert_eq!(
+            Expression::from(vec!["foo".into(), "bar".into(), "baz".into()]).to_string(),
+            "(foo bar baz)"
+        );
     }
 }
