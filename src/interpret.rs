@@ -9,12 +9,10 @@ use std::error::Error;
 
 pub fn interpret<E: Error + Into<InterpretError> + 'static>(
     expressions: &mut (impl Stream<Item = Result<Expression, E>> + Unpin),
-) -> impl Stream<Item = Result<String, InterpretError>> + '_ {
+) -> impl Stream<Item = Result<Expression, InterpretError>> + '_ {
     try_stream! {
         while let Some(result) = expressions.next().await {
-            let expression = result?;
-
-            yield format!("{:?}", evaluate(&expression));
+            yield evaluate(&result?);
         }
     }
 }
