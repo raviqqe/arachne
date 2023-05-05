@@ -32,5 +32,4 @@ jobs:
           name: build
           path: target/release
       - run: chmod +x target/release/arachne
-      - run: bundler install
-      - run: PATH=$PWD/target/release:$PATH cucumber --publish-quiet
+      - run: tools/integration_test.sh
