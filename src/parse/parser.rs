@@ -97,13 +97,14 @@ impl Parser {
         stream: &mut (impl Stream<Item = Result<String, E>> + Unpin),
     ) -> Result<Option<char>, ParseError> {
         if self.buffer.is_empty() {
-            match stream.next().await {
-                None => return Ok(None),
-                Some(Ok(string)) => {
-                    self.buffer.extend(string.chars());
-                    self.buffer.push_back('\n');
+            if let Some(result) = stream.next().await {
+                match result {
+                    Ok(string) => {
+                        self.buffer.extend(string.chars());
+                        self.buffer.push_back('\n');
+                    }
+                    Err(error) => return Err(ParseError::Other(error.into())),
                 }
-                Some(Err(error)) => return Err(ParseError::Other(error.into())),
             }
         }
 
