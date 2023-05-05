@@ -2,10 +2,10 @@ Feature: Primitives
   Scenario: Create an array
     Given a file named "main.arc" with:
     """
-		(array)
+    (array)
     """
-		When I run `arachne` interactively
-		And I pipe in the file "main.arc"
+    When I run `arachne` interactively
+    And I pipe in the file "main.arc"
     Then the stdout should contain exactly:
     """
     ()
