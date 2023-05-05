@@ -98,13 +98,12 @@ impl Parser {
     ) -> Result<Option<char>, ParseError> {
         if self.buffer.is_empty() {
             if let Some(result) = stream.next().await {
-                match result {
-                    Ok(string) => {
-                        self.buffer.extend(string.chars());
-                        self.buffer.push_back('\n');
-                    }
-                    Err(error) => return Err(ParseError::Other(error.into())),
-                }
+                self.buffer.extend(
+                    result
+                        .map_err(|error| ParseError::Other(error.into()))?
+                        .chars(),
+                );
+                self.buffer.push_back('\n');
             }
         }
 
