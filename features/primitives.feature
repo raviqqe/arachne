@@ -93,10 +93,10 @@ Feature: Primitives
 
     Examples:
       | lhs   | rhs   | result |
-      | 0     | 0     |
-      | 0     | 1     |
-      | 0     | ()    |
-      | ()    | ()    |
-      | ()    | (1)   |
-      | (1)   | (1)   |
-      | (1 2) | (1 2) |
+      | 0     | 0     | true   |
+      | 0     | 1     | false  |
+      | 0     | ()    | false  |
+      | ()    | ()    | true   |
+      | ()    | (1)   | false  |
+      | (1)   | (1)   | true   |
+      | (1 2) | (1 2) | true   |
