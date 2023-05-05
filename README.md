@@ -1,6 +1,6 @@
 # Arachne
 
-A programming language for dark mages.
+The programming language for dark mages.
 
 ## Syntax
 
