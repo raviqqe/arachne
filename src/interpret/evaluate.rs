@@ -15,7 +15,7 @@ fn evaluate_option(expression: &Expression) -> Option<Expression> {
                     let arguments = rest().iter().map(evaluate).collect::<Vec<_>>();
 
                     match symbol.as_str() {
-                        "array" => Some(rest().iter().cloned().collect::<Vec<_>>().into()),
+                        "array" => Some(rest().to_vec().into()),
                         "get" => evaluate_array(arguments.get(0)?)?
                             .get((evaluate_integer(arguments.get(1)?)? - 1) as usize)
                             .cloned(),
@@ -45,14 +45,14 @@ fn evaluate_option(expression: &Expression) -> Option<Expression> {
 
 fn evaluate_integer(expression: &Expression) -> Option<isize> {
     match expression {
-        Expression::Symbol(symbol) => isize::from_str_radix(&symbol, 10).ok(),
+        Expression::Symbol(symbol) => symbol.parse::<isize>().ok(),
         _ => None,
     }
 }
 
 fn evaluate_array(expression: &Expression) -> Option<&[Expression]> {
     match expression {
-        Expression::Array(array) => Some(&array),
+        Expression::Array(array) => Some(array),
         _ => None,
     }
 }
