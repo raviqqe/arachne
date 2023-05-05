@@ -10,7 +10,7 @@ pub fn interpret<E: Error + Into<InterpretError> + 'static>(
     try_stream! {
         while let Some(_result) = expressions.next().await {
             // TODO
-            yield Expression::Array(vec![].into());
+            yield Expression::Array(vec![]);
         }
     }
 }
