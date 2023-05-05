@@ -16,6 +16,7 @@ fn evaluate_option(expression: &Expression) -> Option<Expression> {
 
                     match symbol.as_str() {
                         "array" => Some(rest().to_vec().into()),
+                        "eq" => Some((arguments.get(0)? == arguments.get(1)?).to_string().into()),
                         "get" => evaluate_array(arguments.get(0)?)?
                             .get((evaluate_integer(arguments.get(1)?)? - 1) as usize)
                             .cloned(),
@@ -202,6 +203,57 @@ mod tests {
                     .into()
                 ),
                 "2".into(),
+            );
+        }
+    }
+
+    mod eq {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn check_equal_symbols() {
+            assert_eq!(
+                evaluate(&vec!["eq".into(), "0".into(), "0".into()].into()),
+                "true".into(),
+            );
+        }
+
+        #[test]
+        fn check_symbols_not_equal() {
+            assert_eq!(
+                evaluate(&vec!["eq".into(), "0".into(), "1".into()].into()),
+                "false".into(),
+            );
+        }
+
+        #[test]
+        fn check_equal_arrays() {
+            assert_eq!(
+                evaluate(
+                    &vec![
+                        "eq".into(),
+                        vec!["array".into()].into(),
+                        vec!["array".into()].into(),
+                    ]
+                    .into()
+                ),
+                "true".into(),
+            );
+        }
+
+        #[test]
+        fn check_arrays_not_equal() {
+            assert_eq!(
+                evaluate(
+                    &vec![
+                        "eq".into(),
+                        vec!["array".into()].into(),
+                        vec!["array".into(), "1".into()].into(),
+                    ]
+                    .into()
+                ),
+                "false".into(),
             );
         }
     }
