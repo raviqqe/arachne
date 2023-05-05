@@ -31,10 +31,31 @@ Feature: Primitives
     """
 
     Examples:
-      | elements | index | result  |
-      |          | 1     | ()      |
-      | 1        | 0     | ()      |
-      | 1        | 1     | 1       |
-      | 1        | 2     | ()      |
-      | 1 42     | 2     | 42      |
-      | 1 2 42   | 3     | 42      |
+      | elements | index | result |
+      |          | 1     | ()     |
+      | 1        | 0     | ()     |
+      | 1        | 1     | 1      |
+      | 1        | 2     | ()     |
+      | 1 42     | 2     | 42     |
+      | 1 2 42   | 3     | 42     |
+
+  Scenario Outline: Set an element
+    Given a file named "main.arc" with:
+    """
+    (set (array <elements>) <index> <value>)
+    """
+    When I run `arachne` interactively
+    And I pipe in the file "main.arc"
+    Then the stdout should contain exactly:
+    """
+    <result>
+    """
+
+    Examples:
+      | elements | index | value | result  |
+      |          |       |       | ()      |
+      |          | 1     |       | ()      |
+      |          | 1     | 42    | (42)    |
+      |          | 2     | 42    | (() 42) |
+      | 1        | 1     | 42    | (42)    |
+      | 1 2      | 2     | 42    | (1 42)  |
