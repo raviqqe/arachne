@@ -35,7 +35,14 @@ fn evaluate_option(expression: &Expression) -> Option<Expression> {
 
                             Some(Expression::Array(vector))
                         }
-                        "len" => None,
+                        "len" => {
+                            let [array, ..] = rest() else { return None; };
+
+                            Some(Expression::Symbol(format!(
+                                "{}",
+                                evaluate_array(array)?.len()
+                            )))
+                        }
                         _ => None,
                     }
                 }
