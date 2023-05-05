@@ -1,6 +1,8 @@
 use crate::parse::ParseError;
-use std::error::Error;
-use std::fmt::{self, Display, Formatter};
+use std::{
+    error::Error,
+    fmt::{self, Display, Formatter},
+};
 
 #[derive(Debug)]
 pub enum InterpretError {
