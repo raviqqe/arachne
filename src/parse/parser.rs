@@ -2,22 +2,22 @@ use super::error::ParseError;
 use crate::expression::Expression;
 use async_recursion::async_recursion;
 use futures::{Stream, StreamExt};
-use std::{error::Error, marker::Unpin};
+use std::{collections::VecDeque, error::Error, marker::Unpin};
 
 const SPECIAL_CHARACTERS: &str = "(); \t\n";
 const SYMBOL_CAPACITY: usize = 8;
 const ARRAY_CAPACITY: usize = 8;
-const BUFFER_CAPACITY: usize = 8;
+const BUFFER_CAPACITY: usize = 2 << 6;
 
 pub struct Parser {
-    buffer: String,
+    buffer: VecDeque<char>,
     offset: usize,
 }
 
 impl Parser {
     pub fn new() -> Self {
         Self {
-            buffer: String::with_capacity(BUFFER_CAPACITY),
+            buffer: VecDeque::with_capacity(BUFFER_CAPACITY),
             offset: 0,
         }
     }
@@ -102,8 +102,8 @@ impl Parser {
             match reader.next().await {
                 None => return Ok(None),
                 Some(Ok(string)) => {
-                    self.buffer.push_str(&string);
-                    self.buffer.push('\n');
+                    self.buffer.extend(string.chars());
+                    self.buffer.push_back('\n');
                 }
                 Some(Err(error)) => return Err(ParseError::Other(error.into())),
             }
@@ -111,8 +111,7 @@ impl Parser {
 
         self.offset += 1;
 
-        // TODO This is O(n).
-        Ok(self.buffer.chars().nth(self.offset - 1))
+        Ok(self.buffer.pop_front())
     }
 }
 
