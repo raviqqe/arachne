@@ -78,3 +78,25 @@ Feature: Primitives
       | 1        | 1      |
       | 1 2      | 2      |
       | 1 2 3    | 3      |
+
+  Scenario Outline: Check equality
+    Given a file named "main.arc" with:
+    """
+    (eq <lhs> <rhs>)
+    """
+    When I run `arachne` interactively
+    And I pipe in the file "main.arc"
+    Then the stdout should contain exactly:
+    """
+    <result>
+    """
+
+    Examples:
+      | lhs   | rhs   | result |
+      | 0     | 0     |
+      | 0     | 1     |
+      | 0     | ()    |
+      | ()    | ()    |
+      | ()    | (1)   |
+      | (1)   | (1)   |
+      | (1 2) | (1 2) |
