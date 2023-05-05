@@ -33,6 +33,13 @@ where `x` is `'(1 2 3)`
 
 where `x` is `'(1 2 3)`
 
+### Equal
+
+```lisp
+(eq 1 1) ; -> true
+(eq 1 2) ; -> false
+```
+
 ### Comment
 
 ```lisp
