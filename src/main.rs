@@ -14,23 +14,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let matches = clap::Command::new(clap::crate_name!())
         .version(clap::crate_version!())
         .arg(
-            clap::Arg::new("verbose")
-                .short('v')
-                .long("verbose")
-                .help("Use verbose output")
-                .global(true)
+            clap::Arg::new("naive")
+                .long("naive")
+                .help("Use naive implementation")
                 .action(clap::ArgAction::SetTrue),
         )
         .get_matches();
 
-    if let Some(_) = matches.subcommand() {
+    if matches.subcommand().is_some() {
         todo!("format subcommand")
+    } else if matches.get_one("naive").copied().unwrap_or_default() {
+        interpret_naive().await
     } else {
-        if matches.get_one("naive").copied().unwrap_or_default() {
-            interpret_naive().await
-        } else {
-            todo!("real interpreter")
-        }
+        todo!("real interpreter")
     }
 }
 

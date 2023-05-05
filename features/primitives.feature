@@ -4,7 +4,7 @@ Feature: Primitives
     """
     (array <arguments>)
     """
-    When I run `arachne` interactively
+    When I run `arachne --naive` interactively
     And I pipe in the file "main.arc"
     Then the stdout should contain exactly:
     """
@@ -23,7 +23,7 @@ Feature: Primitives
     """
     (get (array <elements>) <index>)
     """
-    When I run `arachne` interactively
+    When I run `arachne --naive` interactively
     And I pipe in the file "main.arc"
     Then the stdout should contain exactly:
     """
@@ -44,7 +44,7 @@ Feature: Primitives
     """
     (set (array <elements>) <index> <value>)
     """
-    When I run `arachne` interactively
+    When I run `arachne --naive` interactively
     And I pipe in the file "main.arc"
     Then the stdout should contain exactly:
     """
@@ -65,7 +65,7 @@ Feature: Primitives
     """
     (len (array <elements>))
     """
-    When I run `arachne` interactively
+    When I run `arachne --naive` interactively
     And I pipe in the file "main.arc"
     Then the stdout should contain exactly:
     """
@@ -84,7 +84,7 @@ Feature: Primitives
     """
     (eq <lhs> <rhs>)
     """
-    When I run `arachne` interactively
+    When I run `arachne --naive` interactively
     And I pipe in the file "main.arc"
     Then the stdout should contain exactly:
     """
