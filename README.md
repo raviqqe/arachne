@@ -18,6 +18,7 @@ The programming language for dark mages.
 ### Array
 
 ```lisp
+(array 42) ; -> ()
 (array 42 8) ; -> ()
 ```
 
