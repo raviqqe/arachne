@@ -18,32 +18,38 @@ The programming language for dark mages.
 ### Array
 
 ```lisp
-(array 1 2) ; -> (1 2)
+(array 42) ; -> ()
+(array 42 8) ; -> ()
 ```
+
+Arguments are capacity and an element size.
 
 ### Get
 
 ```lisp
-(get (array 1 42 3) 2) ; -> 42
+(get xs 0) ; -> 42
 ```
 
 ### Set
 
 ```lisp
-(set (array 1 2 3) 2 42) ; -> (1 42 3)
+(set xs 1 42) ; -> (1 42 3)
 ```
+
+If a value is invalid, the `set` function does nothing and returns the original array.
 
 ### Length
 
 ```lisp
-(len (array 1 2 3)) ; -> 3
+(len xs) ; -> 42
 ```
 
 ### Equal
 
 ```lisp
-(eq 1 1) ; -> 1
-(eq 1 2) ; -> 0
+(eq 0 ()) ; -> 1
+(eq 0 0) ; -> 1
+(eq 0 1) ; -> 0
 ```
 
 ## Prelude library
@@ -98,6 +104,10 @@ where `foo` is `42`.
 ```
 
 > WIP
+
+## Design notes
+
+- [The core language](core.md)
 
 ## References
 
