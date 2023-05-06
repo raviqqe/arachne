@@ -35,6 +35,8 @@ Arguments are an element size and capacity.
 (set (array 1 2 3) 2 42) ; -> (1 42 3)
 ```
 
+If a value is too large, the `set` function does nothing and returns the original array.
+
 ### Length
 
 ```lisp
