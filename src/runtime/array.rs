@@ -7,7 +7,7 @@ use std::{
     mem::{align_of, size_of},
 };
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Debug)]
 pub struct Array(u64);
 
 #[repr(C)]
@@ -36,7 +36,7 @@ impl Array {
         if index < self.len_usize() {
             let ptr = (self.element_ptr() as usize + size_of::<Value>()) as *const Value;
 
-            unsafe { *ptr }
+            (unsafe { &*ptr }).clone()
         } else {
             NIL
         }

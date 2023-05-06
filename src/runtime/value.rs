@@ -4,7 +4,7 @@ pub const NIL: Value = Value(0);
 pub const ARRAY_MASK: u64 = 1 << 63;
 
 #[repr(transparent)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Debug)]
 pub struct Value(u64);
 
 impl Value {
@@ -17,6 +17,13 @@ impl Value {
     }
     pub fn payload(&self) -> u64 {
         self.0
+    }
+}
+
+impl Clone for Value {
+    fn clone(&self) -> Self {
+        // TODO Implement a real clone.
+        Self(self.0)
     }
 }
 
