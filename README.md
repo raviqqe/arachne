@@ -18,7 +18,7 @@ The programming language for dark mages.
 ### Array
 
 ```lisp
-(array 8 42) ; -> ()
+(array) ; -> ()
 ```
 
 Arguments are an element size and capacity.
