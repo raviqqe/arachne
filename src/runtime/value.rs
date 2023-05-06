@@ -9,7 +9,7 @@ pub struct Value(u64);
 
 impl Value {
     pub fn is_number(&self) -> bool {
-        todo!()
+        self.0 & ARRAY_MASK == 0
     }
 
     pub fn payload(&self) -> u64 {
