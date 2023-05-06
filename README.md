@@ -4,13 +4,13 @@ The programming language for dark mages.
 
 ## Syntax
 
-- Atoms (e.g. `true`, `42`, `x`)
+- Atoms (e.g. `42`, `x`)
 - Arrays (e.g. `(x y z)`)
 - Comments (e.g. `; This is a comment.`)
 
 ## Types
 
-- Symbols (e.g. `true`, `42`, `x`)
+- Symbols (e.g. `42`, `x`)
 - Arrays (e.g. `(x y z)`)
 
 ## Primitives
@@ -42,8 +42,8 @@ The programming language for dark mages.
 ### Equal
 
 ```lisp
-(eq 1 1) ; -> true
-(eq 1 2) ; -> false
+(eq 1 1) ; -> 1
+(eq 1 2) ; -> 0
 ```
 
 ## Prelude library
