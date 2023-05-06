@@ -17,11 +17,11 @@ fn evaluate_option(expression: &Expression) -> Option<Expression> {
                         "array" => Some(arguments.into()),
                         "eq" => Some((arguments.get(0)? == arguments.get(1)?).to_string().into()),
                         "get" => evaluate_array(arguments.get(0)?)?
-                            .get((evaluate_integer(arguments.get(1)?)? - 1) as usize)
+                            .get((evaluate_integer(arguments.get(1)?)?) as usize)
                             .cloned(),
                         "set" => {
                             let mut vector = evaluate_array(arguments.get(0)?)?.to_vec();
-                            let index = (evaluate_integer(arguments.get(1)?)? - 1) as usize;
+                            let index = (evaluate_integer(arguments.get(1)?)?) as usize;
 
                             if index >= vector.len() {
                                 vector.extend((0..index + 1 - vector.len()).map(|_| nil()));
