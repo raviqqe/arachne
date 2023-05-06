@@ -18,8 +18,10 @@ The programming language for dark mages.
 ### Array
 
 ```lisp
-(array 1 2) ; -> (1 2)
+(array 8 42) ; -> ()
 ```
+
+Arguments are an element size and capacity.
 
 ### Get
 
