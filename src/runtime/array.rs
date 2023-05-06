@@ -48,7 +48,7 @@ impl Array {
         Number::from(self.len_usize() as f64).into()
     }
 
-    pub fn len_usize(&self) -> usize {
+    fn len_usize(&self) -> usize {
         self.header().length
     }
 
