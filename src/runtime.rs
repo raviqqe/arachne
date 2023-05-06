@@ -1,25 +1,9 @@
-pub type Value = f64;
+mod array;
+mod number;
+mod r#type;
+mod value;
 
-#[repr(transparent)]
-pub struct Number(Value);
-
-#[repr(transparent)]
-pub struct Array(f64);
-
-impl Array {
-    pub fn new() -> Self {
-        Self(0.0)
-    }
-
-    pub fn get(&self, index: Value) -> Value {
-        todo!()
-    }
-
-    pub fn set(&self, index: Value, value: Value) -> Value {
-        todo!()
-    }
-
-    pub fn len(&self) -> Value {
-        todo!()
-    }
-}
+pub use array::Array;
+pub use number::Number;
+pub use r#type::Type;
+pub use value::Value;
