@@ -10,6 +10,7 @@ use std::{
 #[derive(Clone, Copy, Debug)]
 pub struct Array(u64);
 
+#[repr(C)]
 struct Header {
     count: usize,
     length: usize,
