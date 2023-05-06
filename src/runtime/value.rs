@@ -12,6 +12,9 @@ impl Value {
         self.0 & ARRAY_MASK == 0
     }
 
+    pub fn is_array(&self) -> bool {
+        self.0 & ARRAY_MASK != 0
+    }
     pub fn payload(&self) -> u64 {
         self.0
     }

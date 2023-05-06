@@ -4,10 +4,8 @@ use super::{
 };
 use std::{
     alloc::{alloc, Layout},
-    mem::size_of,
+    mem::{align_of, size_of},
 };
-
-const ALIGNMENT: usize = 8;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Array(u64);
@@ -20,7 +18,9 @@ struct Header {
 impl Array {
     pub fn new(size: usize) -> Self {
         let layout = Layout::new::<Header>()
-            .extend(Layout::from_size_align(size_of::<Value>() * size, ALIGNMENT).unwrap())
+            .extend(
+                Layout::from_size_align(size_of::<Value>() * size, align_of::<Value>()).unwrap(),
+            )
             .unwrap()
             .0;
 
