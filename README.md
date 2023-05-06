@@ -26,13 +26,13 @@ Arguments are an element size and capacity.
 ### Get
 
 ```lisp
-(get (array 1 42 3) 2) ; -> 42
+(get xs 0) ; -> 42
 ```
 
 ### Set
 
 ```lisp
-(set (array 1 2 3) 2 42) ; -> (1 42 3)
+(set xs 2 42) ; -> (1 42 3)
 ```
 
 If a value is invalid, the `set` function does nothing and returns the original array.
@@ -40,7 +40,7 @@ If a value is invalid, the `set` function does nothing and returns the original 
 ### Length
 
 ```lisp
-(len (array 1 2 3)) ; -> 3
+(len xs) ; -> 42
 ```
 
 ### Equal
