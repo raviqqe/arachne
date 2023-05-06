@@ -104,7 +104,7 @@ where `foo` is `42`.
 
 > WIP
 
-## Documentation
+## Design notes
 
 - [The core language](core.md)
 
