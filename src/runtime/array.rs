@@ -1,10 +1,10 @@
 use super::Value;
 
-pub struct Array(f64);
+pub struct Array(u64);
 
 impl Array {
     pub fn new() -> Self {
-        Self(0.0)
+        todo!()
     }
 
     pub fn get(&self, index: Value) -> Value {
@@ -17,5 +17,9 @@ impl Array {
 
     pub fn len(&self) -> Value {
         todo!()
+    }
+
+    pub fn to_u64(&self) -> u64 {
+        self.0
     }
 }
