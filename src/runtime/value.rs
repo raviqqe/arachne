@@ -3,7 +3,6 @@ use super::{Array, Number};
 pub const NIL: Value = Value(0);
 pub const ARRAY_MASK: u64 = 1 << 63;
 
-#[repr(transparent)]
 #[derive(Debug)]
 pub struct Value(u64);
 
