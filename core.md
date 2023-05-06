@@ -1,5 +1,16 @@
 # Core language
 
+## Syntax
+
+- Atoms (e.g. `42`, `x`)
+- Arrays (e.g. `(x y z)`)
+
+## Types
+
+- Symbols (e.g. `42`, `x`)
+- Arrays (e.g. `(x y z)`)
+  - `()` represents nil too.
+
 ## Primitives
 
 ### Get
@@ -23,7 +34,8 @@
 ### Equal
 
 ```lisp
-(eq 0 ()) ; -> 1
 (eq 0 0) ; -> 1
 (eq 0 1) ; -> 0
+(eq 0 (0)) ; -> 0
+(eq (0) (0)) ; -> 0
 ```
