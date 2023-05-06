@@ -21,8 +21,6 @@ The programming language for dark mages.
 (array) ; -> ()
 ```
 
-Arguments are an element size and capacity.
-
 ### Get
 
 ```lisp
@@ -102,6 +100,10 @@ where `foo` is `42`.
 ```
 
 > WIP
+
+## Documentation
+
+- [The core language](core.md)
 
 ## References
 
