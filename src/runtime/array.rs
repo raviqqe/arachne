@@ -16,10 +16,11 @@ struct Header {
 }
 
 impl Array {
-    pub fn new(size: usize) -> Self {
+    pub fn new(capacity: usize) -> Self {
         let layout = Layout::new::<Header>()
             .extend(
-                Layout::from_size_align(size_of::<Value>() * size, align_of::<Value>()).unwrap(),
+                Layout::from_size_align(size_of::<Value>() * capacity, align_of::<Value>())
+                    .unwrap(),
             )
             .unwrap()
             .0;
