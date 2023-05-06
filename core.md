@@ -2,12 +2,6 @@
 
 ## Primitives
 
-### Array
-
-```lisp
-(array) ; -> ()
-```
-
 ### Get
 
 ```lisp
