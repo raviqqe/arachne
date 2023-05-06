@@ -1,6 +1,7 @@
 mod expression;
 mod interpret;
 mod parse;
+mod value;
 
 use futures::{pin_mut, StreamExt};
 use interpret::{mlir, naive};
