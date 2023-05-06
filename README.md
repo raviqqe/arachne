@@ -47,8 +47,9 @@ If a value is invalid, the `set` function does nothing and returns the original 
 ### Equal
 
 ```lisp
-(eq 1 1) ; -> 1
-(eq 1 2) ; -> 0
+(eq 0 ()) ; -> 1
+(eq 0 0) ; -> 1
+(eq 0 1) ; -> 0
 ```
 
 ## Prelude library
