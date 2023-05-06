@@ -22,7 +22,7 @@ pub fn interpret<E: Error + Into<InterpretError> + 'static>(
 
     let location = Location::unknown(&context);
     let module = Module::new(location);
-    let _engine = ExecutionEngine::new(&module, 2, &[]);
+    let _engine = ExecutionEngine::new(&module, 2, &[], false);
 
     try_stream! {
         while let Some(_result) = expressions.next().await {
