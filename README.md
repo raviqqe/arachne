@@ -33,7 +33,7 @@ Arguments are capacity and an element size.
 ### Set
 
 ```lisp
-(set xs 2 42) ; -> (1 42 3)
+(set xs 1 42) ; -> (1 42 3)
 ```
 
 If a value is invalid, the `set` function does nothing and returns the original array.
