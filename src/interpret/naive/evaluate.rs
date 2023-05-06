@@ -110,7 +110,7 @@ mod tests {
                     &vec![
                         "get".into(),
                         vec!["array".into(), "42".into()].into(),
-                        "1".into()
+                        "0".into()
                     ]
                     .into()
                 ),
@@ -125,7 +125,7 @@ mod tests {
                     &vec![
                         "get".into(),
                         vec!["array".into(), "42".into()].into(),
-                        "2".into()
+                        "1".into()
                     ]
                     .into()
                 ),
@@ -145,7 +145,7 @@ mod tests {
                     &vec![
                         "set".into(),
                         vec!["array".into(), "0".into()].into(),
-                        "1".into(),
+                        "0".into(),
                         "42".into()
                     ]
                     .into()
@@ -161,7 +161,7 @@ mod tests {
                     &vec![
                         "set".into(),
                         vec!["array".into(), "0".into()].into(),
-                        "3".into(),
+                        "2".into(),
                         "42".into()
                     ]
                     .into()
