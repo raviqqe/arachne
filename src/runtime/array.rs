@@ -1,4 +1,7 @@
-use super::Value;
+use super::{
+    value::{ARRAY_MASK, NIL},
+    Number, Value,
+};
 use std::{
     alloc::{alloc, Layout},
     mem::size_of,
@@ -6,6 +9,7 @@ use std::{
 
 const ALIGNMENT: usize = 8;
 
+#[derive(Clone, Copy, Debug)]
 pub struct Array(u64);
 
 struct Header {
@@ -16,15 +20,24 @@ struct Header {
 impl Array {
     pub fn new(size: usize) -> Self {
         let layout = Layout::new::<Header>()
-            .extend(Layout::from_size_align(size_of::<usize>() * size, ALIGNMENT).unwrap())
+            .extend(Layout::from_size_align(size_of::<Value>() * size, ALIGNMENT).unwrap())
             .unwrap()
             .0;
 
-        Self(unsafe { alloc(layout) } as usize as u64 & (1 << 63))
+        Self(unsafe { alloc(layout) } as usize as u64 | ARRAY_MASK)
     }
 
     pub fn get(&self, index: Value) -> Value {
-        todo!()
+        let Ok(index) = Number::try_from(index) else { return NIL; };
+        let index = index.to_f64() as usize;
+
+        if index < self.len_usize() {
+            let ptr = (self.element_ptr() as usize + size_of::<Value>()) as *const Value;
+
+            unsafe { *ptr }
+        } else {
+            NIL
+        }
     }
 
     pub fn set(&self, index: Value, value: Value) -> Value {
@@ -32,10 +45,28 @@ impl Array {
     }
 
     pub fn len(&self) -> Value {
-        todo!()
+        Number::from(self.len_usize() as f64).into()
+    }
+
+    pub fn len_usize(&self) -> usize {
+        self.header().length
     }
 
     pub fn to_u64(&self) -> u64 {
         self.0
+    }
+
+    fn header(&self) -> &Header {
+        let ptr = self.as_ptr() as *const Header;
+
+        unsafe { &*ptr }
+    }
+
+    fn element_ptr(&self) -> *mut u8 {
+        (self.0 as usize + Layout::new::<Header>().size()) as *mut u8
+    }
+
+    fn as_ptr(&self) -> *mut u8 {
+        self.0 as *mut u8
     }
 }
