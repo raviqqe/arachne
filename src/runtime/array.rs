@@ -88,6 +88,14 @@ impl Array {
     }
 }
 
+impl PartialEq for Array {
+    fn eq(&self, other: &Self) -> bool {
+        self.len() == other.len()
+    }
+}
+
+impl Eq for Array {}
+
 impl Clone for Array {
     fn clone(&self) -> Self {
         unsafe { self.header_mut() }.count += 1;
@@ -113,5 +121,17 @@ mod tests {
     #[test]
     fn new() {
         Array::new(42);
+    }
+
+    #[test]
+    fn clone() {
+        let _ = Array::new(42).clone();
+    }
+
+    #[test]
+    fn get() {
+        assert_eq!(Array::new(0).get(0.0.into()), NIL);
+        assert_eq!(Array::new(0).get(1.0.into()), NIL);
+        assert_eq!(Array::new(1).get(0.0.into()), NIL);
     }
 }

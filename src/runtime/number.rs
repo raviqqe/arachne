@@ -1,4 +1,5 @@
 use super::Value;
+use ordered_float::OrderedFloat;
 
 #[repr(transparent)]
 #[derive(Clone, Copy, Debug)]
@@ -9,6 +10,14 @@ impl Number {
         self.0
     }
 }
+
+impl PartialEq for Number {
+    fn eq(&self, other: &Self) -> bool {
+        OrderedFloat::from(self.0) == OrderedFloat::from(other.0)
+    }
+}
+
+impl Eq for Number {}
 
 impl From<f64> for Number {
     fn from(number: f64) -> Self {
@@ -25,5 +34,18 @@ impl TryFrom<Value> for Number {
         } else {
             Err(())
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn float() {
+        assert_eq!(Number::from(0.0), Number::from(0.0));
+        assert_eq!(Number::from(1.0), Number::from(1.0));
+        assert_ne!(Number::from(0.0), Number::from(1.0));
+        assert_eq!(Number::from(f64::NAN), Number::from(f64::NAN));
     }
 }
