@@ -42,7 +42,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn float() {
+    fn eq() {
         assert_eq!(Number::from(0.0), Number::from(0.0));
         assert_eq!(Number::from(1.0), Number::from(1.0));
         assert_ne!(Number::from(0.0), Number::from(1.0));

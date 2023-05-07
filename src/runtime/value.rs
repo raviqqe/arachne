@@ -76,3 +76,21 @@ impl From<Array> for Value {
         Self(array.to_u64())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn compare_numbers() {
+        assert_eq!(Value::from(0.0), Value::from(0.0));
+        assert_eq!(Value::from(1.0), Value::from(1.0));
+        assert_ne!(Value::from(0.0), Value::from(1.0));
+        assert_eq!(Value::from(f64::NAN), Value::from(f64::NAN));
+    }
+
+    #[test]
+    fn compare_arrays() {
+        // TODO Compare arrays.
+    }
+}
