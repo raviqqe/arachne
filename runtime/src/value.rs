@@ -105,6 +105,8 @@ mod tests {
     #[test]
     fn nan() {
         assert!(Value::from(f64::NAN).is_number());
+        assert!(Value::from(0.0 / 0.0).is_number());
+        assert!(Value::from(-0.0 / 0.0).is_number());
     }
 
     #[test]
@@ -113,8 +115,6 @@ mod tests {
         assert!(Value::from(-1.0).is_number());
         assert!(Value::from(1.0 / 0.0).is_number());
         assert!(Value::from(-1.0 / 0.0).is_number());
-        assert!(Value::from(0.0 / 0.0).is_number());
-        assert!(Value::from(-0.0 / 0.0).is_number());
     }
 
     mod clone {
