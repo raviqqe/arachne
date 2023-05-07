@@ -18,7 +18,7 @@ impl Value {
 
     pub fn to_number(&self) -> Option<Number> {
         if self.is_number() {
-            Some(f64::from_bits(self.0).into())
+            self.clone().try_into().ok()
         } else {
             None
         }
