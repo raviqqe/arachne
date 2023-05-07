@@ -69,6 +69,9 @@ dependencies = [
 [[package]]
 name = "arachne-runtime"
 version = "0.1.0"
+dependencies = [
+ "ordered-float",
+]
 
 [[package]]
 name = "async-recursion"

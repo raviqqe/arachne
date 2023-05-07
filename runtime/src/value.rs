@@ -1,3 +1,5 @@
+use std::mem::forget;
+
 use super::{Array, Number};
 
 pub const NIL: Value = Value(0);
@@ -54,8 +56,22 @@ impl Eq for Value {}
 
 impl Clone for Value {
     fn clone(&self) -> Self {
-        // TODO Implement a real clone.
-        Self(self.0)
+        if let Some(array) = self.as_array() {
+            array.clone().into()
+        } else if self.is_number() {
+            Self(self.0)
+        } else {
+            unreachable!()
+        }
+    }
+}
+
+impl Drop for Value {
+    fn drop(&mut self) {
+        if let Some(_array) = self.as_array() {
+        } else if !self.is_number() {
+            unreachable!()
+        }
     }
 }
 
@@ -73,13 +89,31 @@ impl From<Number> for Value {
 
 impl From<Array> for Value {
     fn from(array: Array) -> Self {
-        Self(array.to_u64())
+        let payload = array.to_u64();
+
+        forget(array);
+
+        Self(payload)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    mod clone {
+        use super::*;
+
+        #[test]
+        fn clone_number() {
+            let _ = Value::from(0.0).clone();
+        }
+
+        #[test]
+        fn clone_array() {
+            let _ = Value::from(Array::new(42)).clone();
+        }
+    }
 
     #[test]
     fn compare_numbers() {

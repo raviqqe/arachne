@@ -98,6 +98,7 @@ impl Eq for Array {}
 
 impl Clone for Array {
     fn clone(&self) -> Self {
+        dbg!("CLONE");
         unsafe { self.header_mut() }.count += 1;
 
         Self(self.0)

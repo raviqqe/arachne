@@ -1,14 +1,9 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+mod array;
+mod number;
+mod r#type;
+mod value;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+pub use array::Array;
+pub use number::Number;
+pub use r#type::Type;
+pub use value::{Value, NIL};
