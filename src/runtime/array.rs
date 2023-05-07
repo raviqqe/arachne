@@ -3,8 +3,8 @@ use super::{
     Number, Value,
 };
 use std::{
-    alloc::{alloc, Layout},
-    mem::{align_of, size_of},
+    alloc::{alloc, dealloc, Layout},
+    mem::{align_of, forget, size_of},
 };
 
 #[derive(Debug)]
@@ -25,8 +25,15 @@ impl Array {
             )
             .unwrap()
             .0;
+        let ptr = unsafe { alloc(layout) };
 
-        Self(unsafe { alloc(layout) } as usize as u64 | ARRAY_MASK)
+        unsafe { &mut *(ptr as *mut Header) }.count += 1;
+
+        let this = Self(unsafe { alloc(layout) } as usize as u64 | ARRAY_MASK);
+
+        forget(this.clone());
+
+        this
     }
 
     pub fn get(&self, index: Value) -> Value {
@@ -59,16 +66,52 @@ impl Array {
     }
 
     fn header(&self) -> &Header {
-        let ptr = self.as_ptr() as *const Header;
+        unsafe { &*self.header_mut() }
+    }
 
-        unsafe { &*ptr }
+    unsafe fn header_mut(&self) -> &mut Header {
+        let ptr = self.as_ptr() as *mut Header;
+
+        unsafe { &mut *ptr }
     }
 
     fn element_ptr(&self) -> *mut u8 {
-        (self.0 as usize + Layout::new::<Header>().size()) as *mut u8
+        (self.ptr_usize() + Layout::new::<Header>().size()) as *mut u8
     }
 
     fn as_ptr(&self) -> *mut u8 {
-        self.0 as *mut u8
+        self.ptr_usize() as *mut u8
+    }
+
+    fn ptr_usize(&self) -> usize {
+        (self.0 & !ARRAY_MASK) as usize
+    }
+}
+
+impl Clone for Array {
+    fn clone(&self) -> Self {
+        unsafe { self.header_mut() }.count += 1;
+
+        Self(self.0)
+    }
+}
+
+impl Drop for Array {
+    fn drop(&mut self) {
+        unsafe { self.header_mut() }.count -= 1;
+
+        if self.header().count == 0 {
+            unsafe { dealloc(self.as_ptr(), Layout::new::<Header>()) }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn new() {
+        Array::new(42);
     }
 }
