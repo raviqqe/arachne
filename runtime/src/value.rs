@@ -1,5 +1,3 @@
-
-
 use super::{Array, Number};
 
 pub const NIL: Value = Value(0);
