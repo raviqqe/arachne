@@ -2,10 +2,8 @@ use super::{
     value::{ARRAY_MASK, NIL},
     Number, Value,
 };
-use std::{
-    alloc::{alloc, dealloc, Layout},
-    mem::{align_of, forget, size_of},
-};
+use alloc::alloc::{alloc, dealloc, Layout};
+use core::mem::{align_of, forget, size_of};
 
 #[derive(Debug)]
 pub struct Array(u64);
