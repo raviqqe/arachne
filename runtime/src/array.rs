@@ -139,7 +139,7 @@ impl Array {
     }
 
     fn element_ptr(&self, index: usize) -> *mut Value {
-        ((self.as_ptr() as usize + Layout::new::<Header>().size()) as usize + index * ELEMENT_SIZE)
+        ((self.as_ptr() as usize + Layout::new::<Header>().size()) + index * ELEMENT_SIZE)
             as *mut Value
     }
 
