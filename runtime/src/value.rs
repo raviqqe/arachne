@@ -109,6 +109,8 @@ mod tests {
 
     #[test]
     fn zero_division() {
+        assert!(Value::from(-0.0).is_number());
+        assert!(Value::from(-1.0).is_number());
         assert!(Value::from(1.0 / 0.0).is_number());
         assert!(Value::from(-1.0 / 0.0).is_number());
         assert!(Value::from(0.0 / 0.0).is_number());
