@@ -1,4 +1,4 @@
-use std::mem::forget;
+use std::mem::{forget, ManuallyDrop};
 
 use super::{Array, Number};
 
@@ -68,7 +68,8 @@ impl Clone for Value {
 
 impl Drop for Value {
     fn drop(&mut self) {
-        if let Some(_array) = self.as_array() {
+        if self.is_array() {
+            unsafe { Array::from_raw(self.0) };
         } else if !self.is_number() {
             unreachable!()
         }
@@ -89,11 +90,7 @@ impl From<Number> for Value {
 
 impl From<Array> for Value {
     fn from(array: Array) -> Self {
-        let payload = array.to_u64();
-
-        forget(array);
-
-        Self(payload)
+        Self(array.into_raw())
     }
 }
 

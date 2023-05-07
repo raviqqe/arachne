@@ -36,6 +36,18 @@ impl Array {
         this
     }
 
+    pub unsafe fn from_raw(ptr: u64) -> Self {
+        Self(ptr)
+    }
+
+    pub fn into_raw(self) -> u64 {
+        let ptr = self.0;
+
+        forget(self);
+
+        ptr
+    }
+
     pub fn get(&self, index: Value) -> Value {
         let Ok(index) = Number::try_from(index) else { return NIL; };
         let index = index.to_f64() as usize;
@@ -59,10 +71,6 @@ impl Array {
 
     fn len_usize(&self) -> usize {
         self.header().length
-    }
-
-    pub fn to_u64(&self) -> u64 {
-        self.0
     }
 
     fn header(&self) -> &Header {
@@ -98,7 +106,6 @@ impl Eq for Array {}
 
 impl Clone for Array {
     fn clone(&self) -> Self {
-        dbg!("CLONE");
         unsafe { self.header_mut() }.count += 1;
 
         Self(self.0)
