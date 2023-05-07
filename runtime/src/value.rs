@@ -102,6 +102,19 @@ mod tests {
         let _ = NIL;
     }
 
+    #[test]
+    fn nan() {
+        assert!(Value::from(f64::NAN).is_number());
+    }
+
+    #[test]
+    fn zero_division() {
+        assert!(Value::from(1.0 / 0.0).is_number());
+        assert!(Value::from(-1.0 / 0.0).is_number());
+        assert!(Value::from(0.0 / 0.0).is_number());
+        assert!(Value::from(-0.0 / 0.0).is_number());
+    }
+
     mod clone {
         use super::*;
 
