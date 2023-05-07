@@ -25,10 +25,6 @@ impl Array {
             )
             .unwrap()
             .0;
-        let ptr = unsafe { alloc(layout) };
-
-        unsafe { &mut *(ptr as *mut Header) }.count += 1;
-
         let this = Self(unsafe { alloc(layout) } as usize as u64 | ARRAY_MASK);
 
         forget(this.clone());
@@ -36,6 +32,9 @@ impl Array {
         this
     }
 
+    /// # Safety
+    ///
+    /// The returned array is not cloned and dropped as usual.
     pub unsafe fn from_raw(ptr: u64) -> Self {
         Self(ptr)
     }
@@ -77,10 +76,8 @@ impl Array {
         unsafe { &*self.header_mut() }
     }
 
-    unsafe fn header_mut(&self) -> &mut Header {
-        let ptr = self.as_ptr() as *mut Header;
-
-        unsafe { &mut *ptr }
+    fn header_mut(&self) -> *mut Header {
+        self.as_ptr() as *mut _
     }
 
     fn element_ptr(&self) -> *mut u8 {
@@ -106,7 +103,7 @@ impl Eq for Array {}
 
 impl Clone for Array {
     fn clone(&self) -> Self {
-        unsafe { self.header_mut() }.count += 1;
+        unsafe { &mut *self.header_mut() }.count += 1;
 
         Self(self.0)
     }
@@ -114,7 +111,7 @@ impl Clone for Array {
 
 impl Drop for Array {
     fn drop(&mut self) {
-        unsafe { self.header_mut() }.count -= 1;
+        unsafe { &mut *self.header_mut() }.count -= 1;
 
         if self.header().count == 0 {
             unsafe { dealloc(self.as_ptr(), Layout::new::<Header>()) }
