@@ -99,7 +99,7 @@ mod tests {
 
     #[test]
     fn nil() {
-        let _ = NIL;
+        assert_eq!(NIL, Value::from(0.0));
     }
 
     #[test]
