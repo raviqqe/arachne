@@ -1,23 +1,24 @@
 use super::{Array, Number};
 
 pub const NIL: Value = Value(0);
-pub const ARRAY_MASK: u64 = 1 << 63;
+const EXPONENT_MASK: u64 = 0x7ff0_0000_0000_0000;
+pub const ARRAY_MASK: u64 = 0x1 | EXPONENT_MASK;
 
 #[derive(Debug)]
 pub struct Value(u64);
 
 impl Value {
     pub fn is_number(&self) -> bool {
-        self.0 & ARRAY_MASK == 0
+        !self.is_array()
     }
 
     pub fn is_array(&self) -> bool {
-        self.0 & ARRAY_MASK != 0
+        self.0 & ARRAY_MASK == ARRAY_MASK
     }
 
     pub fn to_number(&self) -> Option<Number> {
         if self.is_number() {
-            Some(f64::from_bits(self.0).into())
+            self.clone().try_into().ok()
         } else {
             None
         }
@@ -33,7 +34,7 @@ impl Value {
         }
     }
 
-    pub fn payload(&self) -> u64 {
+    pub fn to_raw(&self) -> u64 {
         self.0
     }
 }
@@ -95,6 +96,11 @@ impl From<Array> for Value {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn nil() {
+        let _ = NIL;
+    }
 
     mod clone {
         use super::*;

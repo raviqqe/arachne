@@ -2,8 +2,12 @@ use super::{
     value::{ARRAY_MASK, NIL},
     Number, Value,
 };
-use alloc::alloc::{alloc, dealloc, Layout};
+use alloc::alloc::{alloc_zeroed, dealloc, realloc, Layout};
 use core::mem::{align_of, forget, size_of};
+
+const UNIQUE_COUNT: usize = 0;
+const ELEMENT_SIZE: usize = size_of::<Value>();
+const ALIGNMENT: usize = align_of::<Value>();
 
 #[derive(Debug)]
 pub struct Array(u64);
@@ -11,23 +15,16 @@ pub struct Array(u64);
 #[repr(C)]
 struct Header {
     count: usize,
-    length: usize,
+    len: usize,
 }
 
 impl Array {
     pub fn new(capacity: usize) -> Self {
-        let layout = Layout::new::<Header>()
-            .extend(
-                Layout::from_size_align(size_of::<Value>() * capacity, align_of::<Value>())
-                    .unwrap(),
-            )
-            .unwrap()
-            .0;
-        let this = Self(unsafe { alloc(layout) } as usize as u64 | ARRAY_MASK);
+        let ptr = unsafe { alloc_zeroed(Self::layout(capacity)) } as usize as u64;
 
-        forget(this.clone());
+        assert!(ptr & ARRAY_MASK == 0);
 
-        this
+        Self(ptr | ARRAY_MASK)
     }
 
     /// # Safety
@@ -47,27 +44,90 @@ impl Array {
 
     pub fn get(&self, index: Value) -> Value {
         let Ok(index) = Number::try_from(index) else { return NIL; };
-        let index = index.to_f64() as usize;
+        let index = index.to_f64();
 
-        if index < self.len_usize() {
-            let ptr = (self.element_ptr() as usize + size_of::<Value>()) as *const Value;
+        if index < 0.0 {
+            NIL
+        } else {
+            self.get_usize(index as usize)
+        }
+    }
 
-            (unsafe { &*ptr }).clone()
+    pub fn get_usize(&self, index: usize) -> Value {
+        if index < self.header().len {
+            self.get_usize_unchecked(index)
         } else {
             NIL
         }
     }
 
-    pub fn set(&self, _index: Value, _value: Value) -> Value {
-        todo!()
+    fn get_usize_unchecked(&self, index: usize) -> Value {
+        (unsafe { &*self.element_ptr(index) }).clone()
+    }
+
+    pub fn set(self, index: Value, value: Value) -> Value {
+        let Ok(index) = Number::try_from(index) else { return NIL; };
+        let index = index.to_f64();
+
+        if index < 0.0 {
+            self.into()
+        } else {
+            self.set_usize(index as usize, value)
+        }
+    }
+
+    pub fn set_usize(mut self, index: usize, value: Value) -> Value {
+        let len = index + 1;
+
+        if self.header().count == UNIQUE_COUNT {
+            self.extend(len);
+        } else {
+            self = self.deep_clone(len);
+        }
+
+        self.set_usize_unchecked(index, value);
+
+        self.into()
+    }
+
+    fn set_usize_unchecked(&mut self, index: usize, value: Value) {
+        *unsafe { &mut *self.element_ptr(index) } = value;
+    }
+
+    fn extend(&mut self, len: usize) {
+        if len <= self.header().len {
+            return;
+        }
+
+        self.0 = unsafe {
+            realloc(
+                self.as_ptr(),
+                Self::layout(self.header().len),
+                Self::layout(len).size(),
+            )
+        } as u64
+            | ARRAY_MASK;
+
+        unsafe { &mut *self.header_mut() }.len = len;
     }
 
     pub fn len(&self) -> Value {
-        Number::from(self.len_usize() as f64).into()
+        Number::from(self.header().len as f64).into()
     }
 
-    fn len_usize(&self) -> usize {
-        self.header().length
+    fn deep_clone(&mut self, len: usize) -> Self {
+        let len = self.header().len.max(len);
+        let ptr = unsafe { alloc_zeroed(Self::layout(len)) };
+
+        for index in 0..self.header().len {
+            self.set_usize_unchecked(index, self.get_usize_unchecked(index));
+        }
+
+        let other = Self(ptr as u64 | ARRAY_MASK);
+
+        unsafe { &mut *other.header_mut() }.len = len;
+
+        other
     }
 
     fn header(&self) -> &Header {
@@ -78,16 +138,20 @@ impl Array {
         self.as_ptr() as *mut _
     }
 
-    fn element_ptr(&self) -> *mut u8 {
-        (self.ptr_usize() + Layout::new::<Header>().size()) as *mut u8
+    fn element_ptr(&self, index: usize) -> *mut Value {
+        ((self.as_ptr() as usize + Layout::new::<Header>().size()) + index * ELEMENT_SIZE)
+            as *mut Value
     }
 
     fn as_ptr(&self) -> *mut u8 {
-        self.ptr_usize() as *mut u8
+        (self.0 & !ARRAY_MASK) as usize as *mut u8
     }
 
-    fn ptr_usize(&self) -> usize {
-        (self.0 & !ARRAY_MASK) as usize
+    fn layout(capacity: usize) -> Layout {
+        Layout::new::<Header>()
+            .extend(Layout::from_size_align(ELEMENT_SIZE * capacity, ALIGNMENT).unwrap())
+            .unwrap()
+            .0
     }
 }
 
@@ -109,10 +173,11 @@ impl Clone for Array {
 
 impl Drop for Array {
     fn drop(&mut self) {
-        unsafe { &mut *self.header_mut() }.count -= 1;
-
         if self.header().count == 0 {
+            // TODO Drop elements.
             unsafe { dealloc(self.as_ptr(), Layout::new::<Header>()) }
+        } else {
+            unsafe { &mut *self.header_mut() }.count -= 1;
         }
     }
 }
@@ -133,8 +198,52 @@ mod tests {
 
     #[test]
     fn get() {
+        assert_eq!(Array::new(0).get((-1.0).into()), NIL);
+        assert_eq!(Array::new(0).get((-0.0).into()), NIL);
         assert_eq!(Array::new(0).get(0.0.into()), NIL);
         assert_eq!(Array::new(0).get(1.0.into()), NIL);
         assert_eq!(Array::new(1).get(0.0.into()), NIL);
+    }
+
+    mod set {
+        use super::*;
+
+        #[test]
+        fn set_element() {
+            let value = Array::new(0).set(0.0.into(), 42.0.into());
+            let array = value.as_array().unwrap();
+
+            assert_eq!(array.get(0.0.into()), 42.0.into());
+            assert_eq!(array.get(1.0.into()), NIL);
+        }
+
+        #[test]
+        fn set_element_extending_array() {
+            let value = Array::new(0).set(0.0.into(), 42.0.into());
+            let array = value.as_array().unwrap();
+
+            assert_eq!(array.get(0.0.into()), 42.0.into());
+            assert_eq!(array.get(1.0.into()), NIL);
+        }
+
+        #[test]
+        fn set_element_extending_array_with_nil() {
+            let value = Array::new(0).set(1.0.into(), 42.0.into());
+            let array = value.as_array().unwrap();
+
+            assert_eq!(array.get(0.0.into()), NIL);
+            assert_eq!(array.get(1.0.into()), 42.0.into());
+            assert_eq!(array.get(2.0.into()), NIL);
+        }
+
+        #[test]
+        fn set_element_cloning_array() {
+            let one = Array::new(0);
+            let value = one.clone().set(0.0.into(), 42.0.into());
+            let other = value.as_array().unwrap();
+
+            assert_eq!(one.get(0.0.into()), NIL);
+            assert_eq!(other.get(0.0.into()), 42.0.into());
+        }
     }
 }

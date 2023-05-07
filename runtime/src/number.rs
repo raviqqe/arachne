@@ -30,7 +30,7 @@ impl TryFrom<Value> for Number {
 
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         if value.is_number() {
-            Ok(f64::from_bits(value.payload()).into())
+            Ok(f64::from_bits(value.to_raw()).into())
         } else {
             Err(())
         }
