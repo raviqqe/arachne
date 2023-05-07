@@ -34,7 +34,7 @@ impl Value {
         }
     }
 
-    pub fn payload(&self) -> u64 {
+    pub fn to_raw(&self) -> u64 {
         self.0
     }
 }
