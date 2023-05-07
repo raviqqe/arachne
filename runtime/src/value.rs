@@ -2,7 +2,7 @@ use super::{Array, Number};
 
 pub const NIL: Value = Value(0);
 const EXPONENT_MASK: u64 = 0x7ff0_0000_0000_0000;
-pub const ARRAY_MASK: u64 = 0x1 | EXPONENT_MASK;
+pub const ARRAY_MASK: u64 = 0x0004_0000_0000_0000 | EXPONENT_MASK;
 
 #[derive(Debug)]
 pub struct Value(u64);
