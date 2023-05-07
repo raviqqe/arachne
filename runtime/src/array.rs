@@ -20,7 +20,11 @@ struct Header {
 
 impl Array {
     pub fn new(capacity: usize) -> Self {
-        Self(unsafe { alloc_zeroed(Self::layout(capacity)) } as usize as u64 | ARRAY_MASK)
+        let ptr = unsafe { alloc_zeroed(Self::layout(capacity)) } as usize as u64;
+
+        assert!(ptr & ARRAY_MASK == 0);
+
+        Self(ptr | ARRAY_MASK)
     }
 
     /// # Safety
@@ -194,9 +198,8 @@ mod tests {
 
     #[test]
     fn get() {
-        // TODO
-        // assert_eq!(Array::new(0).get((-1.0).into()), NIL);
-        // assert_eq!(Array::new(0).get((-0.0).into()), NIL);
+        assert_eq!(Array::new(0).get((-1.0).into()), NIL);
+        assert_eq!(Array::new(0).get((-0.0).into()), NIL);
         assert_eq!(Array::new(0).get(0.0.into()), NIL);
         assert_eq!(Array::new(0).get(1.0.into()), NIL);
         assert_eq!(Array::new(1).get(0.0.into()), NIL);
