@@ -105,7 +105,7 @@ mod tests {
     #[test]
     fn nan() {
         assert!(Value::from(f64::NAN).is_number());
-        assert!(Value::from(0.0 / 0.0).is_number());
+        assert!(Value::from(-f64::NAN).is_number());
         assert!(Value::from(-0.0 / 0.0).is_number());
     }
 
