@@ -19,6 +19,7 @@ struct Header {
 }
 
 impl Array {
+    // TODO Handle zero capacity properly.
     pub fn new(capacity: usize) -> Self {
         let ptr = unsafe { alloc_zeroed(Self::layout(capacity)) } as usize as u64;
 
