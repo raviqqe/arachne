@@ -61,7 +61,7 @@ impl Array {
         }
     }
 
-    pub fn set(&self, index: Value, value: Value) -> Value {
+    pub fn set(&self, _index: Value, _value: Value) -> Value {
         todo!()
     }
 
@@ -133,7 +133,7 @@ mod tests {
 
     #[test]
     fn clone() {
-        let _ = Array::new(42).clone();
+        let _ = Array::new(42);
     }
 
     #[test]

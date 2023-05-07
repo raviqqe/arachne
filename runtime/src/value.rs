@@ -1,4 +1,4 @@
-use std::mem::{forget, ManuallyDrop};
+
 
 use super::{Array, Number};
 
@@ -103,12 +103,12 @@ mod tests {
 
         #[test]
         fn clone_number() {
-            let _ = Value::from(0.0).clone();
+            let _ = Value::from(0.0);
         }
 
         #[test]
         fn clone_array() {
-            let _ = Value::from(Array::new(42)).clone();
+            let _ = Value::from(Array::new(42));
         }
     }
 
