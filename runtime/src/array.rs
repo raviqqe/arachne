@@ -2,7 +2,7 @@ use super::{
     value::{ARRAY_MASK, NIL},
     Number, Value,
 };
-use alloc::alloc::{alloc, dealloc, realloc, Layout};
+use alloc::alloc::{alloc_zeroed, dealloc, realloc, Layout};
 use core::mem::{align_of, forget, size_of};
 
 const UNIQUE_COUNT: usize = 0;
@@ -20,7 +20,7 @@ struct Header {
 
 impl Array {
     pub fn new(capacity: usize) -> Self {
-        Self(unsafe { alloc(Self::layout(capacity)) } as usize as u64 | ARRAY_MASK)
+        Self(unsafe { alloc_zeroed(Self::layout(capacity)) } as usize as u64 | ARRAY_MASK)
     }
 
     /// # Safety
@@ -113,13 +113,17 @@ impl Array {
 
     fn deep_clone(&mut self, len: usize) -> Self {
         let len = self.header().len.max(len);
-        let ptr = unsafe { alloc(Self::layout(len)) };
+        let ptr = unsafe { alloc_zeroed(Self::layout(len)) };
 
         for index in 0..self.header().len {
             self.set_usize_unchecked(index, self.get_usize_unchecked(index));
         }
 
-        Self(ptr as u64 | ARRAY_MASK)
+        let other = Self(ptr as u64 | ARRAY_MASK);
+
+        unsafe { &mut *other.header_mut() }.len = len;
+
+        other
     }
 
     fn header(&self) -> &Header {
@@ -227,6 +231,16 @@ mod tests {
             assert_eq!(array.get(0.0.into()), NIL);
             assert_eq!(array.get(1.0.into()), 42.0.into());
             assert_eq!(array.get(2.0.into()), NIL);
+        }
+
+        #[test]
+        fn set_element_cloning_array() {
+            let one = Array::new(0);
+            let value = one.clone().set(0.0.into(), 42.0.into());
+            let other = value.as_array().unwrap();
+
+            assert_eq!(one.get(0.0.into()), NIL);
+            assert_eq!(other.get(0.0.into()), 42.0.into());
         }
     }
 }
