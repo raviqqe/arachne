@@ -3,6 +3,15 @@
 version = 3
 
 [[package]]
+name = "aho-corasick"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "67fc08ce920c31afb70f013dcce1bfc3a3195de6a228474e45e1f145b36f8d04"
+dependencies = [
+ "memchr",
+]
+
+[[package]]
 name = "anstream"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -453,9 +462,9 @@ dependencies = [
 
 [[package]]
 name = "melior"
-version = "0.5.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c199280c152aa6fef5b602da501981535cb2104fc1a526fd34e098d9721a5e8"
+checksum = "3c9f7bf3d9d18cbd3851ff218c32bbdc53628463009b89396d69e50fd374a6f3"
 dependencies = [
  "melior-macro",
  "mlir-sys",
@@ -464,13 +473,15 @@ dependencies = [
 
 [[package]]
 name = "melior-macro"
-version = "0.2.0"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "780475fbddc73649f63852a1c45b8dd13f0babdbcc4db5e3a687faeb435527fa"
+checksum = "a1b98c1385a168cce1df9f81e02bec3e3f192e4f2f509414b15e8fc6cc3bb7dc"
 dependencies = [
  "convert_case",
+ "once_cell",
  "proc-macro2",
  "quote",
+ "regex",
  "syn 2.0.15",
 ]
 
@@ -656,6 +667,8 @@ version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "af83e617f331cc6ae2da5443c602dfa5af81e517212d9d611a5b3ba1777b5370"
 dependencies = [
+ "aho-corasick",
+ "memchr",
  "regex-syntax",
 ]
 
