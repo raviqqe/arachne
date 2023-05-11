@@ -3,7 +3,7 @@ use crate::expression::Expression;
 use async_stream::try_stream;
 use futures::{Stream, StreamExt};
 use melior::{
-    dialect,
+    dialect::DialectRegistry,
     ir::{Location, Module},
     utility::register_all_dialects,
     Context, ExecutionEngine,
@@ -13,7 +13,7 @@ use std::error::Error;
 pub fn interpret<E: Error + Into<InterpretError> + 'static>(
     expressions: &mut (impl Stream<Item = Result<Expression, E>> + Unpin),
 ) -> impl Stream<Item = Result<Expression, InterpretError>> + '_ {
-    let registry = dialect::Registry::new();
+    let registry = DialectRegistry::new();
     register_all_dialects(&registry);
 
     let context = Context::new();
