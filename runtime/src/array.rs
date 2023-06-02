@@ -1,6 +1,6 @@
 use super::{
     value::{ARRAY_MASK, NIL},
-    Number, Value,
+    Float64, Value,
 };
 use alloc::alloc::{alloc_zeroed, dealloc, realloc, Layout};
 use core::mem::{align_of, forget, size_of};
@@ -44,7 +44,7 @@ impl Array {
     }
 
     pub fn get(&self, index: Value) -> Value {
-        let Ok(index) = Number::try_from(index) else { return NIL; };
+        let Ok(index) = Float64::try_from(index) else { return NIL; };
         let index = index.to_f64();
 
         if index < 0.0 {
@@ -67,7 +67,7 @@ impl Array {
     }
 
     pub fn set(self, index: Value, value: Value) -> Value {
-        let Ok(index) = Number::try_from(index) else { return NIL; };
+        let Ok(index) = Float64::try_from(index) else { return NIL; };
         let index = index.to_f64();
 
         if index < 0.0 {
@@ -113,7 +113,7 @@ impl Array {
     }
 
     pub fn len(&self) -> Value {
-        Number::from(self.header().len as f64).into()
+        Float64::from(self.header().len as f64).into()
     }
 
     fn deep_clone(&mut self, len: usize) -> Self {

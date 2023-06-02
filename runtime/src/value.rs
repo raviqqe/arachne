@@ -1,4 +1,4 @@
-use super::{Array, Number};
+use super::{Array, Float64};
 
 pub const NIL: Value = Value(0);
 const EXPONENT_MASK: u64 = 0x7ff0_0000_0000_0000;
@@ -16,7 +16,7 @@ impl Value {
         self.0 & ARRAY_MASK == ARRAY_MASK
     }
 
-    pub fn to_number(&self) -> Option<Number> {
+    pub fn to_number(&self) -> Option<Float64> {
         if self.is_number() {
             self.clone().try_into().ok()
         } else {
@@ -77,12 +77,12 @@ impl Drop for Value {
 
 impl From<f64> for Value {
     fn from(number: f64) -> Self {
-        Number::from(number).into()
+        Float64::from(number).into()
     }
 }
 
-impl From<Number> for Value {
-    fn from(number: Number) -> Self {
+impl From<Float64> for Value {
+    fn from(number: Float64) -> Self {
         Self(number.to_f64().to_bits())
     }
 }
