@@ -5,11 +5,11 @@ extern crate alloc;
 extern crate std;
 
 mod array;
-mod number;
+mod float64;
 mod r#type;
 mod value;
 
 pub use array::Array;
-pub use number::Number;
+pub use float64::Float64;
 pub use r#type::Type;
 pub use value::{Value, NIL};
