@@ -94,7 +94,7 @@ dependencies = [
 name = "arachne-mlir-interpreter"
 version = "0.1.0"
 dependencies = [
- "arachne-ast",
+ "arachne-runtime",
  "async-stream",
  "futures",
  "melior",
@@ -105,7 +105,7 @@ dependencies = [
 name = "arachne-naive-interpreter"
 version = "0.1.0"
 dependencies = [
- "arachne-ast",
+ "arachne-runtime",
  "async-stream",
  "futures",
  "pretty_assertions",

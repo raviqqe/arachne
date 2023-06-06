@@ -1,80 +1,75 @@
 mod error;
 
-use ast::Expression;
 use async_stream::try_stream;
 use error::InterpretError;
 use futures::{Stream, StreamExt};
+use runtime::Value;
 use std::error::Error;
 
 pub fn interpret<E: Error + 'static>(
-    expressions: &mut (impl Stream<Item = Result<Expression, E>> + Unpin),
-) -> impl Stream<Item = Result<Expression, InterpretError>> + '_ {
+    values: &mut (impl Stream<Item = Result<Value, E>> + Unpin),
+) -> impl Stream<Item = Result<Value, InterpretError>> + '_ {
     try_stream! {
-        while let Some(result) = expressions.next().await {
-            yield evaluate(&result.map_err(|error| InterpretError::Other(error.into()))?);
+        while let Some(result) = values.next().await {
+            yield evaluate(result.map_err(|error| InterpretError::Other(error.into()))?);
         }
     }
 }
 
-pub fn evaluate(expression: &Expression) -> Expression {
-    evaluate_option(expression).unwrap_or_else(nil)
+fn evaluate(value: Value) -> Value {
+    evaluate_option(value).unwrap_or_else(nil)
 }
 
-fn evaluate_option(expression: &Expression) -> Option<Expression> {
-    match expression {
-        Expression::Symbol(_) => Some(expression.clone()),
-        Expression::Array(array) => match array.as_slice() {
-            [] => None,
-            [predicate, ..] => match evaluate(predicate) {
-                Expression::Symbol(symbol) => {
-                    let arguments = array[1..].iter().map(evaluate).collect::<Vec<_>>();
+fn evaluate_option(value: Value) -> Option<Value> {
+    if let Ok(array) = value.as_array() {
+        if let Ok(symbol) = evaluate(array.get(0)).to_symbol() {
+            let arguments = array[1..].iter().map(evaluate).collect::<Vec<_>>();
 
-                    match symbol.as_str() {
-                        "array" => Some(arguments.into()),
-                        "eq" => Some((arguments.get(0)? == arguments.get(1)?).to_string().into()),
-                        "get" => evaluate_array(arguments.get(0)?)?
-                            .get((evaluate_integer(arguments.get(1)?)?) as usize)
-                            .cloned(),
-                        "set" => {
-                            let mut vector = evaluate_array(arguments.get(0)?)?.to_vec();
-                            let index = (evaluate_integer(arguments.get(1)?)?) as usize;
+            match symbol.as_str() {
+                "array" => Some(Array::from(arguments)),
+                "eq" => Some((arguments.get(0)? == arguments.get(1)?).to_string().into()),
+                "get" => evaluate_array(arguments.get(0)?)?
+                    .get((evaluate_integer(arguments.get(1)?)?) as usize)
+                    .cloned(),
+                "set" => {
+                    let mut vector = evaluate_array(arguments.get(0)?)?.to_vec();
+                    let index = (evaluate_integer(arguments.get(1)?)?) as usize;
 
-                            if index >= vector.len() {
-                                vector.extend((0..index + 1 - vector.len()).map(|_| nil()));
-                            }
-
-                            vector[index] = arguments.get(2)?.clone();
-
-                            Some(vector.into())
-                        }
-                        "len" => {
-                            Some(format!("{}", evaluate_array(arguments.get(0)?)?.len()).into())
-                        }
-                        _ => None,
+                    if index >= vector.len() {
+                        vector.extend((0..index + 1 - vector.len()).map(|_| nil()));
                     }
+
+                    vector[index] = arguments.get(2)?.clone();
+
+                    Some(vector.into())
                 }
-                Expression::Array(_) => None,
-            },
-        },
+                "len" => Some(format!("{}", evaluate_array(arguments.get(0)?)?.len()).into()),
+                _ => None,
+            }
+        } else {
+            None
+        }
+    } else {
+        Some(value)
     }
 }
 
-fn evaluate_integer(expression: &Expression) -> Option<isize> {
+fn evaluate_integer(expression: &Value) -> Option<isize> {
     match expression {
-        Expression::Symbol(symbol) => symbol.parse::<isize>().ok(),
+        Value::Symbol(symbol) => symbol.parse::<isize>().ok(),
         _ => None,
     }
 }
 
-fn evaluate_array(expression: &Expression) -> Option<&[Expression]> {
+fn evaluate_array(expression: &Value) -> Option<&[Value]> {
     match expression {
-        Expression::Array(array) => Some(array),
+        Value::Array(array) => Some(array),
         _ => None,
     }
 }
 
-fn nil() -> Expression {
-    vec![].into()
+fn nil() -> Value {
+    [].into().into()
 }
 
 #[cfg(test)]
