@@ -71,10 +71,8 @@ impl Clone for Value {
     fn clone(&self) -> Self {
         if let Some(array) = self.as_array() {
             array.clone().into()
-        } else if self.is_float64() {
-            Self(self.0)
         } else {
-            unreachable!()
+            Self(self.0)
         }
     }
 }
