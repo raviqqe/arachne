@@ -219,6 +219,10 @@ impl Display for Array {
         write!(formatter, "(")?;
 
         for index in 0..self.len_usize() {
+            if index != 0 {
+                write!(formatter, " ")?;
+            }
+
             write!(formatter, "{}", self.get_usize(index))?;
         }
 
