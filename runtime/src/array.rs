@@ -342,5 +342,17 @@ mod tests {
             assert_eq!(one.get(0.0.into()), NIL);
             assert_eq!(other.get(0.0.into()), 42.0.into());
         }
+
+        #[test]
+        fn set_element_without_modifying_others() {
+            let array = Array::new(0)
+                .set_usize(0, NIL)
+                .set_usize(1, 13.0.into())
+                .set_usize(0, 42.0.into());
+
+            assert_eq!(array.len_usize(), 2);
+            assert_eq!(array.get_usize(0), 42.0.into());
+            assert_eq!(array.get_usize(1), 13.0.into());
+        }
     }
 }
