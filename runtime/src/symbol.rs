@@ -18,6 +18,7 @@ impl Symbol {
 
 impl Display for Symbol {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        // TODO Print a string representation.
         write!(formatter, "{:?}", self)
     }
 }
