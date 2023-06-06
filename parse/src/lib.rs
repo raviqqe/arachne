@@ -3,7 +3,7 @@ mod parser;
 mod utility;
 
 pub use self::error::ParseError;
-use crate::expression::Expression;
+use ast::Expression;
 use async_stream::try_stream;
 use futures::Stream;
 use parser::Parser;
@@ -29,11 +29,8 @@ pub fn parse<E: Error + 'static>(
 
 #[cfg(test)]
 mod tests {
-    use super::parse;
-    use crate::{
-        expression::Expression,
-        parse::{error::ParseError, utility::lines_stream},
-    };
+    use super::*;
+    use crate::utility::lines_stream;
     use futures::{pin_mut, StreamExt};
 
     async fn parse_string(string: &str) -> Result<Vec<Expression>, ParseError> {

@@ -3,33 +3,33 @@ use ordered_float::OrderedFloat;
 
 #[repr(transparent)]
 #[derive(Clone, Copy, Debug)]
-pub struct Number(f64);
+pub struct Float64(f64);
 
-impl Number {
+impl Float64 {
     pub fn to_f64(self) -> f64 {
         self.0
     }
 }
 
-impl PartialEq for Number {
+impl PartialEq for Float64 {
     fn eq(&self, other: &Self) -> bool {
         OrderedFloat::from(self.0) == OrderedFloat::from(other.0)
     }
 }
 
-impl Eq for Number {}
+impl Eq for Float64 {}
 
-impl From<f64> for Number {
+impl From<f64> for Float64 {
     fn from(number: f64) -> Self {
         Self(number)
     }
 }
 
-impl TryFrom<Value> for Number {
+impl TryFrom<Value> for Float64 {
     type Error = ();
 
     fn try_from(value: Value) -> Result<Self, Self::Error> {
-        if value.is_number() {
+        if value.is_float64() {
             Ok(f64::from_bits(value.to_raw()).into())
         } else {
             Err(())
@@ -43,9 +43,9 @@ mod tests {
 
     #[test]
     fn eq() {
-        assert_eq!(Number::from(0.0), Number::from(0.0));
-        assert_eq!(Number::from(1.0), Number::from(1.0));
-        assert_ne!(Number::from(0.0), Number::from(1.0));
-        assert_eq!(Number::from(f64::NAN), Number::from(f64::NAN));
+        assert_eq!(Float64::from(0.0), Float64::from(0.0));
+        assert_eq!(Float64::from(1.0), Float64::from(1.0));
+        assert_ne!(Float64::from(0.0), Float64::from(1.0));
+        assert_eq!(Float64::from(f64::NAN), Float64::from(f64::NAN));
     }
 }

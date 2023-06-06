@@ -1,4 +1,20 @@
-use crate::expression::Expression;
+mod error;
+
+use ast::Expression;
+use async_stream::try_stream;
+use error::InterpretError;
+use futures::{Stream, StreamExt};
+use std::error::Error;
+
+pub fn interpret<E: Error + 'static>(
+    expressions: &mut (impl Stream<Item = Result<Expression, E>> + Unpin),
+) -> impl Stream<Item = Result<Expression, InterpretError>> + '_ {
+    try_stream! {
+        while let Some(result) = expressions.next().await {
+            yield evaluate(&result.map_err(|error| InterpretError::Other(error.into()))?);
+        }
+    }
+}
 
 pub fn evaluate(expression: &Expression) -> Expression {
     evaluate_option(expression).unwrap_or_else(nil)

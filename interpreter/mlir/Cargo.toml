@@ -1,0 +1,13 @@
+[package]
+name = "arachne-mlir-interpreter"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ast = { package = "arachne-ast", path = "../../ast" }
+async-stream = "0.3.5"
+futures = "0.3.28"
+melior = "0.9"
+
+[dev-dependencies]
+pretty_assertions = "1.3.0"

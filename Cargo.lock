@@ -70,6 +70,9 @@ dependencies = [
 name = "arachne"
 version = "0.1.0"
 dependencies = [
+ "arachne-mlir-interpreter",
+ "arachne-naive-interpreter",
+ "arachne-parse",
  "async-recursion",
  "async-stream",
  "clap",
@@ -81,10 +84,53 @@ dependencies = [
 ]
 
 [[package]]
+name = "arachne-ast"
+version = "0.1.0"
+dependencies = [
+ "pretty_assertions",
+]
+
+[[package]]
+name = "arachne-mlir-interpreter"
+version = "0.1.0"
+dependencies = [
+ "arachne-ast",
+ "async-stream",
+ "futures",
+ "melior",
+ "pretty_assertions",
+]
+
+[[package]]
+name = "arachne-naive-interpreter"
+version = "0.1.0"
+dependencies = [
+ "arachne-ast",
+ "async-stream",
+ "futures",
+ "pretty_assertions",
+]
+
+[[package]]
+name = "arachne-parse"
+version = "0.1.0"
+dependencies = [
+ "arachne-ast",
+ "async-recursion",
+ "async-stream",
+ "futures",
+ "pretty_assertions",
+ "tokio",
+]
+
+[[package]]
 name = "arachne-runtime"
 version = "0.1.0"
 dependencies = [
+ "dashmap",
+ "once_cell",
  "ordered-float",
+ "pretty_assertions",
 ]
 
 [[package]]
@@ -234,18 +280,18 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.3.0"
+version = "4.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "93aae7a4192245f70fe75dd9157fc7b4a5bf53e88d30bd4396f7d8f9284d5acc"
+checksum = "b4ed2379f8603fa2b7509891660e802b88c70a79a6427a70abb5968054de2c28"
 dependencies = [
  "clap_builder",
 ]
 
 [[package]]
 name = "clap_builder"
-version = "4.3.0"
+version = "4.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f423e341edefb78c9caba2d9c7f7687d0e72e89df3ce3394554754393ac3990"
+checksum = "72394f3339a76daf211e57d4bcb374410f3965dcc606dd0e03738c7888766980"
 dependencies = [
  "anstream",
  "anstyle",
@@ -632,9 +678,9 @@ checksum = "518ef76f2f87365916b142844c16d8fefd85039bc5699050210a7778ee1cd1de"
 
 [[package]]
 name = "melior"
-version = "0.8.8"
+version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8095c9102f5acb90f016fe1191663f3104aabfe40a2de17ac0ee4a889139fef6"
+checksum = "1cf67cff6be049bfaa675d87fc970e0e1cb29378c37dbb3f7f7bcb7a9f6b9b2e"
 dependencies = [
  "criterion",
  "dashmap",
@@ -645,9 +691,9 @@ dependencies = [
 
 [[package]]
 name = "melior-macro"
-version = "0.3.5"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ddc2c18fee52d79a5e6111a5b5db0d4312d738726768a7be3de333e38d8b1930"
+checksum = "36a2cdbc01b1346da5b8e4d28ffb620aeaca2b3ebcdcfc7f3579d39acade835b"
 dependencies = [
  "convert_case",
  "once_cell",
@@ -729,9 +775,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.17.2"
+version = "1.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9670a07f94779e00908f3e686eab508878ebb390ba6e604d3a284c00e8d0487b"
+checksum = "dd8b5dd2ae5ed71462c540258bedcb51965123ad7e7ccf4b9a8cafaa4a63576d"
 
 [[package]]
 name = "oorandom"
