@@ -3,8 +3,15 @@ mod error;
 use async_stream::try_stream;
 use error::InterpretError;
 use futures::{Stream, StreamExt};
-use runtime::Value;
+use once_cell::sync::Lazy;
+use runtime::{Array, Float64, Symbol, Value, NIL};
 use std::error::Error;
+
+static ARRAY: Lazy<Symbol> = Lazy::new(|| Symbol::from("array"));
+static EQ: Lazy<Symbol> = Lazy::new(|| Symbol::from("eq"));
+static GET: Lazy<Symbol> = Lazy::new(|| Symbol::from("get"));
+static SET: Lazy<Symbol> = Lazy::new(|| Symbol::from("set"));
+static LEN: Lazy<Symbol> = Lazy::new(|| Symbol::from("len"));
 
 pub fn interpret<E: Error + 'static>(
     values: &mut (impl Stream<Item = Result<Value, E>> + Unpin),
@@ -17,34 +24,38 @@ pub fn interpret<E: Error + 'static>(
 }
 
 fn evaluate(value: Value) -> Value {
-    evaluate_option(value).unwrap_or_else(nil)
+    evaluate_option(value).unwrap_or(NIL)
 }
 
 fn evaluate_option(value: Value) -> Option<Value> {
-    if let Ok(array) = value.as_array() {
-        if let Ok(symbol) = evaluate(array.get(0)).to_symbol() {
-            let arguments = array[1..].iter().map(evaluate).collect::<Vec<_>>();
+    if let Some(array) = value.as_array() {
+        if let Some(symbol) = evaluate(array.get_usize(0)).to_symbol() {
+            if symbol == *ARRAY {
+                let len = array.len_usize();
+                let mut new = Array::new(len - 1);
 
-            match symbol.as_str() {
-                "array" => Some(Array::from(arguments)),
-                "eq" => Some((arguments.get(0)? == arguments.get(1)?).to_string().into()),
-                "get" => evaluate_array(arguments.get(0)?)?
-                    .get((evaluate_integer(arguments.get(1)?)?) as usize)
-                    .cloned(),
-                "set" => {
-                    let mut vector = evaluate_array(arguments.get(0)?)?.to_vec();
-                    let index = (evaluate_integer(arguments.get(1)?)?) as usize;
-
-                    if index >= vector.len() {
-                        vector.extend((0..index + 1 - vector.len()).map(|_| nil()));
-                    }
-
-                    vector[index] = arguments.get(2)?.clone();
-
-                    Some(vector.into())
+                for index in 1..len {
+                    new = new.set_usize(index - 1, array.get_usize(index));
                 }
-                "len" => Some(format!("{}", evaluate_array(arguments.get(0)?)?.len()).into()),
-                _ => None,
+
+                Some(new.into())
+            } else if symbol == *EQ {
+                Some(((array.get_usize(1) == array.get_usize(2)) as usize as f64).into())
+            } else if symbol == *GET {
+                Some(array.get_usize(1).as_array()?.get(array.get_usize(2)))
+            } else if symbol == *SET {
+                Some(
+                    array
+                        .get_usize(1)
+                        .as_array()?
+                        .clone()
+                        .set(array.get_usize(2), array.get_usize(3))
+                        .into(),
+                )
+            } else if symbol == *LEN {
+                Some(array.get_usize(1).as_array()?.len().into())
+            } else {
+                None
             }
         } else {
             None
@@ -54,34 +65,17 @@ fn evaluate_option(value: Value) -> Option<Value> {
     }
 }
 
-fn evaluate_integer(expression: &Value) -> Option<isize> {
-    match expression {
-        Value::Symbol(symbol) => symbol.parse::<isize>().ok(),
-        _ => None,
-    }
-}
-
-fn evaluate_array(expression: &Value) -> Option<&[Value]> {
-    match expression {
-        Value::Array(array) => Some(array),
-        _ => None,
-    }
-}
-
-fn nil() -> Value {
-    [].into().into()
-}
-
 #[cfg(test)]
 mod tests {
     use super::evaluate;
     use pretty_assertions::assert_eq;
+    use runtime::Symbol;
 
     #[test]
     fn evaluate_symbol() {
-        let expression = "foo".into();
+        let expression = Symbol::from("foo").into();
 
-        assert_eq!(evaluate(&expression), expression);
+        assert_eq!(evaluate(expression), expression);
     }
 
     mod array {

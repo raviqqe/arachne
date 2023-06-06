@@ -108,6 +108,7 @@ dependencies = [
  "arachne-runtime",
  "async-stream",
  "futures",
+ "once_cell",
  "pretty_assertions",
 ]
 
