@@ -9,7 +9,7 @@ naive-interpreter = { package = "arachne-naive-interpreter", path = "../interpre
 parse = { package = "arachne-parse", path = "../parse" }
 async-recursion = "1.0.4"
 async-stream = "0.3.5"
-clap = { version = "4.3.1", features = ["cargo"] }
+clap = { version = "4.3.2", features = ["cargo"] }
 futures = "0.3.28"
 melior = "0.9"
 tokio = { version = "1", features = ["full"] }
