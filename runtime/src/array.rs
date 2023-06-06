@@ -123,9 +123,9 @@ impl Array {
         unsafe { &mut *self.header_mut() }.len = len;
     }
 
-    pub fn len(&self) -> Value {
+    pub fn len(&self) -> Float64 {
         if self.is_nil() {
-            NIL
+            Float64::from(0.0)
         } else {
             (self.header().len as f64).into()
         }
