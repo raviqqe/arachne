@@ -1,5 +1,5 @@
 [package]
-name = "naive-interpreter"
+name = "arachne-naive-interpreter"
 version = "0.1.0"
 edition = "2021"
 

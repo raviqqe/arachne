@@ -67,7 +67,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "arachene_ast"
+name = "arachene-ast"
 version = "0.1.0"
 dependencies = [
  "async-recursion",
@@ -82,6 +82,20 @@ dependencies = [
 
 [[package]]
 name = "arachne"
+version = "0.1.0"
+dependencies = [
+ "async-recursion",
+ "async-stream",
+ "clap",
+ "futures",
+ "melior",
+ "pretty_assertions",
+ "tokio",
+ "tokio-stream",
+]
+
+[[package]]
+name = "arachne-naive-interpreter"
 version = "0.1.0"
 dependencies = [
  "async-recursion",
@@ -710,20 +724,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c1262be288d5f59eaa5a6367722e4fd2eb2f668229d2e3e3680530f266a193b3"
 dependencies = [
  "bindgen",
-]
-
-[[package]]
-name = "naive-interpreter"
-version = "0.1.0"
-dependencies = [
- "async-recursion",
- "async-stream",
- "clap",
- "futures",
- "melior",
- "pretty_assertions",
- "tokio",
- "tokio-stream",
 ]
 
 [[package]]
