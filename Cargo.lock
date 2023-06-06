@@ -115,7 +115,7 @@ dependencies = [
 name = "arachne-parse"
 version = "0.1.0"
 dependencies = [
- "arachne-ast",
+ "arachne-runtime",
  "async-recursion",
  "async-stream",
  "futures",
