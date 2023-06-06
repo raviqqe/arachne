@@ -24,6 +24,10 @@ impl Value {
         }
     }
 
+    pub fn is_nil(&self) -> bool {
+        self.0 == 0
+    }
+
     pub fn is_array(&self) -> bool {
         self.r#type() == Type::Array
     }
@@ -137,7 +141,7 @@ mod tests {
         use super::*;
 
         #[test]
-        fn clone_number() {
+        fn clone_float64() {
             let _ = Value::from(0.0);
         }
 
@@ -153,11 +157,23 @@ mod tests {
     }
 
     #[test]
-    fn compare_numbers() {
+    fn compare_float64() {
         assert_eq!(Value::from(0.0), Value::from(0.0));
         assert_eq!(Value::from(1.0), Value::from(1.0));
         assert_ne!(Value::from(0.0), Value::from(1.0));
         assert_eq!(Value::from(f64::NAN), Value::from(f64::NAN));
+    }
+
+    #[test]
+    fn compare_symbol() {
+        assert_eq!(
+            Value::from(Symbol::from("foo")),
+            Value::from(Symbol::from("foo"))
+        );
+        assert_ne!(
+            Value::from(Symbol::from("foo")),
+            Value::from(Symbol::from("bar"))
+        );
     }
 
     #[test]
