@@ -31,15 +31,15 @@ impl Value {
     }
 
     pub fn is_array(&self) -> bool {
-        self.r#type() == Type::Array
+        self.is_nil() || self.r#type() == Type::Array
     }
 
     pub fn is_float64(&self) -> bool {
-        self.r#type() == Type::Float64
+        self.is_nil() || self.r#type() == Type::Float64
     }
 
     pub fn is_symbol(&self) -> bool {
-        self.r#type() == Type::Symbol
+        self.is_nil() || self.r#type() == Type::Symbol
     }
 
     pub fn to_float64(&self) -> Option<Float64> {
@@ -164,6 +164,14 @@ mod tests {
     #[test]
     fn nil() {
         assert_eq!(NIL, Value::from(0.0));
+    }
+
+    #[test]
+    fn nil_is_everything() {
+        assert!(NIL.is_nil());
+        assert!(NIL.is_array());
+        assert!(NIL.is_float64());
+        assert!(NIL.is_symbol());
     }
 
     #[test]
