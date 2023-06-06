@@ -1,7 +1,7 @@
 use super::error::ParseError;
 use async_recursion::async_recursion;
 use futures::{Stream, StreamExt};
-use runtime::{Array, Symbol, Value};
+use runtime::Value;
 use std::{collections::VecDeque, error::Error, marker::Unpin};
 
 const SPECIAL_CHARACTERS: &str = "(); \t\n";
@@ -51,7 +51,7 @@ impl Parser {
 
         loop {
             match self.parse_expression(lines).await {
-                Err(ParseError::ClosedParenthesis) => return Ok(Array::from(vector).into()),
+                Err(ParseError::ClosedParenthesis) => return Ok(vector.into()),
                 Err(error) => return Err(error),
                 Ok(None) => return Err(ParseError::EndOfFile),
                 Ok(Some(expression)) => vector.push(expression),
@@ -69,11 +69,11 @@ impl Parser {
         string.push(character);
 
         loop {
-            let Some(character) = self.read_character(lines).await? else { return Ok(Symbol::from(string).into()) };
+            let Some(character) = self.read_character(lines).await? else { return Ok(string.into()) };
 
             if SPECIAL_CHARACTERS.contains(character) {
                 self.buffer.push_front(character);
-                return Ok(Symbol::from(string).into());
+                return Ok(string.into());
             }
 
             string.push(character);
