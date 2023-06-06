@@ -127,7 +127,7 @@ mod tests {
 
     #[test]
     fn zero_division() {
-        assert!(Value::from(-0.0).is_float64()); // TODO Nil can be anything.
+        assert!(Value::from(-0.0).is_float64());
         assert!(Value::from(-1.0).is_float64());
         assert!(Value::from(1.0 / 0.0).is_float64());
         assert!(Value::from(-1.0 / 0.0).is_float64());
