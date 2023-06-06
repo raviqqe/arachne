@@ -1,5 +1,5 @@
 use super::Value;
-use alloc::string::String;
+use alloc::{borrow::ToOwned, string::String};
 use dashmap::DashMap;
 use once_cell::sync::Lazy;
 
@@ -16,13 +16,19 @@ impl PartialEq for Symbol {
 
 impl Eq for Symbol {}
 
+impl From<String> for Symbol {
+    fn from(symbol: String) -> Self {
+        let entry = CACHE.entry(symbol).or_insert_with(Default::default);
+
+        Self(entry.key().as_ptr() as *const u8)
+    }
+}
+
 impl From<&str> for Symbol {
     fn from(symbol: &str) -> Self {
         // TODO Can we use String keys instead to check if those keys exist or not ahead of
         // allocating heap?
-        let entry = CACHE.entry(symbol.into()).or_insert_with(Default::default);
-
-        Self(entry.key().as_ptr() as *const u8)
+        symbol.to_owned().into()
     }
 }
 
