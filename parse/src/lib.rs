@@ -32,7 +32,6 @@ mod tests {
     use super::*;
     use crate::utility::lines_stream;
     use futures::{pin_mut, StreamExt};
-    use runtime::{Array, Symbol};
 
     async fn parse_string(string: &str) -> Result<Vec<Value>, ParseError> {
         let stream = lines_stream(string);
