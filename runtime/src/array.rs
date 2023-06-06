@@ -87,6 +87,7 @@ impl Array {
 
         if self.is_nil() {
             self = Self::new(len);
+            self.extend(len);
         } else if self.header().count == UNIQUE_COUNT {
             self.extend(len);
         } else {
