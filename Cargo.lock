@@ -699,6 +699,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "naive_interpreter"
+version = "0.1.0"
+dependencies = [
+ "async-recursion",
+ "async-stream",
+ "clap",
+ "futures",
+ "melior",
+ "pretty_assertions",
+ "tokio",
+ "tokio-stream",
+]
+
+[[package]]
 name = "nom"
 version = "7.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
