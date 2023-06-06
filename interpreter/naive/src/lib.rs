@@ -73,8 +73,7 @@ fn evaluate(value: Value) -> Value {
 mod tests {
     use super::evaluate;
     use pretty_assertions::assert_eq;
-    use runtime::Value;
-    use runtime::NIL;
+    use runtime::{Value, NIL};
 
     #[test]
     fn evaluate_symbol() {
