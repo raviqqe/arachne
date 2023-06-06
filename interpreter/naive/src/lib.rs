@@ -4,7 +4,7 @@ use async_stream::try_stream;
 use error::InterpretError;
 use futures::{Stream, StreamExt};
 use once_cell::sync::Lazy;
-use runtime::{Array, Float64, Symbol, Value, NIL};
+use runtime::{Array, Symbol, Value, NIL};
 use std::error::Error;
 
 static ARRAY: Lazy<Symbol> = Lazy::new(|| Symbol::from("array"));
@@ -70,6 +70,7 @@ mod tests {
     use super::evaluate;
     use pretty_assertions::assert_eq;
     use runtime::Symbol;
+    use runtime::{Array, NIL};
 
     #[test]
     fn evaluate_symbol() {
@@ -84,14 +85,17 @@ mod tests {
 
         #[test]
         fn evaluate_empty() {
-            assert_eq!(evaluate(&vec!["array".into()].into()), vec![].into());
+            assert_eq!(
+                evaluate(Array::from([Symbol::from("array").into()]).into()),
+                NIL
+            );
         }
 
         #[test]
         fn evaluate_element() {
             assert_eq!(
-                evaluate(&vec!["array".into(), "1".into()].into()),
-                vec!["1".into()].into()
+                evaluate(["array".into(), 1.0.into()].into()),
+                ["1".into()].into()
             );
         }
 

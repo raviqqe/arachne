@@ -1,5 +1,6 @@
 use super::{Array, Float64};
 use crate::{r#type::Type, symbol::Symbol};
+use alloc::{string::String, vec::Vec};
 
 pub const NIL: Value = Value(0);
 const EXPONENT_MASK: u64 = 0x7ff0_0000_0000_0000;
@@ -91,12 +92,6 @@ impl Drop for Value {
     }
 }
 
-impl From<f64> for Value {
-    fn from(number: f64) -> Self {
-        Float64::from(number).into()
-    }
-}
-
 impl From<Array> for Value {
     fn from(array: Array) -> Self {
         Self(array.into_raw())
@@ -112,6 +107,36 @@ impl From<Float64> for Value {
 impl From<Symbol> for Value {
     fn from(symbol: Symbol) -> Self {
         Self(symbol.to_raw())
+    }
+}
+
+impl From<f64> for Value {
+    fn from(number: f64) -> Self {
+        Float64::from(number).into()
+    }
+}
+
+impl From<String> for Value {
+    fn from(value: String) -> Self {
+        Symbol::from(value).into()
+    }
+}
+
+impl From<&str> for Value {
+    fn from(value: &str) -> Self {
+        Symbol::from(value).into()
+    }
+}
+
+impl<const N: usize> From<[Value; N]> for Value {
+    fn from(values: [Value; N]) -> Self {
+        Array::from(values).into()
+    }
+}
+
+impl From<Vec<Value>> for Value {
+    fn from(values: Vec<Value>) -> Self {
+        Array::from(values).into()
     }
 }
 
