@@ -7,11 +7,8 @@ edition = "2021"
 ast = { package = "arachne-ast", path = "../ast" }
 async-recursion = "1.0.4"
 async-stream = "0.3.5"
-clap = { version = "4.3.1", features = ["cargo"] }
 futures = "0.3.28"
-melior = "0.9"
-tokio = { version = "1", features = ["full"] }
-tokio-stream = { version = "0.1", features = ["full"] }
 
 [dev-dependencies]
 pretty_assertions = "1.3.0"
+tokio = "1.28.2"
