@@ -96,7 +96,7 @@ impl Drop for Value {
 impl Display for Value {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         if self.is_nil() {
-            write!(formatter, "nil")
+            write!(formatter, "()")
         } else if let Some(number) = self.to_float64() {
             write!(formatter, "{}", number)
         } else if let Some(symbol) = self.to_symbol() {
