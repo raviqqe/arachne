@@ -251,33 +251,33 @@ mod tests {
             assert_eq!(array.get(1.0.into()), NIL);
         }
 
-        // #[test]
-        // fn set_element_extending_array() {
-        //     let value = Array::new(0).set(0.0.into(), 42.0.into());
-        //     let array = value.as_array().unwrap();
+        #[test]
+        fn set_element_extending_array() {
+            let value = Array::new(0).set(0.0.into(), 42.0.into());
+            let array = value.as_array().unwrap();
 
-        //     assert_eq!(array.get(0.0.into()), 42.0.into());
-        //     assert_eq!(array.get(1.0.into()), NIL);
-        // }
+            assert_eq!(array.get(0.0.into()), 42.0.into());
+            assert_eq!(array.get(1.0.into()), NIL);
+        }
 
-        // #[test]
-        // fn set_element_extending_array_with_nil() {
-        //     let value = Array::new(0).set(1.0.into(), 42.0.into());
-        //     let array = value.as_array().unwrap();
+        #[test]
+        fn set_element_extending_array_with_nil() {
+            let value = Array::new(0).set(1.0.into(), 42.0.into());
+            let array = value.as_array().unwrap();
 
-        //     assert_eq!(array.get(0.0.into()), NIL);
-        //     assert_eq!(array.get(1.0.into()), 42.0.into());
-        //     assert_eq!(array.get(2.0.into()), NIL);
-        // }
+            assert_eq!(array.get(0.0.into()), NIL);
+            assert_eq!(array.get(1.0.into()), 42.0.into());
+            assert_eq!(array.get(2.0.into()), NIL);
+        }
 
-        // #[test]
-        // fn set_element_cloning_array() {
-        //     let one = Array::new(0);
-        //     let value = one.clone().set(0.0.into(), 42.0.into());
-        //     let other = value.as_array().unwrap();
+        #[test]
+        fn set_element_cloning_array() {
+            let one = Array::new(0);
+            let value = one.clone().set(0.0.into(), 42.0.into());
+            let other = value.as_array().unwrap();
 
-        //     assert_eq!(one.get(0.0.into()), NIL);
-        //     assert_eq!(other.get(0.0.into()), 42.0.into());
-        // }
+            assert_eq!(one.get(0.0.into()), NIL);
+            assert_eq!(other.get(0.0.into()), 42.0.into());
+        }
     }
 }
