@@ -127,7 +127,7 @@ impl Array {
         if self.is_nil() {
             NIL
         } else {
-            Float64::from(self.header().len as f64).into()
+            (self.header().len as f64).into()
         }
     }
 
