@@ -19,6 +19,8 @@ impl Eq for Symbol {}
 
 impl From<&str> for Symbol {
     fn from(symbol: &str) -> Self {
+        // TODO Can we use String keys instead to check if those keys exist or not ahead of
+        // allocating heap?
         let entry = CACHE.entry(symbol.into()).or_insert_with(Default::default);
 
         Self(entry.key().as_ptr() as *const u8)
