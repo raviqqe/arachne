@@ -1,5 +1,5 @@
 use super::error::ParseError;
-use crate::expression::Expression;
+use ast::Expression;
 use async_recursion::async_recursion;
 use futures::{Stream, StreamExt};
 use std::{collections::VecDeque, error::Error, marker::Unpin};
@@ -111,10 +111,8 @@ impl Parser {
 #[cfg(test)]
 mod tests {
     use super::Parser;
-    use crate::{
-        expression::Expression,
-        parse::{error::ParseError, utility::lines_stream},
-    };
+    use crate::{utility::lines_stream, ParseError};
+    use ast::Expression;
     use futures::pin_mut;
 
     async fn parse(string: &str) -> Result<Option<Expression>, ParseError> {
