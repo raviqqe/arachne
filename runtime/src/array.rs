@@ -183,6 +183,20 @@ impl Drop for Array {
     }
 }
 
+impl TryFrom<&Value> for &Array {
+    type Error = ();
+
+    fn try_from(value: &Value) -> Result<Self, Self::Error> {
+        if value.is_array() {
+            let ptr = value as *const _ as *const _;
+
+            Ok(unsafe { &*ptr })
+        } else {
+            Err(())
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

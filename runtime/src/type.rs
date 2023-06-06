@@ -1,5 +1,6 @@
-// TODO Handle generic symbols.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Type {
     Array,
-    Number,
+    Float64,
+    Symbol,
 }
