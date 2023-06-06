@@ -3,7 +3,7 @@ use alloc::{borrow::ToOwned, string::String};
 use dashmap::DashMap;
 use once_cell::sync::Lazy;
 
-static CACHE: Lazy<DashMap<String, ()>> = Lazy::new(|| Default::default());
+static CACHE: Lazy<DashMap<String, ()>> = Lazy::new(Default::default);
 
 #[derive(Clone, Copy, Debug)]
 pub struct Symbol(*const u8);
@@ -26,8 +26,8 @@ impl From<String> for Symbol {
 
 impl From<&str> for Symbol {
     fn from(symbol: &str) -> Self {
-        // TODO Can we use String keys instead to check if those keys exist or not ahead of
-        // allocating heap?
+        // TODO Can we use String keys instead to check if those keys exist or not ahead
+        // of allocating heap?
         symbol.to_owned().into()
     }
 }
