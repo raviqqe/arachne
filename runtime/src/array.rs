@@ -245,6 +245,20 @@ mod tests {
         assert_eq!(Array::new(1).get(0.0.into()), NIL);
     }
 
+    #[test]
+    fn eq() {
+        assert_eq!(Array::new(0), Array::new(0));
+        assert_eq!(Array::new(1), Array::new(0));
+        assert_eq!(
+            Array::new(0).set(0.0.into(), 42.0.into()),
+            Array::new(0).set(0.0.into(), 42.0.into())
+        );
+        assert_ne!(
+            Array::new(0).set(0.0.into(), 42.0.into()),
+            Array::new(0).set(1.0.into(), 42.0.into())
+        );
+    }
+
     mod set {
         use super::*;
         use pretty_assertions::assert_eq;
