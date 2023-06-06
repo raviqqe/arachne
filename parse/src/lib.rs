@@ -32,6 +32,7 @@ mod tests {
     use super::*;
     use crate::utility::lines_stream;
     use futures::{pin_mut, StreamExt};
+    use runtime::{Array, Symbol};
 
     async fn parse_string(string: &str) -> Result<Vec<Value>, ParseError> {
         let stream = lines_stream(string);
@@ -47,14 +48,17 @@ mod tests {
 
     #[tokio::test]
     async fn parse_symbol() {
-        assert_eq!(parse_string("foo").await.unwrap(), vec!["foo".into()]);
+        assert_eq!(
+            parse_string("foo").await.unwrap(),
+            vec![Symbol::from("foo").into()]
+        );
     }
 
     #[tokio::test]
     async fn parse_symbols_separated_by_space() {
         assert_eq!(
             parse_string("foo bar").await.unwrap(),
-            vec!["foo".into(), "bar".into()]
+            vec![Symbol::from("foo").into(), Symbol::from("bar").into()]
         );
     }
 
@@ -62,7 +66,7 @@ mod tests {
     async fn parse_symbols_separated_by_newline() {
         assert_eq!(
             parse_string("foo\nbar").await.unwrap(),
-            vec!["foo".into(), "bar".into()]
+            vec![Symbol::from("foo").into(), Symbol::from("bar").into()]
         );
     }
 
@@ -70,7 +74,7 @@ mod tests {
     async fn parse_symbols_separated_by_tab() {
         assert_eq!(
             parse_string("foo\tbar").await.unwrap(),
-            vec!["foo".into(), "bar".into()]
+            vec![Symbol::from("foo").into(), Symbol::from("bar").into()]
         );
     }
 
@@ -78,7 +82,7 @@ mod tests {
     async fn skip_comment() {
         assert_eq!(
             parse_string(";comment\nfoo").await.unwrap(),
-            vec!["foo".into()]
+            vec![Symbol::from("foo").into()]
         );
     }
 
@@ -86,7 +90,7 @@ mod tests {
     async fn parse_array() {
         assert_eq!(
             parse_string("(foo)").await.unwrap(),
-            vec![vec!["foo".into()].into()]
+            vec![Array::from([Symbol::from("foo").into()]).into()]
         );
     }
 
@@ -94,12 +98,12 @@ mod tests {
     async fn parse_nested_array() {
         assert_eq!(
             parse_string("(foo (bar) baz)").await.unwrap(),
-            Array::from(vec![Array::from(vec![
+            vec![Array::from([
                 Symbol::from("foo").into(),
-                Array::from(vec!["bar".into()].into()),
-                "baz".into()
+                Array::from([Symbol::from("bar").into()]).into(),
+                Symbol::from("baz").into()
             ])
-            .into()])
+            .into()]
         );
     }
 }
