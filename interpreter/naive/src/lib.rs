@@ -46,14 +46,18 @@ fn evaluate(value: Value) -> Value {
                 } else if symbol == *GET {
                     Some(array.get_usize(1).as_array()?.get(array.get_usize(2)))
                 } else if symbol == *SET {
-                    Some(
-                        array
-                            .get_usize(1)
-                            .as_array()?
-                            .clone()
-                            .set(array.get_usize(2), array.get_usize(3))
-                            .into(),
-                    )
+                    if array.len_usize() >= 4 {
+                        Some(
+                            array
+                                .get_usize(1)
+                                .as_array()?
+                                .clone()
+                                .set(array.get_usize(2), array.get_usize(3))
+                                .into(),
+                        )
+                    } else {
+                        None
+                    }
                 } else if symbol == *LEN {
                     Some(array.get_usize(1).as_array()?.len().into())
                 } else {
@@ -176,6 +180,29 @@ mod tests {
                     .into()
                 ),
                 [0.0.into(), [].into(), "42".into()].into(),
+            );
+        }
+
+        #[test]
+        fn set_with_no_value() {
+            assert_eq!(
+                evaluate(
+                    [
+                        "set".into(),
+                        ["array".into(), 0.0.into()].into(),
+                        0.0.into(),
+                    ]
+                    .into()
+                ),
+                NIL
+            );
+        }
+
+        #[test]
+        fn set_with_no_index() {
+            assert_eq!(
+                evaluate(["set".into(), ["array".into(), 0.0.into()].into()].into()),
+                NIL
             );
         }
     }
