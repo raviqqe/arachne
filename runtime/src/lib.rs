@@ -7,6 +7,7 @@ extern crate std;
 mod array;
 mod float64;
 mod symbol;
+mod r#type;
 mod value;
 
 pub use array::Array;

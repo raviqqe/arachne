@@ -1,23 +1,39 @@
 use super::{Array, Float64};
+use crate::r#type::Type;
 
 pub const NIL: Value = Value(0);
 const EXPONENT_MASK: u64 = 0x7ff0_0000_0000_0000;
-pub const ARRAY_MASK: u64 = 0x0004_0000_0000_0000 | EXPONENT_MASK;
+const ARRAY_SUB_MASK: u64 = 0x0004_0000_0000_0000;
+const SYMBOL_SUB_MASK: u64 = 0x0002_0000_0000_0000;
+pub(crate) const ARRAY_MASK: u64 = ARRAY_SUB_MASK | EXPONENT_MASK;
+pub(crate) const SYMBOL_MASK: u64 = SYMBOL_SUB_MASK | EXPONENT_MASK;
 
 #[derive(Debug)]
 pub struct Value(u64);
 
 impl Value {
+    pub fn r#type(&self) -> Type {
+        if self.0 & EXPONENT_MASK == 0 {
+            Type::Float64
+        } else if self.0 & ARRAY_MASK == ARRAY_MASK {
+            Type::Array
+        } else if self.0 & SYMBOL_MASK == SYMBOL_MASK {
+            Type::Symbol
+        } else {
+            Type::Float64
+        }
+    }
+
     pub fn is_array(&self) -> bool {
-        self.0 & ARRAY_MASK == ARRAY_MASK
+        self.r#type() == Type::Array
     }
 
     pub fn is_float64(&self) -> bool {
-        !self.is_array()
+        self.r#type() == Type::Float64
     }
 
     pub fn is_symbol(&self) -> bool {
-        todo!()
+        self.r#type() == Type::Symbol
     }
 
     pub fn to_float64(&self) -> Option<Float64> {
