@@ -10,6 +10,12 @@ static CACHE: Lazy<DashMap<String, ()>> = Lazy::new(Default::default);
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Symbol(u64);
 
+impl Symbol {
+    pub(crate) fn to_raw(&self) -> u64 {
+        self.0
+    }
+}
+
 impl From<String> for Symbol {
     fn from(symbol: String) -> Self {
         let entry = CACHE.entry(symbol).or_insert_with(Default::default);

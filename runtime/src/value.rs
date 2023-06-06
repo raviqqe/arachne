@@ -91,15 +91,21 @@ impl From<f64> for Value {
     }
 }
 
+impl From<Array> for Value {
+    fn from(array: Array) -> Self {
+        Self(array.into_raw())
+    }
+}
+
 impl From<Float64> for Value {
     fn from(number: Float64) -> Self {
         Self(number.to_f64().to_bits())
     }
 }
 
-impl From<Array> for Value {
-    fn from(array: Array) -> Self {
-        Self(array.into_raw())
+impl From<Symbol> for Value {
+    fn from(symbol: Symbol) -> Self {
+        Self(symbol.to_raw())
     }
 }
 
