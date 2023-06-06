@@ -19,6 +19,7 @@ struct Header {
 }
 
 impl Array {
+    // TODO Remove capacity argument.
     pub fn new(capacity: usize) -> Self {
         if capacity == 0 {
             return Self(0);
