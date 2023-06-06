@@ -125,25 +125,16 @@ mod tests {
 
     #[tokio::test]
     async fn parse_symbol() {
-        assert_eq!(
-            parse("foo").await.unwrap(),
-            Some(Symbol::from("foo").into())
-        );
+        assert_eq!(parse("foo").await.unwrap(), Some("foo".into()));
     }
 
     #[tokio::test]
     async fn skip_comment() {
-        assert_eq!(
-            parse(";comment\nfoo").await.unwrap(),
-            Some(Symbol::from("foo").into())
-        );
+        assert_eq!(parse(";comment\nfoo").await.unwrap(), Some("foo".into()));
     }
 
     #[tokio::test]
     async fn parse_array() {
-        assert_eq!(
-            parse("(foo)").await.unwrap(),
-            Some(Array::from(vec![Symbol::from("foo").into()]).into())
-        );
+        assert_eq!(parse("(foo)").await.unwrap(), Some(["foo".into()].into()));
     }
 }
