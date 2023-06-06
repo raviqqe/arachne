@@ -193,7 +193,6 @@ impl Clone for Array {
 impl Drop for Array {
     fn drop(&mut self) {
         if self.is_nil() {
-            return;
         } else if self.header().count == 0 {
             // TODO Drop elements.
             unsafe { dealloc(self.as_ptr(), Layout::new::<Header>()) }
