@@ -1,8 +1,4 @@
-mod interpret;
-mod parse;
-
 use futures::{pin_mut, StreamExt};
-use interpret::mlir;
 use parse::parse;
 use std::error::Error;
 use tokio::io::{stdin, AsyncBufReadExt, BufReader};

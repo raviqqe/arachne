@@ -12,7 +12,7 @@ use melior::{
 };
 use std::error::Error;
 
-pub fn interpret<E: Error + Into<InterpretError> + 'static>(
+pub fn interpret<E: Error + 'static>(
     expressions: &mut (impl Stream<Item = Result<Expression, E>> + Unpin),
 ) -> impl Stream<Item = Result<Expression, InterpretError>> + '_ {
     let registry = DialectRegistry::new();

@@ -70,6 +70,9 @@ dependencies = [
 name = "arachne"
 version = "0.1.0"
 dependencies = [
+ "arachne-mlir-interpreter",
+ "arachne-naive-interpreter",
+ "arachne-parse",
  "async-recursion",
  "async-stream",
  "clap",
