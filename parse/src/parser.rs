@@ -1,7 +1,7 @@
 use super::error::ParseError;
-use ast::Expression;
 use async_recursion::async_recursion;
 use futures::{Stream, StreamExt};
+use runtime::Value;
 use std::{collections::VecDeque, error::Error, marker::Unpin};
 
 const SPECIAL_CHARACTERS: &str = "(); \t\n";
@@ -23,7 +23,7 @@ impl Parser {
     pub async fn parse_expression<E: Error + 'static>(
         &mut self,
         lines: &mut (impl Stream<Item = Result<String, E>> + Unpin),
-    ) -> Result<Option<Expression>, ParseError> {
+    ) -> Result<Option<Value>, ParseError> {
         loop {
             if let Some(character) = self.read_character(lines).await? {
                 match character {
@@ -46,12 +46,12 @@ impl Parser {
     async fn parse_parentheses<E: Error + 'static>(
         &mut self,
         lines: &mut (impl Stream<Item = Result<String, E>> + Unpin),
-    ) -> Result<Expression, ParseError> {
+    ) -> Result<Value, ParseError> {
         let mut vector = Vec::with_capacity(ARRAY_CAPACITY);
 
         loop {
             match self.parse_expression(lines).await {
-                Err(ParseError::ClosedParenthesis) => return Ok(Expression::Array(vector)),
+                Err(ParseError::ClosedParenthesis) => return Ok(vector.into()),
                 Err(error) => return Err(error),
                 Ok(None) => return Err(ParseError::EndOfFile),
                 Ok(Some(expression)) => vector.push(expression),
@@ -63,7 +63,7 @@ impl Parser {
         &mut self,
         lines: &mut (impl Stream<Item = Result<String, E>> + Unpin),
         character: char,
-    ) -> Result<Expression, ParseError> {
+    ) -> Result<Value, ParseError> {
         let mut string = String::with_capacity(SYMBOL_CAPACITY);
 
         string.push(character);
@@ -73,7 +73,10 @@ impl Parser {
 
             if SPECIAL_CHARACTERS.contains(character) {
                 self.buffer.push_front(character);
-                return Ok(Expression::Symbol(string));
+
+                return Ok(str::parse::<f64>(&string)
+                    .map(Into::into)
+                    .unwrap_or_else(|_| string.into()));
             }
 
             string.push(character);
@@ -110,12 +113,11 @@ impl Parser {
 
 #[cfg(test)]
 mod tests {
-    use super::Parser;
+    use super::*;
     use crate::{utility::lines_stream, ParseError};
-    use ast::Expression;
     use futures::pin_mut;
 
-    async fn parse(string: &str) -> Result<Option<Expression>, ParseError> {
+    async fn parse(string: &str) -> Result<Option<Value>, ParseError> {
         let mut parser = Parser::new();
         let stream = lines_stream(string);
 
@@ -125,26 +127,22 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn parse_float64() {
+        assert_eq!(parse("42").await.unwrap(), Some(42.0.into()));
+    }
+
+    #[tokio::test]
     async fn parse_symbol() {
-        assert_eq!(
-            parse("foo").await.unwrap(),
-            Some(Expression::Symbol("foo".into()))
-        );
+        assert_eq!(parse("foo").await.unwrap(), Some("foo".into()));
     }
 
     #[tokio::test]
     async fn skip_comment() {
-        assert_eq!(
-            parse(";comment\nfoo").await.unwrap(),
-            Some(Expression::Symbol("foo".into()))
-        );
+        assert_eq!(parse(";comment\nfoo").await.unwrap(), Some("foo".into()));
     }
 
     #[tokio::test]
     async fn parse_array() {
-        assert_eq!(
-            parse("(foo)").await.unwrap(),
-            Some(Expression::Array(vec![Expression::Symbol("foo".into())]))
-        );
+        assert_eq!(parse("(foo)").await.unwrap(), Some(["foo".into()].into()));
     }
 }

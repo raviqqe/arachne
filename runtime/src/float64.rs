@@ -1,4 +1,5 @@
 use super::Value;
+use core::fmt::{self, Display, Formatter};
 use ordered_float::OrderedFloat;
 
 #[repr(transparent)]
@@ -18,6 +19,12 @@ impl PartialEq for Float64 {
 }
 
 impl Eq for Float64 {}
+
+impl Display for Float64 {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        write!(formatter, "{}", self.0)
+    }
+}
 
 impl From<f64> for Float64 {
     fn from(number: f64) -> Self {

@@ -1,6 +1,5 @@
 mod error;
 
-use ast::Expression;
 use async_stream::try_stream;
 use error::InterpretError;
 use futures::{Stream, StreamExt};
@@ -10,11 +9,12 @@ use melior::{
     utility::register_all_dialects,
     Context, ExecutionEngine,
 };
+use runtime::{Value, NIL};
 use std::error::Error;
 
 pub fn interpret<E: Error + 'static>(
-    expressions: &mut (impl Stream<Item = Result<Expression, E>> + Unpin),
-) -> impl Stream<Item = Result<Expression, InterpretError>> + '_ {
+    expressions: &mut (impl Stream<Item = Result<Value, E>> + Unpin),
+) -> impl Stream<Item = Result<Value, InterpretError>> + '_ {
     let registry = DialectRegistry::new();
     register_all_dialects(&registry);
 
@@ -29,7 +29,7 @@ pub fn interpret<E: Error + 'static>(
     try_stream! {
         while let Some(_result) = expressions.next().await {
             // TODO
-            yield Expression::Array(vec![]);
+            yield NIL;
         }
     }
 }
