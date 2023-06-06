@@ -1,4 +1,4 @@
-use crate::parse::ParseError;
+use parse::ParseError;
 use std::{
     error::Error,
     fmt::{self, Display, Formatter},

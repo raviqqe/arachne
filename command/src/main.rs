@@ -1,9 +1,8 @@
-mod expression;
 mod interpret;
 mod parse;
 
 use futures::{pin_mut, StreamExt};
-use interpret::{mlir, naive};
+use interpret::mlir;
 use parse::parse;
 use std::error::Error;
 use tokio::io::{stdin, AsyncBufReadExt, BufReader};
@@ -30,8 +29,8 @@ macro_rules! interpret_fn {
     };
 }
 
-interpret_fn!(interpret_naive, naive::interpret);
-interpret_fn!(interpret_mlir, mlir::interpret);
+interpret_fn!(interpret_naive, naive_interpreter::interpret);
+interpret_fn!(interpret_mlir, mlir_interpreter::interpret);
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {

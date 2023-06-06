@@ -1,4 +1,4 @@
-use crate::expression::Expression;
+use ast::Expression;
 
 pub fn evaluate(expression: &Expression) -> Expression {
     evaluate_option(expression).unwrap_or_else(nil)

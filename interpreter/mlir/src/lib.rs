@@ -1,6 +1,8 @@
-use super::error::InterpretError;
-use crate::expression::Expression;
+mod error;
+
+use ast::Expression;
 use async_stream::try_stream;
+use error::InterpretError;
 use futures::{Stream, StreamExt};
 use melior::{
     dialect::DialectRegistry,
