@@ -1,5 +1,5 @@
 use super::{Array, Float64};
-use crate::r#type::Type;
+use crate::{r#type::Type, symbol::Symbol};
 
 pub const NIL: Value = Value(0);
 const EXPONENT_MASK: u64 = 0x7ff0_0000_0000_0000;
@@ -37,21 +37,15 @@ impl Value {
     }
 
     pub fn to_float64(&self) -> Option<Float64> {
-        if self.is_float64() {
-            self.clone().try_into().ok()
-        } else {
-            None
-        }
+        self.clone().try_into().ok()
+    }
+
+    pub fn to_symbol(&self) -> Option<Symbol> {
+        self.clone().try_into().ok()
     }
 
     pub fn as_array(&self) -> Option<&Array> {
-        if self.is_array() {
-            let ptr = self as *const _ as *const _;
-
-            Some(unsafe { &*ptr })
-        } else {
-            None
-        }
+        self.try_into().ok()
     }
 
     pub fn to_raw(&self) -> u64 {
@@ -89,8 +83,6 @@ impl Drop for Value {
     fn drop(&mut self) {
         if self.is_array() {
             unsafe { Array::from_raw(self.0) };
-        } else if !self.is_float64() {
-            unreachable!()
         }
     }
 }
