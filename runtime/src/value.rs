@@ -8,12 +8,16 @@ pub const ARRAY_MASK: u64 = 0x0004_0000_0000_0000 | EXPONENT_MASK;
 pub struct Value(u64);
 
 impl Value {
+    pub fn is_array(&self) -> bool {
+        self.0 & ARRAY_MASK == ARRAY_MASK
+    }
+
     pub fn is_float64(&self) -> bool {
         !self.is_array()
     }
 
-    pub fn is_array(&self) -> bool {
-        self.0 & ARRAY_MASK == ARRAY_MASK
+    pub fn is_symbol(&self) -> bool {
+        todo!()
     }
 
     pub fn to_float64(&self) -> Option<Float64> {
