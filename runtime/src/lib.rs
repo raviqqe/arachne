@@ -13,4 +13,5 @@ mod value;
 pub use array::Array;
 pub use float64::Float64;
 pub use r#type::Type;
+pub use symbol::Symbol;
 pub use value::{Value, NIL};
