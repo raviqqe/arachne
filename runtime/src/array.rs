@@ -142,17 +142,15 @@ impl Array {
         }
     }
 
-    fn deep_clone(&mut self, len: usize) -> Self {
+    fn deep_clone(&self, len: usize) -> Self {
         let len = self.header().len.max(len);
-        let ptr = unsafe { alloc_zeroed(Self::layout(len)) };
-
-        for index in 0..self.header().len {
-            self.set_usize_unchecked(index, self.get_usize_unchecked(index));
-        }
-
-        let other = Self(ptr as u64 | ARRAY_MASK);
+        let mut other = Self(unsafe { alloc_zeroed(Self::layout(len)) } as u64 | ARRAY_MASK);
 
         unsafe { &mut *other.header_mut() }.len = len;
+
+        for index in 0..self.header().len {
+            other.set_usize_unchecked(index, self.get_usize_unchecked(index));
+        }
 
         other
     }
@@ -345,14 +343,16 @@ mod tests {
 
         #[test]
         fn set_element_without_modifying_others() {
-            let array = Array::new(0)
-                .set_usize(0, NIL)
-                .set_usize(1, 13.0.into())
-                .set_usize(0, 42.0.into());
+            let one = Array::new(0).set_usize(0, NIL).set_usize(1, 13.0.into());
+            let other = one.clone().set_usize(0, 42.0.into());
 
-            assert_eq!(array.len_usize(), 2);
-            assert_eq!(array.get_usize(0), 42.0.into());
-            assert_eq!(array.get_usize(1), 13.0.into());
+            assert_eq!(one.len_usize(), 2);
+            assert_eq!(one.get_usize(0), NIL);
+            assert_eq!(one.get_usize(1), 13.0.into());
+
+            assert_eq!(other.len_usize(), 2);
+            assert_eq!(other.get_usize(0), 42.0.into());
+            assert_eq!(other.get_usize(1), 13.0.into());
         }
     }
 }
