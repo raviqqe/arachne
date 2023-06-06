@@ -112,8 +112,8 @@ impl Parser {
 mod tests {
     use super::Parser;
     use crate::{utility::lines_stream, ParseError};
+    use ast::Expression;
     use futures::pin_mut;
-    use runtime::Expression;
 
     async fn parse(string: &str) -> Result<Option<Expression>, ParseError> {
         let mut parser = Parser::new();
