@@ -71,18 +71,18 @@ impl Array {
         (unsafe { &*self.element_ptr(index) }).clone()
     }
 
-    pub fn set(self, index: Value, value: Value) -> Value {
-        let Ok(index) = Float64::try_from(index) else { return NIL; };
+    pub fn set(self, index: Value, value: Value) -> Self {
+        let Ok(index) = Float64::try_from(index) else { return Self(0); };
         let index = index.to_f64();
 
         if index < 0.0 {
-            self.into()
+            self
         } else {
             self.set_usize(index as usize, value)
         }
     }
 
-    pub fn set_usize(mut self, index: usize, value: Value) -> Value {
+    pub fn set_usize(mut self, index: usize, value: Value) -> Self {
         let len = index + 1;
 
         if self.is_nil() {
@@ -95,7 +95,7 @@ impl Array {
 
         self.set_usize_unchecked(index, value);
 
-        self.into()
+        self
     }
 
     pub fn is_nil(&self) -> bool {
@@ -245,8 +245,7 @@ mod tests {
 
         #[test]
         fn set_element() {
-            let value = Array::new(0).set(0.0.into(), 42.0.into());
-            let array = value.as_array().unwrap();
+            let array = Array::new(0).set(0.0.into(), 42.0.into());
 
             assert_eq!(array.get(0.0.into()), 42.0.into());
             assert_eq!(array.get(1.0.into()), NIL);
@@ -254,8 +253,7 @@ mod tests {
 
         #[test]
         fn set_element_extending_array() {
-            let value = Array::new(0).set(0.0.into(), 42.0.into());
-            let array = value.as_array().unwrap();
+            let array = Array::new(0).set(0.0.into(), 42.0.into());
 
             assert_eq!(array.get(0.0.into()), 42.0.into());
             assert_eq!(array.get(1.0.into()), NIL);
@@ -263,8 +261,7 @@ mod tests {
 
         #[test]
         fn set_element_extending_array_with_nil() {
-            let value = Array::new(0).set(1.0.into(), 42.0.into());
-            let array = value.as_array().unwrap();
+            let array = Array::new(0).set(1.0.into(), 42.0.into());
 
             assert_eq!(array.get(0.0.into()), NIL);
             assert_eq!(array.get(1.0.into()), 42.0.into());
@@ -274,8 +271,7 @@ mod tests {
         #[test]
         fn set_element_cloning_array() {
             let one = Array::new(0);
-            let value = one.clone().set(0.0.into(), 42.0.into());
-            let other = value.as_array().unwrap();
+            let other = one.clone().set(0.0.into(), 42.0.into());
 
             assert_eq!(one.get(0.0.into()), NIL);
             assert_eq!(other.get(0.0.into()), 42.0.into());
