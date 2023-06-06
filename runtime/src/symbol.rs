@@ -5,7 +5,6 @@ use once_cell::sync::Lazy;
 
 static CACHE: Lazy<DashMap<String, ()>> = Lazy::new(|| Default::default());
 
-#[repr(transparent)]
 #[derive(Clone, Copy, Debug)]
 pub struct Symbol(*const u8);
 
