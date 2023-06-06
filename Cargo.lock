@@ -67,7 +67,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "arachene-ast"
+name = "arachne"
 version = "0.1.0"
 dependencies = [
  "async-recursion",
@@ -81,7 +81,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "arachne"
+name = "arachne-ast"
 version = "0.1.0"
 dependencies = [
  "async-recursion",
@@ -98,6 +98,7 @@ dependencies = [
 name = "arachne-naive-interpreter"
 version = "0.1.0"
 dependencies = [
+ "arachne-ast",
  "async-recursion",
  "async-stream",
  "clap",
