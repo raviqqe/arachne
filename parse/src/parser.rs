@@ -73,7 +73,10 @@ impl Parser {
 
             if SPECIAL_CHARACTERS.contains(character) {
                 self.buffer.push_front(character);
-                return Ok(string.into());
+
+                return Ok(str::parse::<f64>(&string)
+                    .map(Into::into)
+                    .unwrap_or_else(|_| string.into()));
             }
 
             string.push(character);
@@ -121,6 +124,11 @@ mod tests {
         pin_mut!(stream);
 
         parser.parse_expression(&mut stream).await
+    }
+
+    #[tokio::test]
+    async fn parse_float64() {
+        assert_eq!(parse("42").await.unwrap(), Some(42.0.into()));
     }
 
     #[tokio::test]
