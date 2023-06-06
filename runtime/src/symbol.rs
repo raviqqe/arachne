@@ -1,6 +1,5 @@
-use crate::value::SYMBOL_MASK;
-
 use super::Value;
+use crate::value::SYMBOL_MASK;
 use alloc::{borrow::ToOwned, string::String};
 use dashmap::DashMap;
 use once_cell::sync::Lazy;
