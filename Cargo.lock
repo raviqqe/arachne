@@ -125,6 +125,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "arachne-parse"
+version = "0.1.0"
+dependencies = [
+ "arachne-ast",
+ "async-recursion",
+ "async-stream",
+ "clap",
+ "futures",
+ "melior",
+ "pretty_assertions",
+ "tokio",
+ "tokio-stream",
+]
+
+[[package]]
 name = "arachne-runtime"
 version = "0.1.0"
 dependencies = [
