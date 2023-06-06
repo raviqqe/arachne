@@ -142,6 +142,11 @@ mod tests {
         }
 
         #[test]
+        fn clone_symbols() {
+            let _ = Value::from(Symbol::from("foo"));
+        }
+
+        #[test]
         fn clone_array() {
             let _ = Value::from(Array::new(42));
         }
