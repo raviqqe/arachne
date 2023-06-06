@@ -63,6 +63,8 @@ impl PartialEq for Value {
             one == other
         } else if let (Some(one), Some(other)) = (self.as_array(), other.as_array()) {
             one == other
+        } else if let (Some(one), Some(other)) = (self.to_symbol(), other.to_symbol()) {
+            one == other
         } else {
             false
         }
