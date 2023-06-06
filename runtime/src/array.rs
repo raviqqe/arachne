@@ -125,10 +125,14 @@ impl Array {
     }
 
     pub fn len(&self) -> Float64 {
+        (self.len_usize() as f64).into()
+    }
+
+    pub fn len_usize(&self) -> usize {
         if self.is_nil() {
-            Float64::from(0.0)
+            0
         } else {
-            (self.header().len as f64).into()
+            self.header().len
         }
     }
 
@@ -174,7 +178,9 @@ impl Array {
 
 impl PartialEq for Array {
     fn eq(&self, other: &Self) -> bool {
-        self.len() == other.len()
+        self.len() == other.len() && {
+            (0..self.len_usize()).all(|index| self.get_usize(index) == other.get_usize(index))
+        }
     }
 }
 
