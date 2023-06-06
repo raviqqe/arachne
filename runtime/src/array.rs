@@ -241,6 +241,7 @@ mod tests {
 
     mod set {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn set_element() {

@@ -130,6 +130,7 @@ dependencies = [
  "dashmap",
  "once_cell",
  "ordered-float",
+ "pretty_assertions",
 ]
 
 [[package]]
