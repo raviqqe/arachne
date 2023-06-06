@@ -180,6 +180,17 @@ mod tests {
 
     #[test]
     fn compare_arrays() {
-        // TODO Compare arrays.
+        assert_eq!(Value::from(Array::new(0)), Value::from(0.0));
+        assert_ne!(Value::from(Array::new(0)), Value::from(42.0));
+        assert_ne!(Value::from(Array::new(0)), Value::from(Symbol::from("foo")));
+        assert_eq!(Value::from(Array::new(0)), Value::from(Array::new(0)));
+        assert_eq!(
+            Value::from(Array::new(0).set(0.0.into(), 42.0.into())),
+            Value::from(Array::new(0).set(0.0.into(), 42.0.into()))
+        );
+        assert_ne!(
+            Value::from(Array::new(0).set(0.0.into(), 42.0.into())),
+            Value::from(Array::new(0).set(1.0.into(), 42.0.into()))
+        );
     }
 }
