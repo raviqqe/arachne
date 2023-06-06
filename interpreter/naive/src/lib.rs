@@ -7,11 +7,11 @@ use once_cell::sync::Lazy;
 use runtime::{Array, Symbol, Value, NIL};
 use std::error::Error;
 
-static ARRAY: Lazy<Symbol> = Lazy::new(|| Symbol::from("array"));
-static EQ: Lazy<Symbol> = Lazy::new(|| Symbol::from("eq"));
-static GET: Lazy<Symbol> = Lazy::new(|| Symbol::from("get"));
-static SET: Lazy<Symbol> = Lazy::new(|| Symbol::from("set"));
-static LEN: Lazy<Symbol> = Lazy::new(|| Symbol::from("len"));
+static ARRAY: Lazy<Symbol> = Lazy::new(|| "array".into());
+static EQ: Lazy<Symbol> = Lazy::new(|| "eq".into());
+static GET: Lazy<Symbol> = Lazy::new(|| "get".into());
+static SET: Lazy<Symbol> = Lazy::new(|| "set".into());
+static LEN: Lazy<Symbol> = Lazy::new(|| "len".into());
 
 pub fn interpret<E: Error + 'static>(
     values: &mut (impl Stream<Item = Result<Value, E>> + Unpin),

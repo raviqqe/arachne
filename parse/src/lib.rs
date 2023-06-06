@@ -48,17 +48,14 @@ mod tests {
 
     #[tokio::test]
     async fn parse_symbol() {
-        assert_eq!(
-            parse_string("foo").await.unwrap(),
-            vec![Symbol::from("foo").into()]
-        );
+        assert_eq!(parse_string("foo").await.unwrap(), vec!["foo".into()]);
     }
 
     #[tokio::test]
     async fn parse_symbols_separated_by_space() {
         assert_eq!(
             parse_string("foo bar").await.unwrap(),
-            vec![Symbol::from("foo").into(), Symbol::from("bar").into()]
+            vec!["foo".into(), "bar".into()]
         );
     }
 
@@ -66,7 +63,7 @@ mod tests {
     async fn parse_symbols_separated_by_newline() {
         assert_eq!(
             parse_string("foo\nbar").await.unwrap(),
-            vec![Symbol::from("foo").into(), Symbol::from("bar").into()]
+            vec!["foo".into(), "bar".into()]
         );
     }
 
@@ -74,7 +71,7 @@ mod tests {
     async fn parse_symbols_separated_by_tab() {
         assert_eq!(
             parse_string("foo\tbar").await.unwrap(),
-            vec![Symbol::from("foo").into(), Symbol::from("bar").into()]
+            vec!["foo".into(), "bar".into()]
         );
     }
 
@@ -82,7 +79,7 @@ mod tests {
     async fn skip_comment() {
         assert_eq!(
             parse_string(";comment\nfoo").await.unwrap(),
-            vec![Symbol::from("foo").into()]
+            vec!["foo".into()]
         );
     }
 
@@ -90,7 +87,7 @@ mod tests {
     async fn parse_array() {
         assert_eq!(
             parse_string("(foo)").await.unwrap(),
-            vec![Array::from([Symbol::from("foo").into()]).into()]
+            vec![["foo".into()].into()]
         );
     }
 
@@ -98,12 +95,7 @@ mod tests {
     async fn parse_nested_array() {
         assert_eq!(
             parse_string("(foo (bar) baz)").await.unwrap(),
-            vec![Array::from([
-                Symbol::from("foo").into(),
-                Array::from([Symbol::from("bar").into()]).into(),
-                Symbol::from("baz").into()
-            ])
-            .into()]
+            vec![["foo".into(), ["bar".into()].into(), "baz".into()].into()]
         );
     }
 }
