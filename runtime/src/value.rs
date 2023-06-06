@@ -8,7 +8,7 @@ pub const ARRAY_MASK: u64 = 0x0004_0000_0000_0000 | EXPONENT_MASK;
 pub struct Value(u64);
 
 impl Value {
-    pub fn is_number(&self) -> bool {
+    pub fn is_float64(&self) -> bool {
         !self.is_array()
     }
 
@@ -16,8 +16,8 @@ impl Value {
         self.0 & ARRAY_MASK == ARRAY_MASK
     }
 
-    pub fn to_number(&self) -> Option<Float64> {
-        if self.is_number() {
+    pub fn to_float64(&self) -> Option<Float64> {
+        if self.is_float64() {
             self.clone().try_into().ok()
         } else {
             None
@@ -41,7 +41,7 @@ impl Value {
 
 impl PartialEq for Value {
     fn eq(&self, other: &Self) -> bool {
-        if let (Some(one), Some(other)) = (self.to_number(), other.to_number()) {
+        if let (Some(one), Some(other)) = (self.to_float64(), other.to_float64()) {
             one == other
         } else if let (Some(one), Some(other)) = (self.as_array(), other.as_array()) {
             one == other
@@ -57,7 +57,7 @@ impl Clone for Value {
     fn clone(&self) -> Self {
         if let Some(array) = self.as_array() {
             array.clone().into()
-        } else if self.is_number() {
+        } else if self.is_float64() {
             Self(self.0)
         } else {
             unreachable!()
@@ -69,7 +69,7 @@ impl Drop for Value {
     fn drop(&mut self) {
         if self.is_array() {
             unsafe { Array::from_raw(self.0) };
-        } else if !self.is_number() {
+        } else if !self.is_float64() {
             unreachable!()
         }
     }
@@ -104,17 +104,17 @@ mod tests {
 
     #[test]
     fn nan() {
-        assert!(Value::from(f64::NAN).is_number());
-        assert!(Value::from(-f64::NAN).is_number());
-        assert!(Value::from(-0.0 / 0.0).is_number());
+        assert!(Value::from(f64::NAN).is_float64());
+        assert!(Value::from(-f64::NAN).is_float64());
+        assert!(Value::from(-0.0 / 0.0).is_float64());
     }
 
     #[test]
     fn zero_division() {
-        assert!(Value::from(-0.0).is_number());
-        assert!(Value::from(-1.0).is_number());
-        assert!(Value::from(1.0 / 0.0).is_number());
-        assert!(Value::from(-1.0 / 0.0).is_number());
+        assert!(Value::from(-0.0).is_float64());
+        assert!(Value::from(-1.0).is_float64());
+        assert!(Value::from(1.0 / 0.0).is_float64());
+        assert!(Value::from(-1.0 / 0.0).is_float64());
     }
 
     mod clone {
