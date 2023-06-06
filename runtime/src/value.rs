@@ -1,6 +1,7 @@
 use super::{Array, Float64};
 use crate::{r#type::Type, symbol::Symbol};
 use alloc::{string::String, vec::Vec};
+use core::fmt::{self, Display, Formatter};
 
 pub const NIL: Value = Value(0);
 const EXPONENT_MASK: u64 = 0x7ff0_0000_0000_0000;
@@ -88,6 +89,22 @@ impl Drop for Value {
     fn drop(&mut self) {
         if self.is_array() {
             unsafe { Array::from_raw(self.0) };
+        }
+    }
+}
+
+impl Display for Value {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        if self.is_nil() {
+            write!(formatter, "nil")
+        } else if let Some(number) = self.to_float64() {
+            write!(formatter, "{}", number)
+        } else if let Some(symbol) = self.to_symbol() {
+            write!(formatter, "{}", symbol)
+        } else if let Some(array) = self.as_array() {
+            write!(formatter, "{}", array)
+        } else {
+            unreachable!()
         }
     }
 }

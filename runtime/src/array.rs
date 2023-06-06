@@ -6,7 +6,10 @@ use alloc::{
     alloc::{alloc_zeroed, dealloc, realloc, Layout},
     vec::Vec,
 };
-use core::mem::{align_of, forget, size_of};
+use core::{
+    fmt::{self, Display, Formatter},
+    mem::{align_of, forget, size_of},
+};
 
 const UNIQUE_COUNT: usize = 0;
 const ELEMENT_SIZE: usize = size_of::<Value>();
@@ -208,6 +211,18 @@ impl Drop for Array {
         } else {
             unsafe { &mut *self.header_mut() }.count -= 1;
         }
+    }
+}
+
+impl Display for Array {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        write!(formatter, "(")?;
+
+        for index in 0..self.len_usize() {
+            write!(formatter, "{}", self.get_usize(index))?;
+        }
+
+        write!(formatter, ")")
     }
 }
 

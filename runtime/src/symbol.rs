@@ -1,6 +1,7 @@
 use super::Value;
 use crate::value::SYMBOL_MASK;
 use alloc::{borrow::ToOwned, string::String};
+use core::fmt::{self, Display, Formatter};
 use dashmap::DashMap;
 use once_cell::sync::Lazy;
 
@@ -12,6 +13,12 @@ pub struct Symbol(u64);
 impl Symbol {
     pub(crate) fn to_raw(self) -> u64 {
         self.0
+    }
+}
+
+impl Display for Symbol {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        write!(formatter, "{:?}", self)
     }
 }
 
