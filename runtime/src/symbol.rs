@@ -11,7 +11,7 @@ static CACHE: Lazy<DashMap<String, ()>> = Lazy::new(Default::default);
 pub struct Symbol(u64);
 
 impl Symbol {
-    pub(crate) fn to_raw(&self) -> u64 {
+    pub(crate) fn to_raw(self) -> u64 {
         self.0
     }
 }
