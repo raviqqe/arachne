@@ -19,6 +19,7 @@ struct Header {
 }
 
 impl Array {
+    // TODO Remove capacity argument.
     pub fn new(capacity: usize) -> Self {
         if capacity == 0 {
             return Self(0);
@@ -125,10 +126,14 @@ impl Array {
     }
 
     pub fn len(&self) -> Float64 {
+        (self.len_usize() as f64).into()
+    }
+
+    pub fn len_usize(&self) -> usize {
         if self.is_nil() {
-            Float64::from(0.0)
+            0
         } else {
-            (self.header().len as f64).into()
+            self.header().len
         }
     }
 
@@ -174,7 +179,9 @@ impl Array {
 
 impl PartialEq for Array {
     fn eq(&self, other: &Self) -> bool {
-        self.len() == other.len()
+        self.len() == other.len() && {
+            (0..self.len_usize()).all(|index| self.get_usize(index) == other.get_usize(index))
+        }
     }
 }
 
@@ -237,6 +244,20 @@ mod tests {
         assert_eq!(Array::new(0).get(0.0.into()), NIL);
         assert_eq!(Array::new(0).get(1.0.into()), NIL);
         assert_eq!(Array::new(1).get(0.0.into()), NIL);
+    }
+
+    #[test]
+    fn eq() {
+        assert_eq!(Array::new(0), Array::new(0));
+        assert_eq!(Array::new(1), Array::new(0));
+        assert_eq!(
+            Array::new(0).set(0.0.into(), 42.0.into()),
+            Array::new(0).set(0.0.into(), 42.0.into())
+        );
+        assert_ne!(
+            Array::new(0).set(0.0.into(), 42.0.into()),
+            Array::new(0).set(1.0.into(), 42.0.into())
+        );
     }
 
     mod set {
