@@ -51,7 +51,7 @@ impl Parser {
 
         loop {
             match self.parse_expression(lines).await {
-                Err(ParseError::ClosedParenthesis) => return Ok(Array::from(vector)),
+                Err(ParseError::ClosedParenthesis) => return Ok(Array::from(vector).into()),
                 Err(error) => return Err(error),
                 Ok(None) => return Err(ParseError::EndOfFile),
                 Ok(Some(expression)) => vector.push(expression),
@@ -69,11 +69,11 @@ impl Parser {
         string.push(character);
 
         loop {
-            let Some(character) = self.read_character(lines).await? else { return Ok(string.into()) };
+            let Some(character) = self.read_character(lines).await? else { return Ok(Symbol::from(string).into()) };
 
             if SPECIAL_CHARACTERS.contains(character) {
                 self.buffer.push_front(character);
-                return Ok(Symbol::from(string));
+                return Ok(Symbol::from(string).into());
             }
 
             string.push(character);
@@ -125,14 +125,17 @@ mod tests {
 
     #[tokio::test]
     async fn parse_symbol() {
-        assert_eq!(parse("foo").await.unwrap(), Some(Symbol::from("foo")));
+        assert_eq!(
+            parse("foo").await.unwrap(),
+            Some(Symbol::from("foo").into())
+        );
     }
 
     #[tokio::test]
     async fn skip_comment() {
         assert_eq!(
             parse(";comment\nfoo").await.unwrap(),
-            Some(Symbol::from("foo"))
+            Some(Symbol::from("foo").into())
         );
     }
 
@@ -140,7 +143,7 @@ mod tests {
     async fn parse_array() {
         assert_eq!(
             parse("(foo)").await.unwrap(),
-            Some(Array::from(vec![Symbol::from("foo")]))
+            Some(Array::from(vec![Symbol::from("foo").into()]).into())
         );
     }
 }

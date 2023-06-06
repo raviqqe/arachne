@@ -2,7 +2,10 @@ use super::{
     value::{ARRAY_MASK, NIL},
     Float64, Value,
 };
-use alloc::alloc::{alloc_zeroed, dealloc, realloc, Layout};
+use alloc::{
+    alloc::{alloc_zeroed, dealloc, realloc, Layout},
+    vec::Vec,
+};
 use core::mem::{align_of, forget, size_of};
 
 const UNIQUE_COUNT: usize = 0;
@@ -19,7 +22,6 @@ struct Header {
 }
 
 impl Array {
-    // TODO Remove capacity argument.
     pub fn new(capacity: usize) -> Self {
         if capacity == 0 {
             return Self(0);
@@ -220,6 +222,30 @@ impl TryFrom<&Value> for &Array {
         } else {
             Err(())
         }
+    }
+}
+
+impl<const N: usize> From<[Value; N]> for Array {
+    fn from(values: [Value; N]) -> Self {
+        let mut array = Self::new(0);
+
+        for (index, value) in values.into_iter().enumerate() {
+            array = array.set_usize(index, value);
+        }
+
+        array
+    }
+}
+
+impl From<Vec<Value>> for Array {
+    fn from(values: Vec<Value>) -> Self {
+        let mut array = Self::new(0);
+
+        for (index, value) in values.into_iter().enumerate() {
+            array = array.set_usize(index, value);
+        }
+
+        array
     }
 }
 
