@@ -4,5 +4,5 @@ pub enum Instruction {
     Subtract,
     Multiply,
     Divide,
-    Function,
+    Lambda,
 }
