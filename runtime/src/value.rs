@@ -120,6 +120,8 @@ impl Display for Value {
             write!(formatter, "()")
         } else if let Some(number) = self.to_float64() {
             write!(formatter, "{}", number)
+        } else if let Some(closure) = self.as_closure() {
+            write!(formatter, "{}", closure)
         } else if let Some(symbol) = self.to_symbol() {
             write!(formatter, "{}", symbol)
         } else if let Some(array) = self.as_array() {
