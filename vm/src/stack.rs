@@ -16,6 +16,6 @@ impl Stack {
     }
 
     pub fn pop_value(&mut self) -> Value {
-        unsafe { Value::from_raw(self.values.pop().unwrap()) }
+        unsafe { Value::from_raw(self.values.pop().expect("stack value")) }
     }
 }

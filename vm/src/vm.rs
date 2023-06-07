@@ -1,6 +1,21 @@
 use crate::{stack::Stack, Instruction};
-use runtime::Value;
+use runtime::{Value, NIL};
 use std::mem::{size_of, transmute};
+
+macro_rules! binary_operation {
+    ($self:expr, $operator:tt) => {
+        let value = (|| {
+            let lhs = $self.stack.pop_value().to_float64()?;
+            let rhs = $self.stack.pop_value().to_float64()?;
+
+            Some((lhs.to_f64() $operator rhs.to_f64()).into())
+        })()
+        .unwrap_or(NIL);
+
+        $self.stack.push_value(value);
+        $self.program_counter += 1;
+    };
+}
 
 pub struct Vm {
     program_counter: usize,
@@ -26,31 +41,16 @@ impl Vm {
                     self.stack.push_value(value);
                 }
                 Instruction::Float64Add => {
-                    let lhs = self.stack.pop_f64();
-                    let rhs = self.stack.pop_f64();
-
-                    self.stack.push_f64(lhs + rhs);
-                    self.program_counter += 1;
+                    binary_operation!(self, +);
                 }
                 Instruction::Float64Subtract => {
-                    let lhs = self.stack.pop_f64();
-                    let rhs = self.stack.pop_f64();
-
-                    self.stack.push_f64(lhs + rhs);
-
-                    self.program_counter += 1;
+                    binary_operation!(self, -);
                 }
                 Instruction::Float64Multiply => {
-                    let lhs = self.stack.pop_f64();
-                    let rhs = self.stack.pop_f64();
-
-                    self.stack.push_f64(lhs + rhs);
+                    binary_operation!(self, *);
                 }
                 Instruction::Float64Divide => {
-                    let lhs = self.stack.pop_f64();
-                    let rhs = self.stack.pop_f64();
-
-                    self.stack.push_f64(lhs + rhs);
+                    binary_operation!(self, /);
                 }
                 Instruction::Call => todo!(),
                 Instruction::Lambda => todo!(),
