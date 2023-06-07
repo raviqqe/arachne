@@ -66,6 +66,6 @@ impl Vm {
 
         self.program_counter += SIZE;
 
-        return unsafe { Value::from_raw(u64::from_le_bytes(bytes)) };
+        unsafe { Value::from_raw(u64::from_le_bytes(bytes)) }
     }
 }
