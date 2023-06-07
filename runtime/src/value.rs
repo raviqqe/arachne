@@ -57,6 +57,10 @@ impl Value {
     pub fn to_raw(&self) -> u64 {
         self.0
     }
+
+    pub unsafe fn from_raw(value: u64) -> Self {
+        Self(value)
+    }
 }
 
 impl PartialEq for Value {
