@@ -296,7 +296,7 @@ mod tests {
         assert_eq!(&Array::from(["foo".into()]).to_string(), "(42)");
         assert_eq!(
             &Array::from(["foo".into(), 42.0.into()]).to_string(),
-            "(42 foo)"
+            "(foo 42)"
         );
     }
 
