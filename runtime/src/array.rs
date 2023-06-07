@@ -92,7 +92,7 @@ impl Array {
 
         if self.is_nil() {
             self = Self::new(len);
-            unsafe { (&mut *self.header_mut()).len = len };
+            unsafe { (*self.header_mut()).len = len };
         } else if self.header().count == UNIQUE_COUNT {
             self.extend(len);
         } else {
