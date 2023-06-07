@@ -8,13 +8,11 @@ use alloc::{
 };
 use core::{
     fmt::{self, Display, Formatter},
-    mem::{align_of, forget, size_of},
+    mem::forget,
     ptr::drop_in_place,
 };
 
 const UNIQUE_COUNT: usize = 0;
-const ELEMENT_SIZE: usize = size_of::<Value>();
-const ALIGNMENT: usize = align_of::<Value>();
 
 #[derive(Debug)]
 pub struct Array(u64);
@@ -179,8 +177,13 @@ impl Array {
     }
 
     fn element_ptr(&self, index: usize) -> *mut Value {
-        ((self.as_ptr() as usize + Layout::new::<Header>().size()) + index * ELEMENT_SIZE)
-            as *mut Value
+        unsafe {
+            self.as_ptr()
+                .cast::<Header>()
+                .add(1)
+                .cast::<Value>()
+                .add(index)
+        }
     }
 
     fn as_ptr(&self) -> *mut u8 {
@@ -189,7 +192,8 @@ impl Array {
 
     fn layout(capacity: usize) -> Layout {
         Layout::new::<Header>()
-            .extend(Layout::from_size_align(ELEMENT_SIZE * capacity, ALIGNMENT).unwrap())
+            .pad_to_align()
+            .extend(Layout::array::<Value>(capacity).unwrap())
             .unwrap()
             .0
     }
