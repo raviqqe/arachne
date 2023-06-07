@@ -137,6 +137,7 @@ impl Array {
         } as u64
             | ARRAY_MASK;
 
+        // TODO Do we need this?
         for index in self.header().len..len {
             self.set_usize_unchecked(index, NIL);
         }
