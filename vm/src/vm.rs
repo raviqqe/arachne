@@ -35,7 +35,7 @@ impl Vm {
 
         while self.program_counter < instructions.len() {
             match unsafe { transmute(instructions[self.program_counter]) } {
-                Instruction::Nil => panic!("nil po' god!"),
+                Instruction::Nil => unreachable!("nil po' god!"),
                 Instruction::Constant => {
                     let value = self.read_value(instructions);
                     self.stack.push_value(value);
