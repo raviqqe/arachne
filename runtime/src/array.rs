@@ -120,6 +120,10 @@ impl Array {
     }
 
     fn set_usize_unchecked(&mut self, index: usize, value: Value) {
+        #[cfg(test)]
+        unsafe {
+            std::dbg!(&*self.element_ptr(index))
+        };
         *unsafe { &mut *self.element_ptr(index) } = value;
     }
 
