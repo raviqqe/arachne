@@ -59,12 +59,12 @@ impl Vm {
     }
 
     fn read_value(&mut self, instructions: &[u8]) -> Value {
-        let size = size_of::<Value>();
-        let mut bytes = [0u8; 8];
+        const SIZE: usize = size_of::<Value>();
+        let mut bytes = [0u8; SIZE];
 
-        bytes.copy_from_slice(&instructions[self.program_counter..self.program_counter + size]);
+        bytes.copy_from_slice(&instructions[self.program_counter..self.program_counter + SIZE]);
 
-        self.program_counter += size;
+        self.program_counter += SIZE;
 
         return unsafe { Value::from_raw(u64::from_le_bytes(bytes)) };
     }
