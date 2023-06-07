@@ -206,16 +206,17 @@ impl Drop for Array {
         if self.is_nil() {
         } else if self.header().count == 0 {
             unsafe {
-                for index in 0..self.header().len {
-                    drop_in_place(
-                        &mut *self
-                            .as_ptr()
-                            .cast::<Header>()
-                            .add(1)
-                            .cast::<Value>()
-                            .add(index),
-                    );
-                }
+                // TODO Drop content.
+                // for index in 0..self.header().len {
+                //     drop_in_place(
+                //         &mut *self
+                //             .as_ptr()
+                //             .cast::<Header>()
+                //             .add(1)
+                //             .cast::<Value>()
+                //             .add(index),
+                //     );
+                // }
 
                 dealloc(self.as_ptr(), Layout::new::<Header>());
             }
