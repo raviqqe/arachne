@@ -140,7 +140,6 @@ impl Array {
 
         self.0 = ptr | ARRAY_MASK;
 
-        // TODO Do we need this?
         for index in self.header().len..len {
             unsafe { write(self.element_ptr(index), NIL) };
         }
