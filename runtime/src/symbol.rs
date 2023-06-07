@@ -54,10 +54,16 @@ impl TryFrom<Value> for Symbol {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::string::ToString;
 
     #[test]
     fn eq() {
         assert_eq!(Symbol::from("foo"), Symbol::from("foo"));
         assert_ne!(Symbol::from("foo"), Symbol::from("bar"));
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(&Symbol::from("foo").to_string(), "foo");
     }
 }
