@@ -1,5 +1,5 @@
 use super::{Array, Float64};
-use crate::{r#type::Type, symbol::Symbol};
+use crate::{r#type::Type, symbol::Symbol, Closure};
 use alloc::{string::String, vec::Vec};
 use core::fmt::{self, Display, Formatter};
 
@@ -59,6 +59,10 @@ impl Value {
     }
 
     pub fn as_array(&self) -> Option<&Array> {
+        self.try_into().ok()
+    }
+
+    pub fn as_closure(&self) -> Option<&Closure> {
         self.try_into().ok()
     }
 
