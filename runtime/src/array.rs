@@ -295,6 +295,12 @@ mod tests {
     }
 
     #[test]
+    fn clone_with_elements() {
+        #[allow(clippy::redundant_clone)]
+        let _ = Array::from([[42.0.into()].into()]).clone();
+    }
+
+    #[test]
     fn get() {
         assert_eq!(Array::new(0).get((-1.0).into()), NIL);
         assert_eq!(Array::new(0).get((-0.0).into()), NIL);
