@@ -204,19 +204,17 @@ impl Clone for Array {
 impl Drop for Array {
     fn drop(&mut self) {
         if self.is_nil() {
-        } else if self.header().count == 0 {
+        } else if self.header().count == UNIQUE_COUNT {
             unsafe {
-                // TODO Drop content.
-                // for index in 0..self.header().len {
-                //     drop_in_place(
-                //         &mut *self
-                //             .as_ptr()
-                //             .cast::<Header>()
-                //             .add(1)
-                //             .cast::<Value>()
-                //             .add(index),
-                //     );
-                // }
+                for index in 0..self.header().len {
+                    drop_in_place(
+                        self.as_ptr()
+                            .cast::<Header>()
+                            .add(1)
+                            .cast::<Value>()
+                            .add(index),
+                    );
+                }
 
                 dealloc(self.as_ptr(), Layout::new::<Header>());
             }
@@ -292,7 +290,7 @@ mod tests {
 
     #[test]
     fn clone() {
-        let _ = Array::new(42);
+        let _ = Array::new(42).clone();
     }
 
     #[test]
