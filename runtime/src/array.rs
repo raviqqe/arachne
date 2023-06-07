@@ -29,11 +29,17 @@ impl Array {
             return Self(0);
         }
 
-        let ptr = unsafe { alloc_zeroed(Self::layout(capacity)) } as usize as u64;
+        Self(Self::mask_ptr(unsafe {
+            alloc_zeroed(Self::layout(capacity))
+        }))
+    }
+
+    fn mask_ptr(ptr: *const u8) -> u64 {
+        let ptr = ptr as u64;
 
         assert!(ptr & ARRAY_MASK == 0);
 
-        Self(ptr | ARRAY_MASK)
+        ptr | ARRAY_MASK
     }
 
     /// # Safety
@@ -117,17 +123,13 @@ impl Array {
             return;
         }
 
-        let ptr = unsafe {
+        self.0 = Self::mask_ptr(unsafe {
             realloc(
                 self.as_ptr(),
                 Self::layout(self.header().len),
                 Self::layout(len).size(),
             )
-        } as u64;
-
-        assert!(ptr & ARRAY_MASK == 0);
-
-        self.0 = ptr | ARRAY_MASK;
+        });
 
         for index in self.header().len..len {
             unsafe { write(self.element_ptr(index), NIL) };
