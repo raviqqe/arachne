@@ -63,12 +63,8 @@ impl Vm {
                     self.stack.push_value(value);
                 }
                 Instruction::Length => {
-                    let value = (|| {
-                        let array = self.stack.pop_value().into_array()?;
-
-                        Some(array.len().into())
-                    })()
-                    .unwrap_or(NIL);
+                    let value = (|| Some(self.stack.pop_value().into_array()?.len().into()))()
+                        .unwrap_or(NIL);
 
                     self.stack.push_value(value);
                 }
