@@ -142,7 +142,7 @@ impl Array {
 
         // TODO Do we need this?
         for index in self.header().len..len {
-            self.set_usize_unchecked(index, NIL);
+            unsafe { *self.element_ptr(index) = NIL };
         }
 
         unsafe { &mut *self.header_mut() }.len = len;
