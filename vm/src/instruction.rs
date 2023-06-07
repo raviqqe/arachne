@@ -1,5 +1,6 @@
 #[repr(u8)]
 pub enum Instruction {
+    Null,
     Nil,
     Constant,
     Get,

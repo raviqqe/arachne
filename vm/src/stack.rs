@@ -12,7 +12,7 @@ impl Stack {
     }
 
     pub fn push_value(&mut self, value: Value) {
-        self.values.push(value.to_raw());
+        self.values.push(value.into_raw());
     }
 
     pub fn pop_value(&mut self) -> Value {

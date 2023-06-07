@@ -1,7 +1,10 @@
 use super::{Array, Float64};
 use crate::{r#type::Type, symbol::Symbol, Closure};
 use alloc::{string::String, vec::Vec};
-use core::fmt::{self, Display, Formatter};
+use core::{
+    fmt::{self, Display, Formatter},
+    mem::forget,
+};
 
 pub const NIL: Value = Value(0);
 const EXPONENT_MASK: u64 = 0x7ff0_0000_0000_0000;
@@ -74,8 +77,12 @@ impl Value {
         self.try_into().ok()
     }
 
-    pub fn to_raw(&self) -> u64 {
-        self.0
+    pub fn into_raw(self) -> u64 {
+        let raw = self.0;
+
+        forget(self);
+
+        raw
     }
 
     /// # Safety

@@ -37,7 +37,7 @@ impl TryFrom<Value> for Float64 {
 
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         if value.is_float64() {
-            Ok(f64::from_bits(value.to_raw()).into())
+            Ok(f64::from_bits(value.into_raw()).into())
         } else {
             Err(())
         }

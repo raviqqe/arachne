@@ -1,3 +1,4 @@
+mod compile;
 mod instruction;
 mod stack;
 mod vm;

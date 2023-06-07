@@ -252,7 +252,7 @@ impl TryFrom<Value> for Array {
 
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         if value.is_array() {
-            Ok(unsafe { Array::from_raw(value.to_raw()) })
+            Ok(unsafe { Array::from_raw(value.into_raw()) })
         } else {
             Err(())
         }

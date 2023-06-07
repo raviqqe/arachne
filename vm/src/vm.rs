@@ -34,11 +34,19 @@ impl Vm {
         self.program_counter = 0;
 
         while self.program_counter < instructions.len() {
-            match unsafe { transmute(instructions[self.program_counter]) } {
-                Instruction::Nil => unreachable!("nil po' god!"),
+            let instruction = instructions[self.program_counter];
+
+            self.program_counter += 1;
+
+            match unsafe { transmute(instruction) } {
+                Instruction::Null => unreachable!("null po' god!"),
+                Instruction::Nil => {
+                    self.stack.push_value(NIL);
+                }
                 Instruction::Constant => {
                     let value = self.read_value(instructions);
                     self.stack.push_value(value);
+                    self.program_counter += 5;
                 }
                 Instruction::Get => {
                     let value = (|| {
