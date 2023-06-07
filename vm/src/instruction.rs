@@ -2,7 +2,8 @@
 pub enum Instruction {
     Nil,
     Constant,
-    Call,
+    Get,
+    Set,
     Float64Add,
     Float64Subtract,
     Float64Multiply,
