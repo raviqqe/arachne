@@ -33,18 +33,7 @@ impl Array {
 
         assert!(ptr & ARRAY_MASK == 0);
 
-        let this = Self(ptr | ARRAY_MASK);
-
-        // TODO Do we need this?
-        unsafe {
-            *this.header_mut() = Header { count: 0, len: 0 };
-
-            for index in 0..capacity {
-                *this.element_ptr(index) = NIL;
-            }
-        }
-
-        this
+        Self(ptr | ARRAY_MASK)
     }
 
     /// # Safety
