@@ -1,1 +1,1 @@
-mod instruction;
+pub mod instruction;
