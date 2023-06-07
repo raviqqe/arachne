@@ -8,12 +8,11 @@ use alloc::{
 };
 use core::{
     fmt::{self, Display, Formatter},
-    mem::{align_of, forget, size_of},
+    mem::forget,
+    ptr::drop_in_place,
 };
 
 const UNIQUE_COUNT: usize = 0;
-const ELEMENT_SIZE: usize = size_of::<Value>();
-const ALIGNMENT: usize = align_of::<Value>();
 
 #[derive(Debug)]
 pub struct Array(u64);
@@ -34,7 +33,18 @@ impl Array {
 
         assert!(ptr & ARRAY_MASK == 0);
 
-        Self(ptr | ARRAY_MASK)
+        let this = Self(ptr | ARRAY_MASK);
+
+        // TODO Do we need this?
+        unsafe {
+            *this.header_mut() = Header { count: 0, len: 0 };
+
+            for index in 0..capacity {
+                *this.element_ptr(index) = NIL;
+            }
+        }
+
+        this
     }
 
     /// # Safety
@@ -127,6 +137,11 @@ impl Array {
         } as u64
             | ARRAY_MASK;
 
+        // TODO Do we need this?
+        for index in self.header().len..len {
+            self.set_usize_unchecked(index, NIL);
+        }
+
         unsafe { &mut *self.header_mut() }.len = len;
     }
 
@@ -164,8 +179,13 @@ impl Array {
     }
 
     fn element_ptr(&self, index: usize) -> *mut Value {
-        ((self.as_ptr() as usize + Layout::new::<Header>().size()) + index * ELEMENT_SIZE)
-            as *mut Value
+        unsafe {
+            self.as_ptr()
+                .cast::<Header>()
+                .add(1)
+                .cast::<Value>()
+                .add(index)
+        }
     }
 
     fn as_ptr(&self) -> *mut u8 {
@@ -174,7 +194,8 @@ impl Array {
 
     fn layout(capacity: usize) -> Layout {
         Layout::new::<Header>()
-            .extend(Layout::from_size_align(ELEMENT_SIZE * capacity, ALIGNMENT).unwrap())
+            .pad_to_align()
+            .extend(Layout::array::<Value>(capacity).unwrap())
             .unwrap()
             .0
     }
@@ -203,9 +224,20 @@ impl Clone for Array {
 impl Drop for Array {
     fn drop(&mut self) {
         if self.is_nil() {
-        } else if self.header().count == 0 {
-            // TODO Drop elements.
-            unsafe { dealloc(self.as_ptr(), Layout::new::<Header>()) }
+        } else if self.header().count == UNIQUE_COUNT {
+            unsafe {
+                for index in 0..self.header().len {
+                    drop_in_place(
+                        self.as_ptr()
+                            .cast::<Header>()
+                            .add(1)
+                            .cast::<Value>()
+                            .add(index),
+                    );
+                }
+
+                dealloc(self.as_ptr(), Layout::new::<Header>());
+            }
         } else {
             unsafe { &mut *self.header_mut() }.count -= 1;
         }
@@ -278,7 +310,14 @@ mod tests {
 
     #[test]
     fn clone() {
-        let _ = Array::new(42);
+        #[allow(clippy::redundant_clone)]
+        let _ = Array::new(42).clone();
+    }
+
+    #[test]
+    fn clone_with_elements() {
+        #[allow(clippy::redundant_clone)]
+        let _ = Array::from([[42.0.into()].into()]).clone();
     }
 
     #[test]

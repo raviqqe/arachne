@@ -1,0 +1,10 @@
+[package]
+name = "arachne-vm"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+runtime = { package = "arachne-runtime", path = "../runtime" }
+
+[dev-dependencies]
+pretty_assertions = "1.3.0"

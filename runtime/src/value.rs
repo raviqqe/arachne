@@ -1,13 +1,15 @@
 use super::{Array, Float64};
-use crate::{r#type::Type, symbol::Symbol};
+use crate::{r#type::Type, symbol::Symbol, Closure};
 use alloc::{string::String, vec::Vec};
 use core::fmt::{self, Display, Formatter};
 
 pub const NIL: Value = Value(0);
 const EXPONENT_MASK: u64 = 0x7ff0_0000_0000_0000;
 const ARRAY_SUB_MASK: u64 = 0x0004_0000_0000_0000;
+const CLOSURE_SUB_MASK: u64 = 0x0001_0000_0000_0000;
 const SYMBOL_SUB_MASK: u64 = 0x0002_0000_0000_0000;
 pub(crate) const ARRAY_MASK: u64 = ARRAY_SUB_MASK | EXPONENT_MASK;
+pub(crate) const CLOSURE_MASK: u64 = CLOSURE_SUB_MASK | EXPONENT_MASK;
 pub(crate) const SYMBOL_MASK: u64 = SYMBOL_SUB_MASK | EXPONENT_MASK;
 
 #[derive(Debug)]
@@ -19,6 +21,8 @@ impl Value {
             Type::Float64
         } else if self.0 & ARRAY_MASK == ARRAY_MASK {
             Type::Array
+        } else if self.0 & CLOSURE_MASK == CLOSURE_MASK {
+            Type::Closure
         } else if self.0 & SYMBOL_MASK == SYMBOL_MASK {
             Type::Symbol
         } else {
@@ -38,6 +42,10 @@ impl Value {
         self.is_nil() || self.r#type() == Type::Float64
     }
 
+    pub fn is_closure(&self) -> bool {
+        self.is_nil() || self.r#type() == Type::Closure
+    }
+
     pub fn is_symbol(&self) -> bool {
         self.is_nil() || self.r#type() == Type::Symbol
     }
@@ -54,8 +62,19 @@ impl Value {
         self.try_into().ok()
     }
 
+    pub fn as_closure(&self) -> Option<&Closure> {
+        self.try_into().ok()
+    }
+
     pub fn to_raw(&self) -> u64 {
         self.0
+    }
+
+    /// # Safety
+    ///
+    /// The raw content must be valid and moved into the new value.
+    pub unsafe fn from_raw(value: u64) -> Self {
+        Self(value)
     }
 }
 
@@ -79,6 +98,8 @@ impl Clone for Value {
     fn clone(&self) -> Self {
         if let Some(array) = self.as_array() {
             array.clone().into()
+        } else if let Some(closure) = self.as_closure() {
+            closure.clone().into()
         } else {
             Self(self.0)
         }
@@ -99,6 +120,8 @@ impl Display for Value {
             write!(formatter, "()")
         } else if let Some(number) = self.to_float64() {
             write!(formatter, "{}", number)
+        } else if let Some(closure) = self.as_closure() {
+            write!(formatter, "{}", closure)
         } else if let Some(symbol) = self.to_symbol() {
             write!(formatter, "{}", symbol)
         } else if let Some(array) = self.as_array() {
@@ -112,6 +135,12 @@ impl Display for Value {
 impl From<Array> for Value {
     fn from(array: Array) -> Self {
         Self(array.into_raw())
+    }
+}
+
+impl From<Closure> for Value {
+    fn from(closure: Closure) -> Self {
+        Self(closure.into_raw())
     }
 }
 
