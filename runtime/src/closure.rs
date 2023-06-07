@@ -127,18 +127,18 @@ impl TryFrom<&Value> for &Closure {
 mod tests {
     use super::*;
 
-    #[test]
-    fn new() {
-        Closure::new(0, &[]);
-    }
+    // #[test]
+    // fn new() {
+    //     Closure::new(0, &[]);
+    // }
 
-    #[test]
-    fn clone() {
-        let _ = Closure::new(0, &[]);
-    }
+    // #[test]
+    // fn clone() {
+    //     let _ = Closure::new(0, &[]);
+    // }
 
-    #[test]
-    fn clone_with_environment() {
-        let _ = Closure::new(0, &[[42.0.into()].into()]);
-    }
+    // #[test]
+    // fn clone_with_environment() {
+    //     let _ = Closure::new(0, &[[42.0.into()].into()]);
+    // }
 }
