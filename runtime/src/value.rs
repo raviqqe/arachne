@@ -109,7 +109,7 @@ impl Clone for Value {
 impl Drop for Value {
     fn drop(&mut self) {
         if self.is_array() {
-            unsafe { Array::from_raw(self.0) };
+            // unsafe { Array::from_raw(self.0) };
         }
     }
 }
