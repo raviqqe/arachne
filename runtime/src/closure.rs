@@ -4,7 +4,7 @@ use core::{
     alloc::Layout,
     fmt::{self, Display, Formatter},
     mem::forget,
-    ptr::drop_in_place,
+    ptr::{drop_in_place, write},
 };
 
 pub type ClosureId = u32;
@@ -23,21 +23,21 @@ impl Closure {
         let (layout, _) = Layout::new::<Header>()
             .extend(Layout::array::<Value>(environment.len()).unwrap())
             .unwrap();
-        let ptr = unsafe { alloc(layout) };
+        let this = Self(unsafe { alloc(layout) } as u64 | CLOSURE_MASK);
 
         unsafe {
-            *ptr.cast::<Header>() = Header {
+            *this.header_mut() = Header {
                 count: 0,
                 id,
                 environment_size: environment.len() as u32,
             };
 
             for (index, value) in environment.iter().enumerate() {
-                *ptr.cast::<Header>().add(1).cast::<Value>().add(index) = value.clone();
+                write(this.environment_mut(index), value.clone());
             }
         }
 
-        Self(ptr as u64 | CLOSURE_MASK)
+        this
     }
 
     pub fn id(&self) -> ClosureId {
@@ -64,6 +64,16 @@ impl Closure {
         self.as_ptr() as *mut _
     }
 
+    fn environment_mut(&self, index: usize) -> *mut Value {
+        unsafe {
+            self.as_ptr()
+                .cast::<Header>()
+                .add(1)
+                .cast::<Value>()
+                .add(index)
+        }
+    }
+
     fn as_ptr(&self) -> *mut u8 {
         (self.0 & !CLOSURE_MASK) as *mut _
     }
@@ -85,13 +95,7 @@ impl Drop for Closure {
         } else if self.header().count == 0 {
             unsafe {
                 for index in 0..self.header().environment_size {
-                    drop_in_place(
-                        self.as_ptr()
-                            .cast::<Header>()
-                            .add(1)
-                            .cast::<Value>()
-                            .add(index as usize),
-                    );
+                    drop_in_place(self.environment_mut(index as usize));
                 }
 
                 dealloc(self.as_ptr(), Layout::new::<Header>());
