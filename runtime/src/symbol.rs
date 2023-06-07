@@ -44,7 +44,7 @@ impl TryFrom<Value> for Symbol {
 
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         if value.is_symbol() {
-            Ok(Symbol(value.to_raw()))
+            Ok(Self(value.to_raw()))
         } else {
             Err(())
         }
