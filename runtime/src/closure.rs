@@ -139,11 +139,11 @@ mod tests {
 
     #[test]
     fn clone() {
-        let _ = Closure::new(0, &[]).clone();
+        let _ = Closure::new(0, &[]);
     }
 
     #[test]
     fn clone_with_environment() {
-        let _ = Closure::new(0, &[[42.0.into()].into()]).clone();
+        let _ = Closure::new(0, &[[42.0.into()].into()]);
     }
 }
