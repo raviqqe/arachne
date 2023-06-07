@@ -2,6 +2,6 @@
 pub enum Type {
     Array,
     Float64,
-    Function,
+    Closure,
     Symbol,
 }

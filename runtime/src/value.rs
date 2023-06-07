@@ -6,10 +6,10 @@ use core::fmt::{self, Display, Formatter};
 pub const NIL: Value = Value(0);
 const EXPONENT_MASK: u64 = 0x7ff0_0000_0000_0000;
 const ARRAY_SUB_MASK: u64 = 0x0004_0000_0000_0000;
-const FUNCTION_SUB_MASK: u64 = 0x0001_0000_0000_0000;
+const CLOSURE_SUB_MASK: u64 = 0x0001_0000_0000_0000;
 const SYMBOL_SUB_MASK: u64 = 0x0002_0000_0000_0000;
 pub(crate) const ARRAY_MASK: u64 = ARRAY_SUB_MASK | EXPONENT_MASK;
-pub(crate) const FUNCTION_MASK: u64 = FUNCTION_SUB_MASK | EXPONENT_MASK;
+pub(crate) const CLOSURE_MASK: u64 = CLOSURE_SUB_MASK | EXPONENT_MASK;
 pub(crate) const SYMBOL_MASK: u64 = SYMBOL_SUB_MASK | EXPONENT_MASK;
 
 #[derive(Debug)]
@@ -21,8 +21,8 @@ impl Value {
             Type::Float64
         } else if self.0 & ARRAY_MASK == ARRAY_MASK {
             Type::Array
-        } else if self.0 & FUNCTION_MASK == FUNCTION_MASK {
-            Type::Function
+        } else if self.0 & CLOSURE_MASK == CLOSURE_MASK {
+            Type::Closure
         } else if self.0 & SYMBOL_MASK == SYMBOL_MASK {
             Type::Symbol
         } else {
@@ -42,8 +42,8 @@ impl Value {
         self.is_nil() || self.r#type() == Type::Float64
     }
 
-    pub fn is_function(&self) -> bool {
-        self.is_nil() || self.r#type() == Type::Function
+    pub fn is_closure(&self) -> bool {
+        self.is_nil() || self.r#type() == Type::Closure
     }
 
     pub fn is_symbol(&self) -> bool {
@@ -91,8 +91,8 @@ impl Clone for Value {
     fn clone(&self) -> Self {
         if let Some(array) = self.as_array() {
             array.clone().into()
-        } else if let Some(function) = self.as_function() {
-            function.clone().into()
+        } else if let Some(closure) = self.as_closure() {
+            closure.clone().into()
         } else {
             Self(self.0)
         }
