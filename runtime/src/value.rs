@@ -133,6 +133,12 @@ impl From<Array> for Value {
     }
 }
 
+impl From<Closure> for Value {
+    fn from(closure: Closure) -> Self {
+        Self(closure.into_raw())
+    }
+}
+
 impl From<Float64> for Value {
     fn from(number: Float64) -> Self {
         Self(number.to_f64().to_bits())
