@@ -4,6 +4,7 @@ pub enum Instruction {
     Constant,
     Get,
     Set,
+    Length,
     Float64Add,
     Float64Subtract,
     Float64Multiply,
