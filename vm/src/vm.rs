@@ -74,16 +74,16 @@ impl Vm {
 
                     self.stack.push_value(value);
                 }
-                Instruction::Float64Add => {
+                Instruction::Add => {
                     binary_operation!(self, +);
                 }
-                Instruction::Float64Subtract => {
+                Instruction::Subtract => {
                     binary_operation!(self, -);
                 }
-                Instruction::Float64Multiply => {
+                Instruction::Multiply => {
                     binary_operation!(self, *);
                 }
-                Instruction::Float64Divide => {
+                Instruction::Divide => {
                     binary_operation!(self, /);
                 }
                 Instruction::Call => todo!(),
