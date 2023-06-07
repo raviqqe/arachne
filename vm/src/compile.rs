@@ -70,5 +70,6 @@ fn compile_variable(symbol: Symbol, codes: &mut Vec<u8>) {
 }
 
 fn compile_call(array: Array, codes: &mut Vec<u8>) {
+    codes.push(Instruction::Call as u8);
     todo!()
 }
