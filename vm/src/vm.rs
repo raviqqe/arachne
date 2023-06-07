@@ -41,10 +41,27 @@ impl Vm {
                     self.stack.push_value(value);
                 }
                 Instruction::Get => {
-                    let array = self.stack.pop_value().into_array()?;
-                    let index = self.stack.pop_value().to_float64()?;
+                    let value = (|| {
+                        let array = self.stack.pop_value().into_array()?;
+
+                        Some(array.get(self.stack.pop_value()))
+                    })()
+                    .unwrap_or(NIL);
+
+                    self.stack.push_value(value);
                 }
-                Instruction::Set => Foo,
+                Instruction::Set => {
+                    let value = (|| {
+                        let array = self.stack.pop_value().into_array()?;
+                        let index = self.stack.pop_value();
+                        let value = self.stack.pop_value();
+
+                        Some(array.set(index, value).into())
+                    })()
+                    .unwrap_or(NIL);
+
+                    self.stack.push_value(value);
+                }
                 Instruction::Float64Add => {
                     binary_operation!(self, +);
                 }
