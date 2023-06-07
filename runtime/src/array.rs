@@ -206,16 +206,13 @@ impl Drop for Array {
         if self.is_nil() {
         } else if self.header().count == UNIQUE_COUNT {
             unsafe {
-                #[cfg(test)]
                 for index in 0..self.header().len {
-                    std::dbg!(
-                        index,
-                        &*self
-                            .as_ptr()
+                    drop_in_place(
+                        self.as_ptr()
                             .cast::<Header>()
                             .add(1)
                             .cast::<Value>()
-                            .add(index)
+                            .add(index),
                     );
                 }
 
