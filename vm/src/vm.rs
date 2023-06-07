@@ -13,7 +13,6 @@ macro_rules! binary_operation {
         .unwrap_or(NIL);
 
         $self.stack.push_value(value);
-        $self.program_counter += 1;
     };
 }
 
