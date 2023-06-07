@@ -9,6 +9,7 @@ use alloc::{
 use core::{
     fmt::{self, Display, Formatter},
     mem::forget,
+    ptr::{drop_in_place, write},
 };
 
 const UNIQUE_COUNT: usize = 0;
@@ -28,22 +29,17 @@ impl Array {
             return Self(0);
         }
 
-        let ptr = unsafe { alloc_zeroed(Self::layout(capacity)) } as usize as u64;
+        Self(Self::mask_ptr(unsafe {
+            alloc_zeroed(Self::layout(capacity))
+        }))
+    }
+
+    fn mask_ptr(ptr: *const u8) -> u64 {
+        let ptr = ptr as u64;
 
         assert!(ptr & ARRAY_MASK == 0);
 
-        let this = Self(ptr | ARRAY_MASK);
-
-        // TODO Do we need this?
-        unsafe {
-            *this.header_mut() = Header { count: 0, len: 0 };
-
-            for index in 0..capacity {
-                *this.element_ptr(index) = NIL;
-            }
-        }
-
-        this
+        ptr | ARRAY_MASK
     }
 
     /// # Safety
@@ -102,7 +98,7 @@ impl Array {
 
         if self.is_nil() {
             self = Self::new(len);
-            self.extend(len);
+            unsafe { (*self.header_mut()).len = len };
         } else if self.header().count == UNIQUE_COUNT {
             self.extend(len);
         } else {
@@ -127,18 +123,16 @@ impl Array {
             return;
         }
 
-        self.0 = unsafe {
+        self.0 = Self::mask_ptr(unsafe {
             realloc(
                 self.as_ptr(),
                 Self::layout(self.header().len),
                 Self::layout(len).size(),
             )
-        } as u64
-            | ARRAY_MASK;
+        });
 
-        // TODO Do we need this?
         for index in self.header().len..len {
-            self.set_usize_unchecked(index, NIL);
+            unsafe { write(self.element_ptr(index), NIL) };
         }
 
         unsafe { &mut *self.header_mut() }.len = len;
@@ -225,16 +219,9 @@ impl Drop for Array {
         if self.is_nil() {
         } else if self.header().count == UNIQUE_COUNT {
             unsafe {
-                // TODO drop actually
-                // for index in 0..self.header().len {
-                //     drop_in_place(
-                //         self.as_ptr()
-                //             .cast::<Header>()
-                //             .add(1)
-                //             .cast::<Value>()
-                //             .add(index),
-                //     );
-                // }
+                for index in 0..self.header().len {
+                    drop_in_place(self.element_ptr(index));
+                }
 
                 dealloc(self.as_ptr(), Layout::new::<Header>());
             }
