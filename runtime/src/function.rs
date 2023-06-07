@@ -19,6 +19,8 @@ impl Function {
             .unwrap();
         let ptr = unsafe { alloc(layout) };
 
+        unsafe { *ptr.cast::<FunctionHeader>() = FunctionHeader { id } };
+
         Self { ptr }
     }
 }
