@@ -47,6 +47,7 @@ impl TryFrom<Value> for Float64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::string::ToString;
 
     #[test]
     fn eq() {
@@ -54,5 +55,10 @@ mod tests {
         assert_eq!(Float64::from(1.0), Float64::from(1.0));
         assert_ne!(Float64::from(0.0), Float64::from(1.0));
         assert_eq!(Float64::from(f64::NAN), Float64::from(f64::NAN));
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(&Float64::from(42.0).to_string(), "42");
     }
 }

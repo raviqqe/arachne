@@ -269,6 +269,7 @@ impl From<Vec<Value>> for Array {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::string::ToString;
 
     #[test]
     fn new() {
@@ -287,6 +288,16 @@ mod tests {
         assert_eq!(Array::new(0).get(0.0.into()), NIL);
         assert_eq!(Array::new(0).get(1.0.into()), NIL);
         assert_eq!(Array::new(1).get(0.0.into()), NIL);
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(&Array::from([]).to_string(), "()");
+        assert_eq!(&Array::from(["foo".into()]).to_string(), "(foo)");
+        assert_eq!(
+            &Array::from(["foo".into(), 42.0.into()]).to_string(),
+            "(foo 42)"
+        );
     }
 
     #[test]
