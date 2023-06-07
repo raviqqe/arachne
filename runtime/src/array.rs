@@ -229,13 +229,7 @@ impl Drop for Array {
         } else if self.header().count == UNIQUE_COUNT {
             unsafe {
                 for index in 0..self.header().len {
-                    drop_in_place(
-                        self.as_ptr()
-                            .cast::<Header>()
-                            .add(1)
-                            .cast::<Value>()
-                            .add(index),
-                    );
+                    drop_in_place(self.element_ptr(index));
                 }
 
                 dealloc(self.as_ptr(), Layout::new::<Header>());
