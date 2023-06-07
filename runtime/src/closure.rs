@@ -86,8 +86,7 @@ impl Drop for Closure {
             unsafe {
                 for index in 0..self.header().environment_size {
                     drop_in_place(
-                        &mut *self
-                            .as_ptr()
+                        self.as_ptr()
                             .cast::<Header>()
                             .add(1)
                             .cast::<Value>()
