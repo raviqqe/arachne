@@ -1,11 +1,11 @@
-use crate::Instruction;
+use crate::{stack::Stack, Instruction};
 use std::mem::transmute;
 
 const STACK_SIZE: usize = 2048;
 
 pub struct Vm {
     program_counter: usize,
-    stack: Vec<u64>,
+    stack: Stack,
 }
 
 impl Vm {
@@ -19,11 +19,25 @@ impl Vm {
     pub fn run(&mut self, instructions: &[u8]) {
         for &instruction in instructions {
             match unsafe { transmute(instruction) } {
+                Instruction::Nil => panic!("nil po' god!"),
                 Instruction::Float64 => todo!(),
-                Instruction::Add => todo!(),
-                Instruction::Subtract => todo!(),
-                Instruction::Multiply => todo!(),
-                Instruction::Divide => todo!(),
+                Instruction::Float64Add => {
+                    self.stack
+                        .push_f64(self.stack.pop_f64() + self.stack.pop_f64());
+                }
+                Instruction::Float64Subtract => {
+                    self.stack
+                        .push_f64(self.stack.pop_f64() - self.stack.pop_f64());
+                }
+                Instruction::Float64Multiply => {
+                    self.stack
+                        .push_f64(self.stack.pop_f64() * self.stack.pop_f64());
+                }
+                Instruction::Float64Divide => {
+                    self.stack
+                        .push_f64(self.stack.pop_f64() / self.stack.pop_f64());
+                }
+                Instruction::Call => todo!(),
                 Instruction::Lambda => todo!(),
             }
         }

@@ -1,4 +1,5 @@
 mod instruction;
+mod stack;
 mod vm;
 
 pub use instruction::Instruction;
