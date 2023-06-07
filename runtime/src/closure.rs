@@ -20,11 +20,9 @@ struct Header {
 
 impl Closure {
     pub fn new(id: ClosureId, environment: &[Value]) -> Self {
-        let layout = Layout::new::<Header>()
+        let (layout, _) = Layout::new::<Header>()
             .extend(Layout::array::<Value>(environment.len()).unwrap())
-            .unwrap()
-            .0
-            .pad_to_align();
+            .unwrap();
         let ptr = unsafe { alloc(layout) };
 
         unsafe {
