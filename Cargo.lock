@@ -135,6 +135,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "arachne-vm"
+version = "0.1.0"
+dependencies = [
+ "arachne-runtime",
+ "pretty_assertions",
+]
+
+[[package]]
 name = "async-recursion"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
