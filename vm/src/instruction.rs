@@ -3,6 +3,7 @@ pub enum Instruction {
     Null,
     Nil,
     Constant,
+    Local,
     Get,
     Set,
     Length,

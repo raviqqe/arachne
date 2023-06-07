@@ -42,7 +42,7 @@ fn compile_expression(value: Value, codes: &mut Vec<u8>) {
                     }
                     _ => {
                         compile_variable(symbol, codes);
-                        compile_call(array.into(), codes);
+                        compile_call(array, codes);
                     }
                 },
                 Err(value) => {
@@ -65,7 +65,8 @@ fn compile_constant<T: Into<Value>>(value: T, codes: &mut Vec<u8>) {
     codes.extend(value.into().into_raw().to_le_bytes());
 }
 
-fn compile_variable(_symbol: Symbol, _codes: &mut Vec<u8>) {
+fn compile_variable(_symbol: Symbol, codes: &mut Vec<u8>) {
+    codes.push(Instruction::Local as u8);
     todo!("Resolve a symbol.")
 }
 
