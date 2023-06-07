@@ -40,6 +40,11 @@ impl Vm {
                     let value = self.read_value(instructions);
                     self.stack.push_value(value);
                 }
+                Instruction::Get => {
+                    let array = self.stack.pop_value().into_array()?;
+                    let index = self.stack.pop_value().to_float64()?;
+                }
+                Instruction::Set => Foo,
                 Instruction::Float64Add => {
                     binary_operation!(self, +);
                 }

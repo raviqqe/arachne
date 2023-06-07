@@ -8,5 +8,6 @@ pub enum Instruction {
     Float64Subtract,
     Float64Multiply,
     Float64Divide,
+    Call,
     Lambda,
 }

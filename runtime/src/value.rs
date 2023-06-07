@@ -58,7 +58,15 @@ impl Value {
         self.clone().try_into().ok()
     }
 
+    pub fn into_array(self) -> Option<Array> {
+        self.try_into().ok()
+    }
+
     pub fn as_array(&self) -> Option<&Array> {
+        self.try_into().ok()
+    }
+
+    pub fn into_closure(self) -> Option<Closure> {
         self.try_into().ok()
     }
 
