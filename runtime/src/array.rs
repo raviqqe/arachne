@@ -290,6 +290,11 @@ mod tests {
     }
 
     #[test]
+    fn display() {
+        assert_eq!(&Float64::from(42.0).to_string(), "42");
+    }
+
+    #[test]
     fn eq() {
         assert_eq!(Array::new(0), Array::new(0));
         assert_eq!(Array::new(1), Array::new(0));
