@@ -45,13 +45,13 @@ impl From<&str> for Symbol {
 }
 
 impl TryFrom<Value> for Symbol {
-    type Error = ();
+    type Error = Value;
 
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         if value.is_symbol() {
             Ok(Self(value.into_raw()))
         } else {
-            Err(())
+            Err(value)
         }
     }
 }

@@ -1,5 +1,5 @@
 use super::{Array, Float64};
-use crate::{r#type::Type, symbol::Symbol, Closure};
+use crate::{r#type::Type, symbol::Symbol, Closure, TypedValue};
 use alloc::{string::String, vec::Vec};
 use core::{
     fmt::{self, Display, Formatter},
@@ -75,6 +75,19 @@ impl Value {
 
     pub fn as_closure(&self) -> Option<&Closure> {
         self.try_into().ok()
+    }
+
+    pub fn into_typed(self) -> Option<TypedValue> {
+        if self.is_nil() {
+            None
+        } else {
+            Some(match self.r#type() {
+                Type::Array => TypedValue::Array(self.try_into().unwrap()),
+                Type::Closure => TypedValue::Closure(self.try_into().unwrap()),
+                Type::Float64 => TypedValue::Float64(self.try_into().unwrap()),
+                Type::Symbol => TypedValue::Symbol(self.try_into().unwrap()),
+            })
+        }
     }
 
     pub fn into_raw(self) -> u64 {

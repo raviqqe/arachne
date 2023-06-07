@@ -33,13 +33,13 @@ impl From<f64> for Float64 {
 }
 
 impl TryFrom<Value> for Float64 {
-    type Error = ();
+    type Error = Value;
 
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         if value.is_float64() {
             Ok(f64::from_bits(value.into_raw()).into())
         } else {
-            Err(())
+            Err(value)
         }
     }
 }

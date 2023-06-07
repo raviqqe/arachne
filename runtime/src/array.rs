@@ -248,13 +248,13 @@ impl Display for Array {
 }
 
 impl TryFrom<Value> for Array {
-    type Error = ();
+    type Error = Value;
 
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         if value.is_array() {
             Ok(unsafe { Array::from_raw(value.into_raw()) })
         } else {
-            Err(())
+            Err(value)
         }
     }
 }

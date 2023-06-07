@@ -120,13 +120,13 @@ impl Display for Closure {
 }
 
 impl TryFrom<Value> for Closure {
-    type Error = ();
+    type Error = Value;
 
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         if value.is_closure() {
             Ok(unsafe { Closure::from_raw(value.into_raw()) })
         } else {
-            Err(())
+            Err(value)
         }
     }
 }
