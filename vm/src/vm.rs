@@ -45,7 +45,6 @@ impl Vm {
                 Instruction::Constant => {
                     let value = self.read_value(instructions);
                     self.stack.push_value(value);
-                    self.program_counter += 5;
                 }
                 Instruction::Get => {
                     let value = (|| {
