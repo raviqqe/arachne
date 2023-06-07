@@ -18,8 +18,8 @@ impl Symbol {
 
 impl Display for Symbol {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
-        write!(formatter, "{:?}", unsafe {
-            &*(self.0 as *const u8 as *const String)
+        write!(formatter, "{}", unsafe {
+            &*((self.0 & !SYMBOL_MASK) as *const u8 as *const String)
         })
     }
 }
@@ -28,7 +28,7 @@ impl From<String> for Symbol {
     fn from(symbol: String) -> Self {
         let entry = CACHE.entry(symbol.into()).or_insert_with(Default::default);
 
-        Self(entry.key().as_ptr() as u64 | SYMBOL_MASK)
+        Self(entry.key().as_ref() as *const String as *const _ as u64 | SYMBOL_MASK)
     }
 }
 

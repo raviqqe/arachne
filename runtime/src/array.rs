@@ -293,7 +293,7 @@ mod tests {
     #[test]
     fn display() {
         assert_eq!(&Array::from([]).to_string(), "()");
-        assert_eq!(&Array::from(["foo".into()]).to_string(), "(42)");
+        assert_eq!(&Array::from(["foo".into()]).to_string(), "(foo)");
         assert_eq!(
             &Array::from(["foo".into(), 42.0.into()]).to_string(),
             "(foo 42)"
