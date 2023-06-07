@@ -31,7 +31,17 @@ impl Array {
             return Self(0);
         }
 
-        let ptr = unsafe { alloc_zeroed(Self::layout(capacity)) } as usize as u64;
+        let ptr = unsafe {
+            let ptr = alloc_zeroed(Self::layout(capacity));
+
+            *ptr.cast::<Header>() = Header { count: 0, len: 0 };
+
+            for index in 0..capacity {
+                *ptr.cast::<Header>().add(1).cast::<Value>().add(index) = NIL;
+            }
+
+            ptr as usize as u64
+        };
 
         assert!(ptr & ARRAY_MASK == 0);
 
