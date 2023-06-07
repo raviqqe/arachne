@@ -72,7 +72,7 @@ impl Value {
 
     /// Creates a value from raw content.
     ///
-    /// #Safety
+    /// # Safety
     ///
     /// The raw content must be valid and moved into the new value.
     pub unsafe fn from_raw(value: u64) -> Self {
