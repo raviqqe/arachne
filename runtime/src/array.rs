@@ -290,6 +290,7 @@ mod tests {
 
     #[test]
     fn clone() {
+        #[allow(clippy::redundant_clone)]
         let _ = Array::new(42).clone();
     }
 

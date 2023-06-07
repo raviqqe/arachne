@@ -134,11 +134,13 @@ mod tests {
 
     #[test]
     fn clone() {
-        let _ = Closure::new(0, &[]);
+        #[allow(clippy::redundant_clone)]
+        let _ = Closure::new(0, &[]).clone();
     }
 
     #[test]
     fn clone_with_environment() {
-        let _ = Closure::new(0, &[[42.0.into()].into()]);
+        #[allow(clippy::redundant_clone)]
+        let _ = Closure::new(0, &[[42.0.into()].into()]).clone();
     }
 }
