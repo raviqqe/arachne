@@ -9,6 +9,7 @@ use alloc::{
 use core::{
     fmt::{self, Display, Formatter},
     mem::{align_of, forget, size_of},
+    ptr::drop_in_place,
 };
 
 const UNIQUE_COUNT: usize = 0;
@@ -204,8 +205,20 @@ impl Drop for Array {
     fn drop(&mut self) {
         if self.is_nil() {
         } else if self.header().count == 0 {
-            // TODO Drop elements.
-            unsafe { dealloc(self.as_ptr(), Layout::new::<Header>()) }
+            unsafe {
+                for index in 0..self.header().len {
+                    drop_in_place(
+                        &mut *self
+                            .as_ptr()
+                            .cast::<Header>()
+                            .add(1)
+                            .cast::<Value>()
+                            .add(index),
+                    );
+                }
+
+                dealloc(self.as_ptr(), Layout::new::<Header>());
+            }
         } else {
             unsafe { &mut *self.header_mut() }.count -= 1;
         }

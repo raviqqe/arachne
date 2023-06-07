@@ -3,7 +3,6 @@ use alloc::alloc::{alloc, dealloc};
 use core::{
     alloc::Layout,
     fmt::{self, Display, Formatter},
-    marker::PhantomData,
     mem::forget,
     ptr::drop_in_place,
 };
@@ -12,33 +11,29 @@ pub type ClosureId = u32;
 
 pub struct Closure(u64);
 
-pub struct ClosureHeader {
+#[repr(C)]
+struct Header {
     count: usize,
     id: ClosureId,
     environment_size: u32,
-    environment: PhantomData<[Value]>,
 }
 
 impl Closure {
     pub fn new(id: ClosureId, environment: &[Value]) -> Self {
-        let (layout, _) = Layout::new::<ClosureHeader>()
+        let (layout, _) = Layout::new::<Header>()
             .extend(Layout::array::<Value>(environment.len()).unwrap())
             .unwrap();
         let ptr = unsafe { alloc(layout) };
 
         unsafe {
-            *ptr.cast::<ClosureHeader>() = ClosureHeader {
+            *ptr.cast::<Header>() = Header {
                 count: 0,
                 id,
                 environment_size: environment.len() as u32,
-                environment: Default::default(),
             };
 
             for (index, value) in environment.iter().enumerate() {
-                *ptr.cast::<ClosureHeader>()
-                    .add(1)
-                    .cast::<Value>()
-                    .add(index) = value.clone();
+                *ptr.cast::<Header>().add(1).cast::<Value>().add(index) = value.clone();
             }
         }
 
@@ -61,11 +56,11 @@ impl Closure {
         ptr
     }
 
-    fn header(&self) -> &ClosureHeader {
+    fn header(&self) -> &Header {
         unsafe { &*self.header_mut() }
     }
 
-    fn header_mut(&self) -> *mut ClosureHeader {
+    fn header_mut(&self) -> *mut Header {
         self.as_ptr() as *mut _
     }
 
@@ -93,14 +88,14 @@ impl Drop for Closure {
                     drop_in_place(
                         &mut *self
                             .as_ptr()
-                            .cast::<ClosureHeader>()
+                            .cast::<Header>()
                             .add(1)
                             .cast::<Value>()
                             .add(index as usize),
                     );
                 }
 
-                dealloc(self.as_ptr(), Layout::new::<ClosureHeader>());
+                dealloc(self.as_ptr(), Layout::new::<Header>());
             }
         } else {
             unsafe { &mut *self.header_mut() }.count -= 1;
