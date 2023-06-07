@@ -120,10 +120,6 @@ impl Array {
     }
 
     fn set_usize_unchecked(&mut self, index: usize, value: Value) {
-        #[cfg(test)]
-        unsafe {
-            std::dbg!(&*self.element_ptr(index))
-        };
         *unsafe { &mut *self.element_ptr(index) } = value;
     }
 
@@ -132,14 +128,17 @@ impl Array {
             return;
         }
 
-        self.0 = unsafe {
+        let ptr = unsafe {
             realloc(
                 self.as_ptr(),
                 Self::layout(self.header().len),
                 Self::layout(len).size(),
             )
-        } as u64
-            | ARRAY_MASK;
+        } as u64;
+
+        assert!(ptr & ARRAY_MASK == 0);
+
+        self.0 = ptr | ARRAY_MASK;
 
         // TODO Do we need this?
         for index in self.header().len..len {
