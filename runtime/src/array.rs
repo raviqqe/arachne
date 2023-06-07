@@ -9,7 +9,6 @@ use alloc::{
 use core::{
     fmt::{self, Display, Formatter},
     mem::forget,
-    ptr::drop_in_place,
 };
 
 const UNIQUE_COUNT: usize = 0;
@@ -226,15 +225,16 @@ impl Drop for Array {
         if self.is_nil() {
         } else if self.header().count == UNIQUE_COUNT {
             unsafe {
-                for index in 0..self.header().len {
-                    drop_in_place(
-                        self.as_ptr()
-                            .cast::<Header>()
-                            .add(1)
-                            .cast::<Value>()
-                            .add(index),
-                    );
-                }
+                // TODO drop actually
+                // for index in 0..self.header().len {
+                //     drop_in_place(
+                //         self.as_ptr()
+                //             .cast::<Header>()
+                //             .add(1)
+                //             .cast::<Value>()
+                //             .add(index),
+                //     );
+                // }
 
                 dealloc(self.as_ptr(), Layout::new::<Header>());
             }
