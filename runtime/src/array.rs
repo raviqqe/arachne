@@ -9,7 +9,7 @@ use alloc::{
 use core::{
     fmt::{self, Display, Formatter},
     mem::forget,
-    ptr::drop_in_place,
+    ptr::{drop_in_place, write},
 };
 
 const UNIQUE_COUNT: usize = 0;
@@ -142,7 +142,7 @@ impl Array {
 
         // TODO Do we need this?
         for index in self.header().len..len {
-            unsafe { *self.element_ptr(index) = NIL };
+            unsafe { write(self.element_ptr(index), NIL) };
         }
 
         unsafe { &mut *self.header_mut() }.len = len;
