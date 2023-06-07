@@ -5,6 +5,7 @@ use core::fmt::{self, Display, Formatter};
 use dashmap::DashMap;
 use once_cell::sync::Lazy;
 
+#[allow(clippy::box_collection)]
 static CACHE: Lazy<DashMap<Box<String>, ()>> = Lazy::new(Default::default);
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
