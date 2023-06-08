@@ -32,14 +32,14 @@ impl<'a> Compiler<'a> {
             match symbol.as_str() {
                 // TODO Generate let instruction.
                 "let" => todo!(),
-                _ => compile_expression(array.into(), codes),
+                _ => compile_expression(array.into()),
             }
         } else {
             compile_expression(array.into(), codes);
         }
     }
 
-    fn compile_expression(&self, value: Value, codes: &mut Vec<u8>) {
+    fn compile_expression(&self, value: Value) {
         if let Some(value) = value.into_typed() {
             match value {
                 TypedValue::Array(array) => match Symbol::try_from(array.get_usize(0)) {
@@ -73,7 +73,7 @@ impl<'a> Compiler<'a> {
     }
 
     fn compile_arguments(&self, array: Array, arity: usize) {
-        for index in (0..array.len_usze() - 1).rev() {
+        for index in (1..array.len_usize()).rev() {
             self.compile_expression(array.get(index));
         }
     }
