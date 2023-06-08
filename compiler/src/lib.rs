@@ -1,6 +1,6 @@
 use async_stream::try_stream;
 use futures::{Stream, StreamExt};
-use runtime::{Array, Symbol, TypedValue, Value, NIL};
+use runtime::{Array, Symbol, TypedValue, Value};
 use std::{cell::RefCell, error::Error};
 use vm::Instruction;
 
@@ -19,77 +19,83 @@ impl<'a> Compiler<'a> {
     ) -> impl Stream<Item = Result<(), E>> + 'b {
         try_stream! {
             while let Some(value) = values.next().await {
-                compile_statement(value?, &mut self.codes.borrow_mut());
+                self.compile_statement(value?);
                 yield ();
             }
         }
     }
-}
 
-fn compile_statement(value: Value, codes: &mut Vec<u8>) {
-    let Some(array) = value.into_array() else { return };
-
-    if let Some(symbol) = array.get_usize(0).to_symbol() {
-        match symbol.as_str() {
-            // TODO Generate let instruction.
-            "let" => todo!(),
-            _ => compile_expression(array.into(), codes),
-        }
-    } else {
-        compile_expression(array.into(), codes);
-    }
-}
-
-fn compile_expression(value: Value, codes: &mut Vec<u8>) {
-    if let Some(value) = value.into_typed() {
-        match value {
-            TypedValue::Array(array) => match Symbol::try_from(array.get_usize(0)) {
-                Ok(symbol) => match symbol.as_str() {
-                    "array" => todo!(),
-                    "eq" => todo!(),
-                    "get" => {
-                        codes.push(Instruction::Get as u8);
-                        todo!();
+    fn compile_statement(&self, value: Value) {
+        match Array::try_from(value) {
+            Ok(array) => {
+                if let Some(symbol) = array.get_usize(0).to_symbol() {
+                    match symbol.as_str() {
+                        // TODO Generate let instruction.
+                        "let" => todo!(),
+                        _ => self.compile_expression(array.into()),
                     }
-                    "set" => {
-                        codes.push(Instruction::Set as u8);
-                        todo!();
-                    }
-                    "len" => {
-                        codes.push(Instruction::Length as u8);
-                        todo!();
-                    }
-                    _ => {
-                        compile_variable(symbol, codes);
-                        compile_call(array, codes);
-                    }
-                },
-                Err(value) => {
-                    compile_expression(value, codes);
-                    compile_call(array, codes);
+                } else {
+                    self.compile_expression(array.into());
                 }
-            },
-            TypedValue::Closure(closure) => compile_constant(closure, codes),
-            TypedValue::Float64(number) => compile_constant(number, codes),
-            TypedValue::Symbol(symbol) => compile_variable(symbol, codes),
+            }
+            Err(value) => self.compile_expression(value),
         }
-    } else {
-        codes.push(Instruction::Constant as u8);
-        codes.extend(NIL.into_raw().to_le_bytes());
+
+        self.codes.borrow_mut().push(Instruction::Dump as u8);
     }
-}
 
-fn compile_constant<T: Into<Value>>(value: T, codes: &mut Vec<u8>) {
-    codes.push(Instruction::Constant as u8);
-    codes.extend(value.into().into_raw().to_le_bytes());
-}
+    fn compile_expression(&self, value: Value) {
+        if let Some(value) = value.into_typed() {
+            match value {
+                TypedValue::Array(array) => {
+                    if let Some(symbol) = (array.get_usize(0)).to_symbol() {
+                        if let Some(instruction) = match symbol.as_str() {
+                            "array" => Some(Instruction::Array),
+                            "eq" => Some(Instruction::Equal),
+                            "get" => Some(Instruction::Get),
+                            "set" => Some(Instruction::Set),
+                            "len" => Some(Instruction::Length),
+                            _ => None,
+                        } {
+                            self.compile_arguments(array);
+                            self.codes.borrow_mut().push(instruction as u8);
+                        } else {
+                            self.compile_call(array);
+                        }
+                    } else {
+                        self.compile_call(array)
+                    }
+                }
+                TypedValue::Closure(closure) => self.compile_constant(closure),
+                TypedValue::Float64(number) => self.compile_constant(number),
+                TypedValue::Symbol(symbol) => self.compile_variable(symbol),
+            }
+        } else {
+            self.codes.borrow_mut().push(Instruction::Nil as u8);
+        }
+    }
 
-fn compile_variable(_symbol: Symbol, codes: &mut Vec<u8>) {
-    codes.push(Instruction::Local as u8);
-    todo!("Resolve a symbol.")
-}
+    fn compile_arguments(&self, array: Array) {
+        for index in (1..array.len_usize()).rev() {
+            self.compile_expression(array.get_usize(index));
+        }
+    }
 
-fn compile_call(_array: Array, codes: &mut Vec<u8>) {
-    codes.push(Instruction::Call as u8);
-    todo!()
+    fn compile_constant<T: Into<Value>>(&self, value: T) {
+        self.codes.borrow_mut().push(Instruction::Constant as u8);
+        self.codes
+            .borrow_mut()
+            .extend(value.into().into_raw().to_le_bytes());
+    }
+
+    fn compile_variable(&self, _symbol: Symbol) {
+        self.codes.borrow_mut().push(Instruction::Local as u8);
+        todo!("Resolve a symbol.")
+    }
+
+    fn compile_call(&self, array: Array) {
+        self.compile_arguments(array.clone());
+        self.compile_expression(array.get_usize(0));
+        self.codes.borrow_mut().push(Instruction::Call as u8);
+    }
 }

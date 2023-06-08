@@ -46,19 +46,20 @@ impl Value {
     }
 
     pub fn is_closure(&self) -> bool {
+        // TODO Should closures be non-nil?
         self.is_nil() || self.r#type() == Type::Closure
     }
 
     pub fn is_symbol(&self) -> bool {
-        self.is_nil() || self.r#type() == Type::Symbol
+        self.r#type() == Type::Symbol
     }
 
     pub fn to_float64(&self) -> Option<Float64> {
-        self.clone().try_into().ok()
+        self.try_into().ok()
     }
 
     pub fn to_symbol(&self) -> Option<Symbol> {
-        self.clone().try_into().ok()
+        self.try_into().ok()
     }
 
     pub fn into_array(self) -> Option<Array> {
@@ -96,6 +97,10 @@ impl Value {
         forget(self);
 
         raw
+    }
+
+    pub fn to_raw(&self) -> u64 {
+        self.0
     }
 
     /// # Safety
@@ -224,11 +229,12 @@ mod tests {
     }
 
     #[test]
-    fn nil_is_everything() {
+    fn nil_type_check() {
         assert!(NIL.is_nil());
         assert!(NIL.is_array());
+        assert!(NIL.is_closure());
         assert!(NIL.is_float64());
-        assert!(NIL.is_symbol());
+        assert!(!NIL.is_symbol());
     }
 
     #[test]

@@ -1,6 +1,7 @@
 use crate::{stack::Stack, Instruction};
+use num_traits::FromPrimitive;
 use runtime::{Value, NIL};
-use std::mem::{size_of, transmute};
+use std::mem::size_of;
 
 macro_rules! binary_operation {
     ($self:expr, $operator:tt) => {
@@ -30,14 +31,13 @@ impl Vm {
     }
 
     pub fn run(&mut self, instructions: &[u8]) {
-        self.program_counter = 0;
-
         while self.program_counter < instructions.len() {
-            let instruction = instructions[self.program_counter];
+            let instruction = Instruction::from_u8(instructions[self.program_counter])
+                .expect("valid instruction");
 
             self.program_counter += 1;
 
-            match unsafe { transmute(instruction) } {
+            match instruction {
                 Instruction::Null => unreachable!("null po' god!"),
                 Instruction::Nil => {
                     self.stack.push_value(NIL);
@@ -86,9 +86,14 @@ impl Vm {
                 Instruction::Divide => {
                     binary_operation!(self, /);
                 }
+                Instruction::Dump => {
+                    println!("{}", self.stack.pop_value());
+                }
                 Instruction::Call => todo!(),
                 Instruction::Lambda => todo!(),
                 Instruction::Local => todo!(),
+                Instruction::Equal => todo!(),
+                Instruction::Array => todo!(),
             }
         }
     }

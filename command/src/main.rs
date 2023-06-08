@@ -67,7 +67,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         pin_mut!(outputs);
 
         while let Some(result) = outputs.next().await {
-            println!("{}", result?);
+            result?;
         }
 
         Ok(())
