@@ -40,6 +40,13 @@ impl Closure {
         this
     }
 
+    /// # Safety
+    ///
+    /// The pointer must be valid.
+    pub unsafe fn from_raw(ptr: u64) -> Self {
+        Self(ptr)
+    }
+
     pub fn id(&self) -> ClosureId {
         self.header().id
     }
@@ -109,6 +116,18 @@ impl Drop for Closure {
 impl Display for Closure {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         write!(formatter, "<closure {:x}>", self.0)
+    }
+}
+
+impl TryFrom<Value> for Closure {
+    type Error = Value;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        if value.is_closure() {
+            Ok(unsafe { Closure::from_raw(value.into_raw()) })
+        } else {
+            Err(value)
+        }
     }
 }
 

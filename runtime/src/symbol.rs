@@ -5,6 +5,7 @@ use core::fmt::{self, Display, Formatter};
 use dashmap::DashMap;
 use once_cell::sync::Lazy;
 
+// TODO Should we use Box::pin()?
 #[allow(clippy::box_collection)]
 static CACHE: Lazy<DashMap<Box<String>, ()>> = Lazy::new(Default::default);
 
@@ -15,13 +16,15 @@ impl Symbol {
     pub(crate) fn to_raw(self) -> u64 {
         self.0
     }
+
+    pub fn as_str(&self) -> &str {
+        unsafe { &*((self.0 & !SYMBOL_MASK) as *const u8 as *const String) }
+    }
 }
 
 impl Display for Symbol {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
-        write!(formatter, "{}", unsafe {
-            &*((self.0 & !SYMBOL_MASK) as *const u8 as *const String)
-        })
+        write!(formatter, "{}", self.as_str())
     }
 }
 
@@ -42,13 +45,13 @@ impl From<&str> for Symbol {
 }
 
 impl TryFrom<Value> for Symbol {
-    type Error = ();
+    type Error = Value;
 
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         if value.is_symbol() {
-            Ok(Self(value.to_raw()))
+            Ok(Self(value.into_raw()))
         } else {
-            Err(())
+            Err(value)
         }
     }
 }

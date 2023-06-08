@@ -1,7 +1,10 @@
 use super::{Array, Float64};
-use crate::{r#type::Type, symbol::Symbol, Closure};
+use crate::{r#type::Type, symbol::Symbol, Closure, TypedValue};
 use alloc::{string::String, vec::Vec};
-use core::fmt::{self, Display, Formatter};
+use core::{
+    fmt::{self, Display, Formatter},
+    mem::forget,
+};
 
 pub const NIL: Value = Value(0);
 const EXPONENT_MASK: u64 = 0x7ff0_0000_0000_0000;
@@ -58,7 +61,15 @@ impl Value {
         self.clone().try_into().ok()
     }
 
+    pub fn into_array(self) -> Option<Array> {
+        self.try_into().ok()
+    }
+
     pub fn as_array(&self) -> Option<&Array> {
+        self.try_into().ok()
+    }
+
+    pub fn into_closure(self) -> Option<Closure> {
         self.try_into().ok()
     }
 
@@ -66,8 +77,25 @@ impl Value {
         self.try_into().ok()
     }
 
-    pub fn to_raw(&self) -> u64 {
-        self.0
+    pub fn into_typed(self) -> Option<TypedValue> {
+        if self.is_nil() {
+            None
+        } else {
+            Some(match self.r#type() {
+                Type::Array => TypedValue::Array(self.try_into().unwrap()),
+                Type::Closure => TypedValue::Closure(self.try_into().unwrap()),
+                Type::Float64 => TypedValue::Float64(self.try_into().unwrap()),
+                Type::Symbol => TypedValue::Symbol(self.try_into().unwrap()),
+            })
+        }
+    }
+
+    pub fn into_raw(self) -> u64 {
+        let raw = self.0;
+
+        forget(self);
+
+        raw
     }
 
     /// # Safety

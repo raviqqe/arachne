@@ -13,7 +13,6 @@ macro_rules! binary_operation {
         .unwrap_or(NIL);
 
         $self.stack.push_value(value);
-        $self.program_counter += 1;
     };
 }
 
@@ -34,26 +33,62 @@ impl Vm {
         self.program_counter = 0;
 
         while self.program_counter < instructions.len() {
-            match unsafe { transmute(instructions[self.program_counter]) } {
-                Instruction::Nil => unreachable!("nil po' god!"),
+            let instruction = instructions[self.program_counter];
+
+            self.program_counter += 1;
+
+            match unsafe { transmute(instruction) } {
+                Instruction::Null => unreachable!("null po' god!"),
+                Instruction::Nil => {
+                    self.stack.push_value(NIL);
+                }
                 Instruction::Constant => {
                     let value = self.read_value(instructions);
                     self.stack.push_value(value);
                 }
-                Instruction::Float64Add => {
+                Instruction::Get => {
+                    let value = (|| {
+                        let array = self.stack.pop_value().into_array()?;
+
+                        Some(array.get(self.stack.pop_value()))
+                    })()
+                    .unwrap_or(NIL);
+
+                    self.stack.push_value(value);
+                }
+                Instruction::Set => {
+                    let value = (|| {
+                        let array = self.stack.pop_value().into_array()?;
+                        let index = self.stack.pop_value();
+                        let value = self.stack.pop_value();
+
+                        Some(array.set(index, value).into())
+                    })()
+                    .unwrap_or(NIL);
+
+                    self.stack.push_value(value);
+                }
+                Instruction::Length => {
+                    let value = (|| Some(self.stack.pop_value().into_array()?.len().into()))()
+                        .unwrap_or(NIL);
+
+                    self.stack.push_value(value);
+                }
+                Instruction::Add => {
                     binary_operation!(self, +);
                 }
-                Instruction::Float64Subtract => {
+                Instruction::Subtract => {
                     binary_operation!(self, -);
                 }
-                Instruction::Float64Multiply => {
+                Instruction::Multiply => {
                     binary_operation!(self, *);
                 }
-                Instruction::Float64Divide => {
+                Instruction::Divide => {
                     binary_operation!(self, /);
                 }
                 Instruction::Call => todo!(),
                 Instruction::Lambda => todo!(),
+                Instruction::Local => todo!(),
             }
         }
     }
