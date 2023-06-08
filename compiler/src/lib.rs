@@ -40,6 +40,7 @@ impl<'a> Compiler<'a> {
                             if let Some(symbol) = array.get_usize(1).to_symbol() {
                                 self.compile_expression(array.get_usize(2));
                                 self.variables.insert(symbol, self.variables.len());
+                                // Keep a value on a stack.
                             }
                         }
                         _ => self.compile_top_expression(array.into()),
