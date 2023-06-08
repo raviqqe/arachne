@@ -122,7 +122,7 @@ impl Vm {
                 }
                 Instruction::Equal => todo!(),
                 Instruction::Array => todo!(),
-                Instruction::Jump => todo!(),
+                Instruction::Jump => self.program_counter = self.read_u32(instructions) as usize,
                 Instruction::Return => todo!(),
             }
         }
