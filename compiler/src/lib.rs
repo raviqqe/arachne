@@ -1,11 +1,12 @@
 use async_stream::try_stream;
 use futures::{Stream, StreamExt};
 use runtime::{Array, Symbol, TypedValue, Value};
-use std::{cell::RefCell, error::Error};
+use std::{cell::RefCell, collections::HashMap, error::Error};
 use vm::Instruction;
 
 pub struct Compiler<'a> {
     codes: &'a RefCell<Vec<u8>>,
+    variables: HashMap<Symbol, usize>,
 }
 
 impl<'a> Compiler<'a> {
