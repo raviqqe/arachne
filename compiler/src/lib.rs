@@ -32,7 +32,10 @@ impl<'a> Compiler<'a> {
             match symbol.as_str() {
                 // TODO Generate let instruction.
                 "let" => todo!(),
-                _ => self.compile_expression(array.into()),
+                _ => {
+                    self.compile_expression(array.into());
+                    self.codes.borrow_mut().push(Instruction::Dump as u8);
+                }
             }
         } else {
             self.compile_expression(array.into());

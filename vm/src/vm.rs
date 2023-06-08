@@ -86,6 +86,9 @@ impl Vm {
                 Instruction::Divide => {
                     binary_operation!(self, /);
                 }
+                Instruction::Dump => {
+                    println!("{}", self.stack.pop_value());
+                }
                 Instruction::Call => todo!(),
                 Instruction::Lambda => todo!(),
                 Instruction::Local => todo!(),
