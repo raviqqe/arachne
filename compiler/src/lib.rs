@@ -32,10 +32,10 @@ impl<'a> Compiler<'a> {
             match symbol.as_str() {
                 // TODO Generate let instruction.
                 "let" => todo!(),
-                _ => compile_expression(array.into()),
+                _ => self.compile_expression(array.into()),
             }
         } else {
-            compile_expression(array.into(), codes);
+            self.compile_expression(array.into());
         }
     }
 
@@ -47,34 +47,34 @@ impl<'a> Compiler<'a> {
                         "array" => todo!(),
                         "eq" => todo!(),
                         "get" => {
-                            compile_arguments(array);
-                            codes.push(Instruction::Get as u8);
+                            self.compile_arguments(array);
+                            self.codes.borrow_mut().push(Instruction::Get as u8);
                         }
                         "set" => {
-                            compile_arguments(array);
-                            codes.push(Instruction::Set as u8);
+                            self.compile_arguments(array);
+                            self.codes.borrow_mut().push(Instruction::Set as u8);
                         }
                         "len" => {
-                            compile_arguments(array);
-                            codes.push(Instruction::Length as u8);
+                            self.compile_arguments(array);
+                            self.codes.borrow_mut().push(Instruction::Length as u8);
                         }
-                        _ => compile_call(array, codes),
+                        _ => self.compile_call(array),
                     },
-                    Err(value) => compile_call(array, codes),
+                    Err(value) => self.compile_call(array),
                 },
-                TypedValue::Closure(closure) => compile_constant(closure, codes),
-                TypedValue::Float64(number) => compile_constant(number, codes),
-                TypedValue::Symbol(symbol) => compile_variable(symbol, codes),
+                TypedValue::Closure(closure) => self.compile_constant(closure),
+                TypedValue::Float64(number) => self.compile_constant(number),
+                TypedValue::Symbol(symbol) => self.compile_variable(symbol),
             }
         } else {
-            codes.push(Instruction::Constant as u8);
-            codes.extend(NIL.into_raw().to_le_bytes());
+            self.codes.borrow_mut().push(Instruction::Constant as u8);
+            self.codes.borrow_mut().extend(NIL.into_raw().to_le_bytes());
         }
     }
 
-    fn compile_arguments(&self, array: Array, arity: usize) {
+    fn compile_arguments(&self, array: Array) {
         for index in (1..array.len_usize()).rev() {
-            self.compile_expression(array.get(index));
+            self.compile_expression(array.get_usize(index));
         }
     }
 
@@ -91,7 +91,7 @@ impl<'a> Compiler<'a> {
     }
 
     fn compile_call(&self, array: Array) {
-        self.compile_arguments(array, codes);
+        self.compile_arguments(array);
         self.codes.borrow_mut().push(Instruction::Call as u8);
     }
 }
