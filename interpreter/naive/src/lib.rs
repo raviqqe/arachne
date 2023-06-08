@@ -3,15 +3,8 @@ mod error;
 use async_stream::try_stream;
 use error::InterpretError;
 use futures::{Stream, StreamExt};
-use once_cell::sync::Lazy;
-use runtime::{Array, Symbol, Value, NIL};
+use runtime::{Array, Value, NIL};
 use std::error::Error;
-
-static ARRAY: Lazy<Symbol> = Lazy::new(|| "array".into());
-static EQ: Lazy<Symbol> = Lazy::new(|| "eq".into());
-static GET: Lazy<Symbol> = Lazy::new(|| "get".into());
-static SET: Lazy<Symbol> = Lazy::new(|| "set".into());
-static LEN: Lazy<Symbol> = Lazy::new(|| "len".into());
 
 pub fn interpret<E: Error + 'static>(
     values: &mut (impl Stream<Item = Result<Value, E>> + Unpin),
@@ -32,36 +25,37 @@ fn evaluate(value: Value) -> Value {
             }
 
             if let Some(symbol) = array.get_usize(0).to_symbol() {
-                if symbol == *ARRAY {
-                    let len = array.len_usize();
-                    let mut new = Array::new(len - 1);
+                match symbol.as_str() {
+                    "array" => {
+                        let len = array.len_usize();
+                        let mut new = Array::new(len - 1);
 
-                    for index in 1..len {
-                        new = new.set_usize(index - 1, array.get_usize(index));
-                    }
+                        for index in 1..len {
+                            new = new.set_usize(index - 1, array.get_usize(index));
+                        }
 
-                    Some(new.into())
-                } else if symbol == *EQ {
-                    Some(((array.get_usize(1) == array.get_usize(2)) as usize as f64).into())
-                } else if symbol == *GET {
-                    Some(array.get_usize(1).as_array()?.get(array.get_usize(2)))
-                } else if symbol == *SET {
-                    if array.len_usize() >= 4 {
-                        Some(
-                            array
-                                .get_usize(1)
-                                .as_array()?
-                                .clone()
-                                .set(array.get_usize(2), array.get_usize(3))
-                                .into(),
-                        )
-                    } else {
-                        None
+                        Some(new.into())
                     }
-                } else if symbol == *LEN {
-                    Some(array.get_usize(1).as_array()?.len().into())
-                } else {
-                    None
+                    "eq" => {
+                        Some(((array.get_usize(1) == array.get_usize(2)) as usize as f64).into())
+                    }
+                    "get" => Some(array.get_usize(1).as_array()?.get(array.get_usize(2))),
+                    "set" => {
+                        if array.len_usize() >= 4 {
+                            Some(
+                                array
+                                    .get_usize(1)
+                                    .as_array()?
+                                    .clone()
+                                    .set(array.get_usize(2), array.get_usize(3))
+                                    .into(),
+                            )
+                        } else {
+                            None
+                        }
+                    }
+                    "len" => Some(array.get_usize(1).as_array()?.len().into()),
+                    _ => None,
                 }
             } else {
                 None
