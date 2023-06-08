@@ -4,7 +4,7 @@ pub enum Instruction {
     Null,
     Nil,
     Constant,
-    Local, // TODO Rename to `Variable`?
+    Local,
     Get,
     Set,
     Length,
