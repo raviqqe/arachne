@@ -26,7 +26,7 @@ impl Interpreter {
         values: &'a mut (impl Stream<Item = Result<Value, E>> + Unpin),
     ) -> impl Stream<Item = Result<Value, InterpretError>> + 'a {
         try_stream! {
-            let compiler = Compiler::new(&self.codes);
+            let mut compiler = Compiler::new(&self.codes);
             let mut vm = Vm::new(VM_STACK_SIZE);
             let results = compiler.compile(values);
 

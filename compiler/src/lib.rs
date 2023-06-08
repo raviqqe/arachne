@@ -19,10 +19,10 @@ impl<'a> Compiler<'a> {
         }
     }
 
-    pub fn compile<'b, E: Error + 'static>(
-        &'b mut self,
-        values: &'b mut (impl Stream<Item = Result<Value, E>> + Unpin),
-    ) -> impl Stream<Item = Result<(), E>> + 'b {
+    pub fn compile<E: Error + 'static>(
+        &'a mut self,
+        values: &'a mut (impl Stream<Item = Result<Value, E>> + Unpin),
+    ) -> impl Stream<Item = Result<(), E>> + 'a {
         try_stream! {
             while let Some(value) = values.next().await {
                 self.compile_statement(value?);
