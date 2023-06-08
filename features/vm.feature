@@ -12,9 +12,12 @@ Feature: VM interpreter
     """
 
     Examples:
-      | literal | result  |
-      | ()      | ()      |
-      | 42      | 42      |
+      | literal                  | result  |
+      | ()                       | ()      |
+      | 42                       | 42      |
+      | (set () 0 42)            | (42)    |
+      | (set (set () 0 42) 1 13) | (42 13) |
+      | (get (set () 0 42) 0)    | 42      |
 
   Scenario: Define a variable
     Given a file named "main.arc" with:
