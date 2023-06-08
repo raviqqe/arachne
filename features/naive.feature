@@ -1,4 +1,4 @@
-Feature: Primitives
+Feature: Naive interpreter
   Scenario Outline: Create an array
     Given a file named "main.arc" with:
     """
