@@ -30,8 +30,6 @@ impl Vm {
     }
 
     pub fn run(&mut self, instructions: &[u8]) {
-        self.program_counter = 0;
-
         while self.program_counter < instructions.len() {
             let instruction = instructions[self.program_counter];
 
