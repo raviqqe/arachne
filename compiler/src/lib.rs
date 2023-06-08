@@ -37,7 +37,7 @@ impl<'a> Compiler<'a> {
                 if let Some(symbol) = array.get_usize(0).to_symbol() {
                     match symbol.as_str() {
                         "let" => {
-                            if let Some() = foo { } else {}
+                            if let Some() = array.get_usize(1).to_symbol() { } else {},
                             self.variables.push()
                             self.codes.borrow_mut().push(Instruction::Let as u8);
                         }

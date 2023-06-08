@@ -78,6 +78,7 @@ impl Array {
         }
     }
 
+    // TODO Do not clone.
     fn get_usize_unchecked(&self, index: usize) -> Value {
         (unsafe { &*self.element_ptr(index) }).clone()
     }
