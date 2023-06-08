@@ -73,6 +73,8 @@ dependencies = [
  "arachne-mlir-interpreter",
  "arachne-naive-interpreter",
  "arachne-parse",
+ "arachne-vm",
+ "arachne-vm-interpreter",
  "async-recursion",
  "async-stream",
  "clap",
@@ -81,6 +83,17 @@ dependencies = [
  "pretty_assertions",
  "tokio",
  "tokio-stream",
+]
+
+[[package]]
+name = "arachne-compiler"
+version = "0.1.0"
+dependencies = [
+ "arachne-runtime",
+ "arachne-vm",
+ "async-stream",
+ "futures",
+ "pretty_assertions",
 ]
 
 [[package]]
@@ -132,6 +145,19 @@ name = "arachne-vm"
 version = "0.1.0"
 dependencies = [
  "arachne-runtime",
+ "pretty_assertions",
+]
+
+[[package]]
+name = "arachne-vm-interpreter"
+version = "0.1.0"
+dependencies = [
+ "arachne-compiler",
+ "arachne-runtime",
+ "arachne-vm",
+ "async-stream",
+ "futures",
+ "once_cell",
  "pretty_assertions",
 ]
 
