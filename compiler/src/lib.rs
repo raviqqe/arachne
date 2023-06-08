@@ -40,6 +40,7 @@ impl<'a> Compiler<'a> {
             }
             Err(value) => self.compile_expression(value),
         }
+
         self.codes.borrow_mut().push(Instruction::Dump as u8);
     }
 
