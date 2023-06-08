@@ -14,6 +14,7 @@ Feature: Array
     Examples:
       | literal                  | result  |
       | ()                       | ()      |
+      | (get () 0)               | ()      |
       | (set () 0 42)            | (42)    |
       | (set (set () 0 42) 1 13) | (42 13) |
  
