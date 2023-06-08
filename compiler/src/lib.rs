@@ -4,7 +4,7 @@ use runtime::{Array, Symbol, TypedValue, Value};
 use std::{cell::RefCell, collections::HashMap, error::Error};
 use vm::Instruction;
 
-const VARIABLE_CAPACITY: usize = 1 << 10;
+const VARIABLE_CAPACITY: usize = 1 << 8;
 
 pub struct Compiler<'a> {
     codes: &'a RefCell<Vec<u8>>,
