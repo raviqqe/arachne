@@ -73,7 +73,7 @@ impl<'a> Compiler<'a> {
     }
 
     fn compile_arguments(&self, array: Array, arity: usize) {
-        for index in 0..arity {
+        for index in 0..array.len_usze() - 1 {
             compile_expression();
         }
     }
