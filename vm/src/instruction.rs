@@ -1,4 +1,5 @@
 #[repr(u8)]
+#[derive(Clone, Copy, Debug, num_derive::ToPrimitive)]
 pub enum Instruction {
     Null,
     Nil,
