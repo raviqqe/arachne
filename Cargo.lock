@@ -84,13 +84,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "arachne-ast"
-version = "0.1.0"
-dependencies = [
- "pretty_assertions",
-]
-
-[[package]]
 name = "arachne-compiler"
 version = "0.1.0"
 dependencies = [
