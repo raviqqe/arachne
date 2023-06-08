@@ -44,6 +44,18 @@ impl From<&str> for Symbol {
     }
 }
 
+impl TryFrom<&Value> for Symbol {
+    type Error = ();
+
+    fn try_from(value: &Value) -> Result<Self, Self::Error> {
+        if value.is_symbol() {
+            Ok(Self(value.to_raw()))
+        } else {
+            Err(())
+        }
+    }
+}
+
 impl TryFrom<Value> for Symbol {
     type Error = Value;
 

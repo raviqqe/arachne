@@ -54,13 +54,11 @@ impl Value {
     }
 
     pub fn to_float64(&self) -> Option<Float64> {
-        // TODO Fix.
-        self.clone().try_into().ok()
+        self.try_into().ok()
     }
 
     pub fn to_symbol(&self) -> Option<Symbol> {
-        // TODO Fix.
-        self.clone().try_into().ok()
+        self.try_into().ok()
     }
 
     pub fn into_array(self) -> Option<Array> {
@@ -98,6 +96,10 @@ impl Value {
         forget(self);
 
         raw
+    }
+
+    pub fn to_raw(&self) -> u64 {
+        self.0
     }
 
     /// # Safety
