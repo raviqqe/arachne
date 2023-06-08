@@ -73,6 +73,8 @@ dependencies = [
  "arachne-mlir-interpreter",
  "arachne-naive-interpreter",
  "arachne-parse",
+ "arachne-vm",
+ "arachne-vm-interpreter",
  "async-recursion",
  "async-stream",
  "clap",

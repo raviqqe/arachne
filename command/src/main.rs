@@ -38,13 +38,26 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 .help("Use naive implementation")
                 .action(clap::ArgAction::SetTrue),
         )
+        .arg(
+            clap::Arg::new("mlir")
+                .long("mlir")
+                .help("Use mlir implementation")
+                .action(clap::ArgAction::SetTrue),
+        )
         .get_matches();
 
     if matches.subcommand().is_some() {
         todo!("format subcommand")
     } else if matches.get_one("naive").copied().unwrap_or_default() {
         interpret_naive().await
-    } else {
+    } else if matches.get_one("mlir").copied().unwrap_or_default() {
         interpret_mlir().await
+    } else {
+        let mut lines = LinesStream::new(BufReader::new(stdin()).lines());
+        let expressions = parse(&mut lines);
+
+        pin_mut!(expressions);
+
+        Ok(vm_interpreter::interpret(&mut expressions).await?)
     }
 }
