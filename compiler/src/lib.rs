@@ -95,6 +95,7 @@ impl<'a> Compiler<'a> {
     }
 
     fn compile_arguments(&self, array: Array) {
+        // TODO Fix an evaluation order.
         for index in (1..array.len_usize()).rev() {
             self.compile_expression(array.get_usize(index));
         }
