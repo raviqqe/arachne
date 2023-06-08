@@ -74,6 +74,8 @@ impl<'a> Compiler<'a> {
                             codes.extend(0u32.to_le_bytes());
                             let function_index = codes.len();
 
+                            // TODO Compile a function.
+
                             let current_index = codes.len();
 
                             codes[jump_target_index..jump_target_index + size_of::<u32>()]
