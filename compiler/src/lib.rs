@@ -70,8 +70,7 @@ impl<'a> Compiler<'a> {
                 TypedValue::Symbol(symbol) => self.compile_variable(symbol),
             }
         } else {
-            self.codes.borrow_mut().push(Instruction::Constant as u8);
-            self.codes.borrow_mut().extend(NIL.into_raw().to_le_bytes());
+            self.codes.borrow_mut().push(Instruction::Nil as u8);
         }
     }
 
