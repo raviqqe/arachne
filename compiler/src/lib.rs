@@ -26,20 +26,21 @@ impl<'a> Compiler<'a> {
     }
 
     fn compile_statement(&self, value: Value) {
-        let Some(array) = value.into_array() else { return };
-
-        if let Some(symbol) = array.get_usize(0).to_symbol() {
-            match symbol.as_str() {
-                // TODO Generate let instruction.
-                "let" => todo!(),
-                _ => {
+        match Array::try_from(value) {
+            Ok(array) => {
+                if let Some(symbol) = array.get_usize(0).to_symbol() {
+                    match symbol.as_str() {
+                        // TODO Generate let instruction.
+                        "let" => todo!(),
+                        _ => self.compile_expression(array.into()),
+                    }
+                } else {
                     self.compile_expression(array.into());
-                    self.codes.borrow_mut().push(Instruction::Dump as u8);
                 }
             }
-        } else {
-            self.compile_expression(array.into());
+            Err(value) => self.compile_expression(value),
         }
+        self.codes.borrow_mut().push(Instruction::Dump as u8);
     }
 
     fn compile_expression(&self, value: Value) {
