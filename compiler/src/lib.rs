@@ -4,6 +4,8 @@ use runtime::{Array, Symbol, TypedValue, Value};
 use std::{cell::RefCell, collections::HashMap, error::Error};
 use vm::Instruction;
 
+const VARIABLE_CAPACITY: usize = 1 << 10;
+
 pub struct Compiler<'a> {
     codes: &'a RefCell<Vec<u8>>,
     variables: HashMap<Symbol, usize>,
@@ -11,7 +13,10 @@ pub struct Compiler<'a> {
 
 impl<'a> Compiler<'a> {
     pub fn new(codes: &'a RefCell<Vec<u8>>) -> Self {
-        Self { codes }
+        Self {
+            codes,
+            variables: HashMap::new(),
+        }
     }
 
     pub fn compile<'b, E: Error + 'static>(
