@@ -20,7 +20,7 @@ impl<'a> Compiler<'a> {
     }
 
     pub fn compile<'b, E: Error + 'static>(
-        &'b self,
+        &'b mut self,
         values: &'b mut (impl Stream<Item = Result<Value, E>> + Unpin),
     ) -> impl Stream<Item = Result<(), E>> + 'b {
         try_stream! {
@@ -31,13 +31,16 @@ impl<'a> Compiler<'a> {
         }
     }
 
-    fn compile_statement(&self, value: Value) {
+    fn compile_statement(&mut self, value: Value) {
         match Array::try_from(value) {
             Ok(array) => {
                 if let Some(symbol) = array.get_usize(0).to_symbol() {
                     match symbol.as_str() {
                         "let" => {
-                            if let Some(symbol) = array.get_usize(1).to_symbol() { } else {},
+                            if let Some(symbol) = array.get_usize(1).to_symbol() {
+                                self.variables.insert(symbol, self.);
+                            }
+
                             self.codes.borrow_mut().push(Instruction::Let as u8);
                         }
                         _ => self.compile_expression(array.into()),
