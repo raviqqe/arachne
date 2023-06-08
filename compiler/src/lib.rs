@@ -59,15 +59,9 @@ fn compile_expression(value: Value, codes: &mut Vec<u8>) {
                         compile_arguments(array, 1, codes);
                         codes.push(Instruction::Length as u8);
                     }
-                    _ => {
-                        compile_variable(symbol, codes);
-                        compile_call(array, codes);
-                    }
+                    _ => compile_call(array, codes),
                 },
-                Err(value) => {
-                    compile_expression(value, codes);
-                    compile_call(array, codes);
-                }
+                Err(value) => compile_call(array, codes),
             },
             TypedValue::Closure(closure) => compile_constant(closure, codes),
             TypedValue::Float64(number) => compile_constant(number, codes),
