@@ -23,6 +23,7 @@ pub async fn interpret<E: Error + 'static>(
             .map_err(|error| InterpretError::Other(error.into()))?,
         &mut codes,
     );
+
     let mut vm = Vm::new(VM_STACK_SIZE);
 
     vm.run(&codes);
