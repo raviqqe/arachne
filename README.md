@@ -70,6 +70,14 @@ If a value is invalid, the `set` function does nothing and returns the original 
 (let foo bar)
 ```
 
+#### Mutual recursion
+
+```lisp
+(let
+  (foo (fn () (bar)))
+  (bar (fn () (foo))))
+```
+
 ### Lambda expression
 
 ```lisp
