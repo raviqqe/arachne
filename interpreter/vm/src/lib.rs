@@ -1,32 +1,43 @@
 mod error;
 
-use compiler::compile;
+use async_stream::try_stream;
+use compiler::Compiler;
 use error::InterpretError;
-use futures::{Stream, StreamExt};
-use runtime::Value;
-use std::error::Error;
+use futures::{pin_mut, Stream, StreamExt};
+use runtime::{Value, NIL};
+use std::{cell::RefCell, error::Error};
 use vm::Vm;
 
 const BYTE_CODE_CAPACITY: usize = 1 << 10;
 const VM_STACK_SIZE: usize = 1 << 10;
 
-pub async fn interpret<E: Error + 'static>(
-    values: &mut (impl Stream<Item = Result<Value, E>> + Unpin),
-) -> Result<(), InterpretError> {
-    let mut codes = Vec::with_capacity(BYTE_CODE_CAPACITY);
-    let values = values.collect::<Vec<_>>().await;
+pub struct Interpreter {
+    codes: RefCell<Vec<u8>>,
+}
 
-    compile(
-        values
-            .into_iter()
-            .collect::<Result<Vec<_>, _>>()
-            .map_err(|error| InterpretError::Other(error.into()))?,
-        &mut codes,
-    );
+impl Interpreter {
+    pub fn new() -> Self {
+        Self {
+            codes: Vec::with_capacity(BYTE_CODE_CAPACITY).into(),
+        }
+    }
 
-    let mut vm = Vm::new(VM_STACK_SIZE);
+    pub fn interpret<'a, E: Error + 'static>(
+        &'a self,
+        values: &'a mut (impl Stream<Item = Result<Value, E>> + Unpin),
+    ) -> impl Stream<Item = Result<Value, InterpretError>> + 'a {
+        try_stream! {
+            let compiler = Compiler::new(&self.codes);
+            let mut vm = Vm::new(VM_STACK_SIZE);
+            let results = compiler.compile(values);
 
-    vm.run(&codes);
+            pin_mut!(results);
 
-    Ok(())
+            while let Some(result) = results.next().await {
+                result.map_err(|error| InterpretError::Other(error.into()))?;
+                vm.run(&self.codes.borrow());
+                yield NIL;
+            }
+        }
+    }
 }

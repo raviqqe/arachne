@@ -91,6 +91,8 @@ version = "0.1.0"
 dependencies = [
  "arachne-runtime",
  "arachne-vm",
+ "async-stream",
+ "futures",
  "pretty_assertions",
 ]
 

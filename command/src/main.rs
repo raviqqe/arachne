@@ -3,6 +3,7 @@ use parse::parse;
 use std::error::Error;
 use tokio::io::{stdin, AsyncBufReadExt, BufReader};
 use tokio_stream::wrappers::LinesStream;
+use vm_interpreter::Interpreter;
 
 macro_rules! interpret_fn {
     ($name: ident, $stream_fn: expr) => {
@@ -54,10 +55,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
         interpret_mlir().await
     } else {
         let mut lines = LinesStream::new(BufReader::new(stdin()).lines());
-        let expressions = parse(&mut lines);
+        let values = parse(&mut lines);
 
-        pin_mut!(expressions);
+        pin_mut!(values);
 
-        Ok(vm_interpreter::interpret(&mut expressions).await?)
+        let interpreter = Interpreter::new();
+        let outputs = interpreter.interpret(&mut values);
+
+        pin_mut!(outputs);
+
+        while let Some(result) = outputs.next().await {
+            println!("{}", result?);
+        }
+
+        Ok(())
     }
 }

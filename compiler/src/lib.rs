@@ -1,9 +1,28 @@
+use async_stream::try_stream;
+use futures::{Stream, StreamExt};
 use runtime::{Array, Symbol, TypedValue, Value, NIL};
+use std::{cell::RefCell, error::Error};
 use vm::Instruction;
 
-pub fn compile(values: impl IntoIterator<Item = Value>, codes: &mut Vec<u8>) {
-    for value in values {
-        compile_statement(value, codes);
+pub struct Compiler<'a> {
+    codes: &'a RefCell<Vec<u8>>,
+}
+
+impl<'a> Compiler<'a> {
+    pub fn new(codes: &'a RefCell<Vec<u8>>) -> Self {
+        Self { codes }
+    }
+
+    pub fn compile<'b, E: Error + 'static>(
+        &'b self,
+        values: &'b mut (impl Stream<Item = Result<Value, E>> + Unpin),
+    ) -> impl Stream<Item = Result<(), E>> + 'b {
+        try_stream! {
+            while let Some(value) = values.next().await {
+                compile_statement(value?, &mut self.codes.borrow_mut());
+                yield ();
+            }
+        }
     }
 }
 
