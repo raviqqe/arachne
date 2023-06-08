@@ -1,5 +1,6 @@
 use runtime::Value;
 
+#[derive(Debug)]
 pub struct Stack {
     values: Vec<u64>,
 }
