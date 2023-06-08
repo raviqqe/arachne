@@ -70,6 +70,10 @@ impl<'a> Compiler<'a> {
                             "get" => Some(Instruction::Get),
                             "set" => Some(Instruction::Set),
                             "len" => Some(Instruction::Length),
+                            "+" => Some(Instruction::Add),
+                            "-" => Some(Instruction::Subtract),
+                            "*" => Some(Instruction::Multiply),
+                            "/" => Some(Instruction::Divide),
                             _ => None,
                         } {
                             self.compile_arguments(array);
