@@ -86,6 +86,9 @@ impl Vm {
                 Instruction::Divide => {
                     binary_operation!(self, /);
                 }
+                Instruction::Drop => {
+                    self.stack.pop_value();
+                }
                 Instruction::Dump => {
                     let value = self.stack.pop_value();
 

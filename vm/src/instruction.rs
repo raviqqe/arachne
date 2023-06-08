@@ -16,5 +16,6 @@ pub enum Instruction {
     Lambda,
     Equal,
     Array,
+    Drop,
     Dump,
 }

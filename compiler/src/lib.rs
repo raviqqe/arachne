@@ -51,6 +51,7 @@ impl<'a> Compiler<'a> {
         }
 
         self.codes.borrow_mut().push(Instruction::Dump as u8);
+        self.codes.borrow_mut().push(Instruction::Drop as u8);
     }
 
     fn compile_expression(&self, value: Value) {
