@@ -4,7 +4,7 @@ use async_stream::try_stream;
 use compiler::Compiler;
 use error::InterpretError;
 use futures::{pin_mut, Stream, StreamExt};
-use runtime::{Value, NIL};
+use runtime::Value;
 use std::{cell::RefCell, error::Error};
 use vm::Vm;
 
@@ -24,9 +24,9 @@ impl Interpreter {
     pub fn interpret<'a, E: Error + 'static>(
         &'a self,
         values: &'a mut (impl Stream<Item = Result<Value, E>> + Unpin),
-    ) -> impl Stream<Item = Result<Value, InterpretError>> + 'a {
+    ) -> impl Stream<Item = Result<(), InterpretError>> + 'a {
         try_stream! {
-            let compiler = Compiler::new(&self.codes);
+            let mut compiler = Compiler::new(&self.codes);
             let mut vm = Vm::new(VM_STACK_SIZE);
             let results = compiler.compile(values);
 
@@ -35,7 +35,7 @@ impl Interpreter {
             while let Some(result) = results.next().await {
                 result.map_err(|error| InterpretError::Other(error.into()))?;
                 vm.run(&self.codes.borrow());
-                yield NIL;
+                yield ();
             }
         }
     }

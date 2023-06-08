@@ -9,7 +9,7 @@ use once_cell::sync::Lazy;
 #[allow(clippy::box_collection)]
 static CACHE: Lazy<DashMap<Box<String>, ()>> = Lazy::new(Default::default);
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct Symbol(u64);
 
 impl Symbol {

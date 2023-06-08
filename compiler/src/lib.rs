@@ -1,22 +1,28 @@
 use async_stream::try_stream;
 use futures::{Stream, StreamExt};
 use runtime::{Array, Symbol, TypedValue, Value};
-use std::{cell::RefCell, error::Error};
+use std::{cell::RefCell, collections::HashMap, error::Error};
 use vm::Instruction;
+
+const VARIABLE_CAPACITY: usize = 1 << 8;
 
 pub struct Compiler<'a> {
     codes: &'a RefCell<Vec<u8>>,
+    variables: HashMap<Symbol, usize>,
 }
 
 impl<'a> Compiler<'a> {
     pub fn new(codes: &'a RefCell<Vec<u8>>) -> Self {
-        Self { codes }
+        Self {
+            codes,
+            variables: HashMap::with_capacity(VARIABLE_CAPACITY),
+        }
     }
 
-    pub fn compile<'b, E: Error + 'static>(
-        &'b self,
-        values: &'b mut (impl Stream<Item = Result<Value, E>> + Unpin),
-    ) -> impl Stream<Item = Result<(), E>> + 'b {
+    pub fn compile<E: Error + 'static>(
+        &'a mut self,
+        values: &'a mut (impl Stream<Item = Result<Value, E>> + Unpin),
+    ) -> impl Stream<Item = Result<(), E>> + 'a {
         try_stream! {
             while let Some(value) = values.next().await {
                 self.compile_statement(value?);
@@ -25,23 +31,32 @@ impl<'a> Compiler<'a> {
         }
     }
 
-    fn compile_statement(&self, value: Value) {
+    fn compile_statement(&mut self, value: Value) {
         match Array::try_from(value) {
             Ok(array) => {
                 if let Some(symbol) = array.get_usize(0).to_symbol() {
                     match symbol.as_str() {
-                        // TODO Generate let instruction.
-                        "let" => todo!(),
-                        _ => self.compile_expression(array.into()),
+                        "let" => {
+                            if let Some(symbol) = array.get_usize(1).to_symbol() {
+                                self.compile_expression(array.get_usize(2));
+                                self.variables.insert(symbol, self.variables.len());
+                                // Keep a value on a stack.
+                            }
+                        }
+                        _ => self.compile_top_expression(array.into()),
                     }
                 } else {
-                    self.compile_expression(array.into());
+                    self.compile_top_expression(array.into());
                 }
             }
-            Err(value) => self.compile_expression(value),
+            Err(value) => self.compile_top_expression(value),
         }
+    }
 
+    fn compile_top_expression(&self, value: Value) {
+        self.compile_expression(value);
         self.codes.borrow_mut().push(Instruction::Dump as u8);
+        self.codes.borrow_mut().push(Instruction::Drop as u8);
     }
 
     fn compile_expression(&self, value: Value) {
@@ -88,9 +103,13 @@ impl<'a> Compiler<'a> {
             .extend(value.into().into_raw().to_le_bytes());
     }
 
-    fn compile_variable(&self, _symbol: Symbol) {
-        self.codes.borrow_mut().push(Instruction::Local as u8);
-        todo!("Resolve a symbol.")
+    fn compile_variable(&self, symbol: Symbol) {
+        if let Some(&index) = self.variables.get(&symbol) {
+            self.codes.borrow_mut().push(Instruction::Local as u8);
+            self.codes.borrow_mut().push(index as u8);
+        } else {
+            self.compile_constant(symbol);
+        }
     }
 
     fn compile_call(&self, array: Array) {

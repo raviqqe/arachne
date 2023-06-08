@@ -12,6 +12,10 @@ impl Stack {
         }
     }
 
+    pub fn get(&self, index: usize) -> &Value {
+        unsafe { &*(self.values.get(index).unwrap() as *const u64).cast::<Value>() }
+    }
+
     pub fn push_value(&mut self, value: Value) {
         self.values.push(value.into_raw());
     }

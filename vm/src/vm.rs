@@ -86,12 +86,24 @@ impl Vm {
                 Instruction::Divide => {
                     binary_operation!(self, /);
                 }
+                Instruction::Drop => {
+                    self.stack.pop_value();
+                }
                 Instruction::Dump => {
-                    println!("{}", self.stack.pop_value());
+                    let value = self.stack.pop_value();
+
+                    println!("{}", value);
+
+                    self.stack.push_value(value);
                 }
                 Instruction::Call => todo!(),
                 Instruction::Lambda => todo!(),
-                Instruction::Local => todo!(),
+                Instruction::Local => {
+                    // TODO Check a frame pointer.
+                    let index = self.read_u8(instructions);
+                    self.stack
+                        .push_value(self.stack.get(index as usize).clone());
+                }
                 Instruction::Equal => todo!(),
                 Instruction::Array => todo!(),
             }
@@ -107,5 +119,13 @@ impl Vm {
         self.program_counter += SIZE;
 
         unsafe { Value::from_raw(u64::from_le_bytes(bytes)) }
+    }
+
+    fn read_u8(&mut self, instructions: &[u8]) -> u8 {
+        let value = instructions[self.program_counter];
+
+        self.program_counter += 1;
+
+        value
     }
 }
