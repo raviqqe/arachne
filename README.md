@@ -68,6 +68,9 @@ If a value is invalid, the `set` function does nothing and returns the original 
 
 ```lisp
 (let foo bar)
+(let
+  (foo bar)
+  (baz qux))
 ```
 
 ### Lambda expression
