@@ -48,9 +48,8 @@ fn compile_expression(value: Value, codes: &mut Vec<u8>) {
                     "array" => todo!(),
                     "eq" => todo!(),
                     "get" => {
-                        compile_expression();
+                        compile_arguments(array, 2, codes);
                         codes.push(Instruction::Get as u8);
-                        todo!();
                     }
                     "set" => {
                         codes.push(Instruction::Set as u8);
@@ -80,7 +79,7 @@ fn compile_expression(value: Value, codes: &mut Vec<u8>) {
     }
 }
 
-fn compile_arguments(array: Array, arity, codes: &mut Vec<u8>) {
+fn compile_arguments(array: Array, arity: usize, codes: &mut Vec<u8>) {
     foo
 }
 
