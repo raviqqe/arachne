@@ -152,6 +152,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "arachne-vm-interpreter"
+version = "0.1.0"
+dependencies = [
+ "arachne-compiler",
+ "arachne-runtime",
+ "arachne-vm",
+ "async-stream",
+ "futures",
+ "once_cell",
+ "pretty_assertions",
+]
+
+[[package]]
 name = "async-recursion"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
