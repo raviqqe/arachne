@@ -48,6 +48,7 @@ fn compile_expression(value: Value, codes: &mut Vec<u8>) {
                     "array" => todo!(),
                     "eq" => todo!(),
                     "get" => {
+                        compile_expression();
                         codes.push(Instruction::Get as u8);
                         todo!();
                     }
@@ -77,6 +78,10 @@ fn compile_expression(value: Value, codes: &mut Vec<u8>) {
         codes.push(Instruction::Constant as u8);
         codes.extend(NIL.into_raw().to_le_bytes());
     }
+}
+
+fn compile_arguments(array: Array, arity, codes: &mut Vec<u8>) {
+    foo
 }
 
 fn compile_constant<T: Into<Value>>(value: T, codes: &mut Vec<u8>) {
