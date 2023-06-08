@@ -83,8 +83,8 @@ impl<'a> Compiler<'a> {
 
                             codes.push(Instruction::Closure as u8);
                             codes.extend(function_index.to_le_bytes());
-                            codes.extend(0u32.to_le_bytes());
                             // TODO Initialize environment.
+                            codes.extend(0u8.to_le_bytes());
                         } else if let Some(instruction) = match symbol {
                             "array" => Some(Instruction::Array),
                             "eq" => Some(Instruction::Equal),
