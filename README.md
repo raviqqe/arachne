@@ -112,8 +112,6 @@ where `foo` is `42`.
 (use "path/to/module.arc")
 ```
 
-> WIP
-
 ## Design notes
 
 - [The core language](core.md)
