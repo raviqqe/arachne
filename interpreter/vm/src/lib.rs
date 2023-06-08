@@ -8,7 +8,6 @@ use runtime::{Value, NIL};
 use std::{cell::RefCell, error::Error};
 use vm::Vm;
 
-const BYTE_CODE_CAPACITY: usize = 1 << 10;
 const VM_STACK_SIZE: usize = 1 << 10;
 
 pub struct Interpreter {
@@ -16,9 +15,9 @@ pub struct Interpreter {
 }
 
 impl Interpreter {
-    pub fn new() -> Self {
+    pub fn new(byte_code_capacity: usize) -> Self {
         Self {
-            codes: Vec::with_capacity(BYTE_CODE_CAPACITY).into(),
+            codes: Vec::with_capacity(byte_code_capacity).into(),
         }
     }
 

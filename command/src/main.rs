@@ -26,6 +26,8 @@ macro_rules! interpret_fn {
     };
 }
 
+const BYTE_CODE_CAPACITY: usize = 1 << 10;
+
 interpret_fn!(interpret_naive, naive_interpreter::interpret);
 interpret_fn!(interpret_mlir, mlir_interpreter::interpret);
 
@@ -59,7 +61,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         pin_mut!(values);
 
-        let interpreter = Interpreter::new();
+        let interpreter = Interpreter::new(BYTE_CODE_CAPACITY);
         let outputs = interpreter.interpret(&mut values);
 
         pin_mut!(outputs);
