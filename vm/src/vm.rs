@@ -87,7 +87,11 @@ impl Vm {
                     binary_operation!(self, /);
                 }
                 Instruction::Dump => {
-                    println!("{}", self.stack.pop_value());
+                    let value = self.stack.pop_value();
+
+                    println!("{}", value);
+
+                    self.stack.push_value(value);
                 }
                 Instruction::Call => todo!(),
                 Instruction::Lambda => todo!(),
