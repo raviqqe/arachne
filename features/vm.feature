@@ -2,7 +2,7 @@ Feature: VM interpreter
   Scenario Outline: Literal
     Given a file named "main.arc" with:
     """
-		<literal>
+    <literal>
     """
     When I run `arachne` interactively
     And I pipe in the file "main.arc"
