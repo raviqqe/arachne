@@ -52,12 +52,12 @@ fn compile_expression(value: Value, codes: &mut Vec<u8>) {
                         codes.push(Instruction::Get as u8);
                     }
                     "set" => {
+                        compile_arguments(array, 3, codes);
                         codes.push(Instruction::Set as u8);
-                        todo!();
                     }
                     "len" => {
+                        compile_arguments(array, 1, codes);
                         codes.push(Instruction::Length as u8);
-                        todo!();
                     }
                     _ => {
                         compile_variable(symbol, codes);
