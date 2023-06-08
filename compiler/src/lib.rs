@@ -73,23 +73,25 @@ impl<'a> Compiler<'a> {
     }
 
     fn compile_arguments(&self, array: Array, arity: usize) {
-        for index in 0..array.len_usze() - 1 {
-            compile_expression();
+        for index in (0..array.len_usze() - 1).rev() {
+            self.compile_expression(array.get(index));
         }
     }
 
     fn compile_constant<T: Into<Value>>(&self, value: T) {
-        codes.push(Instruction::Constant as u8);
-        codes.extend(value.into().into_raw().to_le_bytes());
+        self.codes.borrow_mut().push(Instruction::Constant as u8);
+        self.codes
+            .borrow_mut()
+            .extend(value.into().into_raw().to_le_bytes());
     }
 
     fn compile_variable(&self, _symbol: Symbol) {
-        codes.push(Instruction::Local as u8);
+        self.codes.borrow_mut().push(Instruction::Local as u8);
         todo!("Resolve a symbol.")
     }
 
     fn compile_call(&self, array: Array) {
-        compile_arguments(array, codes);
-        codes.push(Instruction::Call as u8);
+        self.compile_arguments(array, codes);
+        self.codes.borrow_mut().push(Instruction::Call as u8);
     }
 }
