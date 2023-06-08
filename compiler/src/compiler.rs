@@ -1,7 +1,7 @@
 use async_stream::try_stream;
 use futures::{Stream, StreamExt};
-use runtime::{Array, Closure, Symbol, TypedValue, Value};
-use std::{cell::RefCell, collections::HashMap, error::Error};
+use runtime::{Array, Symbol, TypedValue, Value};
+use std::{cell::RefCell, collections::HashMap, error::Error, mem::size_of};
 use vm::Instruction;
 
 const VARIABLE_CAPACITY: usize = 1 << 8;
@@ -67,11 +67,22 @@ impl<'a> Compiler<'a> {
                         let symbol = symbol.as_str();
 
                         if symbol == "fn" {
-                            let closure = Closure::new(0, 0);
+                            let mut codes = self.codes.borrow_mut();
 
+                            codes.push(Instruction::Jump as u8);
+                            let jump_target_index = codes.len();
+                            codes.extend(0u32.to_le_bytes());
+                            let function_index = codes.len();
+
+                            let current_index = codes.len();
+
+                            codes[jump_target_index..jump_target_index + size_of::<u32>()]
+                                .copy_from_slice(&(current_index as u32).to_le_bytes());
+
+                            codes.push(Instruction::Closure as u8);
+                            codes.extend(function_index.to_le_bytes());
+                            codes.extend(0u32.to_le_bytes());
                             // TODO Initialize environment.
-
-                            self.compile_constant(closure);
                         } else if let Some(instruction) = match symbol {
                             "array" => Some(Instruction::Array),
                             "eq" => Some(Instruction::Equal),
