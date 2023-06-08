@@ -101,7 +101,8 @@ impl Vm {
                 Instruction::Local => {
                     // TODO Check a frame pointer.
                     let index = self.read_u8(instructions);
-                    self.stack.get(index as usize);
+                    self.stack
+                        .push_value(self.stack.get(index as usize).clone());
                 }
                 Instruction::Equal => todo!(),
                 Instruction::Array => todo!(),
