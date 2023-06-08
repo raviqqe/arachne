@@ -42,15 +42,18 @@ impl<'a> Compiler<'a> {
                                 self.variables.insert(symbol, self.variables.len());
                             }
                         }
-                        _ => self.compile_expression(array.into()),
+                        _ => self.compile_top_expression(array.into()),
                     }
                 } else {
-                    self.compile_expression(array.into());
+                    self.compile_top_expression(array.into());
                 }
             }
-            Err(value) => self.compile_expression(value),
+            Err(value) => self.compile_top_expression(value),
         }
+    }
 
+    fn compile_top_expression(&self, value: Value) {
+        self.compile_expression(value);
         self.codes.borrow_mut().push(Instruction::Dump as u8);
         self.codes.borrow_mut().push(Instruction::Drop as u8);
     }
@@ -99,9 +102,13 @@ impl<'a> Compiler<'a> {
             .extend(value.into().into_raw().to_le_bytes());
     }
 
-    fn compile_variable(&self, _symbol: Symbol) {
-        self.codes.borrow_mut().push(Instruction::Local as u8);
-        todo!("Resolve a symbol.")
+    fn compile_variable(&self, symbol: Symbol) {
+        if let Some(&index) = self.variables.get(&symbol) {
+            self.codes.borrow_mut().push(Instruction::Local as u8);
+            self.codes.borrow_mut().push(index as u8);
+        } else {
+            self.compile_constant(symbol);
+        }
     }
 
     fn compile_call(&self, array: Array) {

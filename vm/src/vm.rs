@@ -98,7 +98,11 @@ impl Vm {
                 }
                 Instruction::Call => todo!(),
                 Instruction::Lambda => todo!(),
-                Instruction::Local => todo!(),
+                Instruction::Local => {
+                    // TODO Check a frame pointer.
+                    let index = self.read_u8(instructions);
+                    self.stack.get(index as usize);
+                }
                 Instruction::Equal => todo!(),
                 Instruction::Array => todo!(),
             }
@@ -114,5 +118,13 @@ impl Vm {
         self.program_counter += SIZE;
 
         unsafe { Value::from_raw(u64::from_le_bytes(bytes)) }
+    }
+
+    fn read_u8(&mut self, instructions: &[u8]) -> u8 {
+        let value = instructions[self.program_counter];
+
+        self.program_counter += 1;
+
+        value
     }
 }
