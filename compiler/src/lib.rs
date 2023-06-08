@@ -91,7 +91,8 @@ impl<'a> Compiler<'a> {
     }
 
     fn compile_call(&self, array: Array) {
-        self.compile_arguments(array);
+        self.compile_arguments(array.clone());
+        self.compile_expression(array.get_usize(0));
         self.codes.borrow_mut().push(Instruction::Call as u8);
     }
 }
