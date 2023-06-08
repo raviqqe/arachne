@@ -40,8 +40,6 @@ impl<'a> Compiler<'a> {
                             if let Some(symbol) = array.get_usize(1).to_symbol() {
                                 self.variables.insert(symbol, todo!("get index from vm"));
                             }
-
-                            self.codes.borrow_mut().push(Instruction::Let as u8);
                         }
                         _ => self.compile_expression(array.into()),
                     }
