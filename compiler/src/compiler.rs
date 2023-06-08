@@ -1,6 +1,6 @@
 use async_stream::try_stream;
 use futures::{Stream, StreamExt};
-use runtime::{Array, Symbol, TypedValue, Value};
+use runtime::{Array, Closure, Symbol, TypedValue, Value};
 use std::{cell::RefCell, collections::HashMap, error::Error};
 use vm::Instruction;
 
@@ -64,7 +64,15 @@ impl<'a> Compiler<'a> {
             match value {
                 TypedValue::Array(array) => {
                     if let Some(symbol) = (array.get_usize(0)).to_symbol() {
-                        if let Some(instruction) = match symbol.as_str() {
+                        let symbol = symbol.as_str();
+
+                        if symbol == "fn" {
+                            let closure = Closure::new(0, 0);
+
+                            // TODO Initialize environment.
+
+                            self.compile_constant(closure);
+                        } else if let Some(instruction) = match symbol {
                             "array" => Some(Instruction::Array),
                             "eq" => Some(Instruction::Equal),
                             "get" => Some(Instruction::Get),

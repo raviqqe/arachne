@@ -19,9 +19,9 @@ struct Header {
 }
 
 impl Closure {
-    pub fn new(id: ClosureId, environment: &[Value]) -> Self {
+    pub fn new(id: ClosureId, environment_size: usize) -> Self {
         let (layout, _) = Layout::new::<Header>()
-            .extend(Layout::array::<Value>(environment.len()).unwrap())
+            .extend(Layout::array::<Value>(environment_size).unwrap())
             .unwrap();
         let this = Self(unsafe { alloc(layout) } as u64 | CLOSURE_MASK);
 
@@ -29,15 +29,17 @@ impl Closure {
             *this.header_mut() = Header {
                 count: 0,
                 id,
-                environment_size: environment.len() as u32,
+                environment_size: environment_size as u32,
             };
-
-            for (index, value) in environment.iter().enumerate() {
-                write(this.environment_mut(index), value.clone());
-            }
         }
 
         this
+    }
+
+    pub fn write_environment(&mut self, index: usize, value: Value) {
+        assert!(index < self.header().environment_size as usize);
+
+        unsafe { write(self.environment_mut(index), value) }
     }
 
     /// # Safety
@@ -151,18 +153,23 @@ mod tests {
 
     #[test]
     fn new() {
-        Closure::new(0, &[]);
+        Closure::new(0, 0);
     }
 
     #[test]
     fn clone() {
         #[allow(clippy::redundant_clone)]
-        let _ = Closure::new(0, &[]).clone();
+        let _ = Closure::new(0, 0).clone();
     }
 
     #[test]
     fn clone_with_environment() {
+        let value = [42.0.into()].into();
+        let mut closure = Closure::new(0, 1);
+
+        closure.write_environment(0, value);
+
         #[allow(clippy::redundant_clone)]
-        let _ = Closure::new(0, &[[42.0.into()].into()]).clone();
+        let _ = closure.clone();
     }
 }
