@@ -1,6 +1,6 @@
 use async_stream::try_stream;
 use futures::{Stream, StreamExt};
-use runtime::{Array, Symbol, TypedValue, Value, NIL};
+use runtime::{Array, Symbol, TypedValue, Value};
 use std::{cell::RefCell, error::Error};
 use vm::Instruction;
 
