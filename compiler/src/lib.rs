@@ -74,7 +74,7 @@ fn compile_expression(value: Value, codes: &mut Vec<u8>) {
 }
 
 fn compile_arguments(array: Array, arity: usize, codes: &mut Vec<u8>) {
-    foo
+    todo!()
 }
 
 fn compile_constant<T: Into<Value>>(value: T, codes: &mut Vec<u8>) {
