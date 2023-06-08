@@ -47,15 +47,15 @@ impl<'a> Compiler<'a> {
                         "array" => todo!(),
                         "eq" => todo!(),
                         "get" => {
-                            compile_arguments(array, 2, codes);
+                            compile_arguments(array);
                             codes.push(Instruction::Get as u8);
                         }
                         "set" => {
-                            compile_arguments(array, 3, codes);
+                            compile_arguments(array);
                             codes.push(Instruction::Set as u8);
                         }
                         "len" => {
-                            compile_arguments(array, 1, codes);
+                            compile_arguments(array);
                             codes.push(Instruction::Length as u8);
                         }
                         _ => compile_call(array, codes),
@@ -88,9 +88,8 @@ impl<'a> Compiler<'a> {
         todo!("Resolve a symbol.")
     }
 
-    fn compile_call(_array: Array, codes: &mut Vec<u8>) {
-        compile_arguments(array, 3, codes);
-        compile_arguments(array, 3, codes);
+    fn compile_call(&self, array: Array) {
+        compile_arguments(array, codes);
         codes.push(Instruction::Call as u8);
     }
 }
