@@ -91,6 +91,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "arachne-compiler"
+version = "0.1.0"
+dependencies = [
+ "arachne-runtime",
+ "arachne-vm",
+ "pretty_assertions",
+]
+
+[[package]]
 name = "arachne-mlir-interpreter"
 version = "0.1.0"
 dependencies = [
