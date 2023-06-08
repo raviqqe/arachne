@@ -1,9 +1,17 @@
 Feature: VM interpreter
-  Scenario: Use a number
+  Scenario Outline: Literal
     Given a file named "main.arc" with:
     """
-    42
+		<literal>
     """
     When I run `arachne` interactively
     And I pipe in the file "main.arc"
-    Then the exit status should be 0
+    Then the stdout should contain exactly:
+    """
+    <result>
+    """
+
+    Examples:
+      | literal | result  |
+      | ()      | ()      |
+      | 42      | 42      |
