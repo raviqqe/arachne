@@ -89,6 +89,8 @@ impl Vm {
                 Instruction::Call => todo!(),
                 Instruction::Lambda => todo!(),
                 Instruction::Local => todo!(),
+                Instruction::Equal => todo!(),
+                Instruction::Array => todo!(),
             }
         }
     }

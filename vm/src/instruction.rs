@@ -13,4 +13,6 @@ pub enum Instruction {
     Divide,
     Call,
     Lambda,
+    Equal,
+    Array,
 }

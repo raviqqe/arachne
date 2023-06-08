@@ -43,23 +43,20 @@ impl<'a> Compiler<'a> {
         if let Some(value) = value.into_typed() {
             match value {
                 TypedValue::Array(array) => match Symbol::try_from(array.get_usize(0)) {
-                    Ok(symbol) => match symbol.as_str() {
-                        "array" => todo!(),
-                        "eq" => todo!(),
-                        "get" => {
+                    Ok(symbol) => {
+                        if let Some(instruction) = match symbol.as_str() {
+                            "array" => Instruction::Array,
+                            "eq" => Instruction::Equal,
+                            "get" => Instruction::Get,
+                            "set" => Instruction::Set,
+                            "len" => Instruction::Length,
+                        } {
                             self.compile_arguments(array);
-                            self.codes.borrow_mut().push(Instruction::Get as u8);
+                            self.codes.borrow_mut().push(instruction as u8);
+                        } else {
+                            self.compile_call(array);
                         }
-                        "set" => {
-                            self.compile_arguments(array);
-                            self.codes.borrow_mut().push(Instruction::Set as u8);
-                        }
-                        "len" => {
-                            self.compile_arguments(array);
-                            self.codes.borrow_mut().push(Instruction::Length as u8);
-                        }
-                        _ => self.compile_call(array),
-                    },
+                    }
                     Err(value) => self.compile_call(array),
                 },
                 TypedValue::Closure(closure) => self.compile_constant(closure),
