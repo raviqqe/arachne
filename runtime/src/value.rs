@@ -54,10 +54,12 @@ impl Value {
     }
 
     pub fn to_float64(&self) -> Option<Float64> {
+        // TODO Fix.
         self.clone().try_into().ok()
     }
 
     pub fn to_symbol(&self) -> Option<Symbol> {
+        // TODO Fix.
         self.clone().try_into().ok()
     }
 

@@ -42,23 +42,25 @@ impl<'a> Compiler<'a> {
     fn compile_expression(&self, value: Value) {
         if let Some(value) = value.into_typed() {
             match value {
-                TypedValue::Array(array) => match Symbol::try_from(array.get_usize(0)) {
-                    Ok(symbol) => {
+                TypedValue::Array(array) => {
+                    if let Some(symbol) = (array.get_usize(0)).to_symbol() {
                         if let Some(instruction) = match symbol.as_str() {
-                            "array" => Instruction::Array,
-                            "eq" => Instruction::Equal,
-                            "get" => Instruction::Get,
-                            "set" => Instruction::Set,
-                            "len" => Instruction::Length,
+                            "array" => Some(Instruction::Array),
+                            "eq" => Some(Instruction::Equal),
+                            "get" => Some(Instruction::Get),
+                            "set" => Some(Instruction::Set),
+                            "len" => Some(Instruction::Length),
+                            _ => None,
                         } {
                             self.compile_arguments(array);
                             self.codes.borrow_mut().push(instruction as u8);
                         } else {
                             self.compile_call(array);
                         }
+                    } else {
+                        self.compile_call(array)
                     }
-                    Err(value) => self.compile_call(array),
-                },
+                }
                 TypedValue::Closure(closure) => self.compile_constant(closure),
                 TypedValue::Float64(number) => self.compile_constant(number),
                 TypedValue::Symbol(symbol) => self.compile_variable(symbol),
