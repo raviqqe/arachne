@@ -36,8 +36,9 @@ impl<'a> Compiler<'a> {
             Ok(array) => {
                 if let Some(symbol) = array.get_usize(0).to_symbol() {
                     match symbol.as_str() {
-                        // TODO Generate let instruction.
-                        "let" => todo!(),
+                        "let" => {
+                            self.codes.borrow_mut().push(Instruction::Let as u8);
+                        }
                         _ => self.compile_expression(array.into()),
                     }
                 } else {
