@@ -15,7 +15,7 @@ impl<'a> Compiler<'a> {
     pub fn new(codes: &'a RefCell<Vec<u8>>) -> Self {
         Self {
             codes,
-            variables: HashMap::new(),
+            variables: HashMap::with_capacity(VARIABLE_CAPACITY),
         }
     }
 
