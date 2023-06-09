@@ -17,7 +17,7 @@ impl Display for CompileError {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         match self {
             Self::Closure => {
-                write!(formatter, "closure cannnot be compiled")
+                write!(formatter, "closure cannot be compiled")
             }
             Self::Other(error) => {
                 write!(formatter, "{}", error)
