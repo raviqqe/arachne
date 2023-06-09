@@ -53,13 +53,13 @@ impl<'a> Compiler<'a> {
         }
     }
 
-    fn compile_top_expression(&self, value: Value) {
+    fn compile_top_expression(&mut self, value: Value) {
         self.compile_expression(value);
         self.codes.borrow_mut().push(Instruction::Dump as u8);
         self.codes.borrow_mut().push(Instruction::Drop as u8);
     }
 
-    fn compile_expression(&self, value: Value) {
+    fn compile_expression(&mut self, value: Value) {
         if let Some(value) = value.into_typed() {
             match value {
                 TypedValue::Array(array) => {
@@ -74,7 +74,9 @@ impl<'a> Compiler<'a> {
                             codes.extend(0u32.to_le_bytes());
                             let function_index = codes.len();
 
-                            // TODO Compile a function.
+                            for index in 0..array.len_usize() - 2 {
+                                self.compile_statement(array.get_usize(index));
+                            }
 
                             let current_index = codes.len();
 
@@ -115,7 +117,7 @@ impl<'a> Compiler<'a> {
         }
     }
 
-    fn compile_arguments(&self, array: Array) {
+    fn compile_arguments(&mut self, array: Array) {
         // TODO Fix an evaluation order.
         for index in (1..array.len_usize()).rev() {
             self.compile_expression(array.get_usize(index));
@@ -138,9 +140,35 @@ impl<'a> Compiler<'a> {
         }
     }
 
-    fn compile_call(&self, array: Array) {
+    fn compile_call(&mut self, array: Array) {
         self.compile_arguments(array.clone());
         self.compile_expression(array.get_usize(0));
         self.codes.borrow_mut().push(Instruction::Call as u8);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use futures::{pin_mut, FutureExt};
+    use std::io;
+
+    type Error = io::Error;
+
+    #[tokio::test]
+    async fn compile_symbol() {
+        let codes = vec![].into();
+        let mut compiler = Compiler::new(&codes);
+        let values = async { Ok("foo".into()) }.into_stream();
+
+        pin_mut!(values);
+
+        let results = compiler.compile::<Error>(&mut values);
+
+        pin_mut!(results);
+
+        while let Some(result) = results.next().await {
+            result.unwrap();
+        }
     }
 }
