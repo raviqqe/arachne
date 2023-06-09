@@ -129,7 +129,7 @@ impl<'a> Compiler<'a> {
                         codes.push(Instruction::Local as u8);
                         codes.push(index as u8);
                     } else if symbol.as_str().len() >= 1 << 8 {
-                        todo!();
+                        return Err(CompileError::SymbolLength(symbol.as_str().into()));
                     } else {
                         codes.push(Instruction::Symbol as u8);
                         codes.push(symbol.as_str().len() as u8);

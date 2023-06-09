@@ -6,6 +6,7 @@ use std::fmt::{Display, Formatter};
 pub enum CompileError {
     Closure,
     Other(Box<dyn Error>),
+    SymbolLength(String),
 }
 
 impl Error for CompileError {}
@@ -18,6 +19,9 @@ impl Display for CompileError {
             }
             Self::Other(error) => {
                 write!(formatter, "{}", error)
+            }
+            Self::SymbolLength(symbol) => {
+                write!(formatter, "symbol too long: {}", symbol)
             }
         }
     }
