@@ -42,7 +42,7 @@ pub enum InstructionIr {
     Return,
 }
 
-pub fn decode_bytecodes(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeError> {
+pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeError> {
     let mut index = 0;
     let mut instructions = Vec::new();
 
