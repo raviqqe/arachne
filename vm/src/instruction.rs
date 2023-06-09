@@ -1,7 +1,10 @@
+mod decode;
+
+pub use decode::{decode_instructions, DecodeError};
+
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, num_derive::FromPrimitive)]
 pub enum Instruction {
-    Null,
     Nil,
     Float64,
     Symbol,

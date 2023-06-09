@@ -1,7 +1,11 @@
-use crate::{stack::Stack, Instruction};
+use crate::{
+    decode::{decode_bytes, decode_f64, decode_u32, decode_u8},
+    stack::Stack,
+    Instruction,
+};
 use num_traits::FromPrimitive;
 use runtime::{Closure, NIL};
-use std::{mem::size_of, str};
+use std::str;
 
 macro_rules! binary_operation {
     ($self:expr, $operator:tt) => {
@@ -30,25 +34,19 @@ impl Vm {
         }
     }
 
-    pub fn run(&mut self, instructions: &[u8]) {
-        while self.program_counter < instructions.len() {
-            let instruction = Instruction::from_u8(instructions[self.program_counter])
-                .expect("valid instruction");
-
-            self.program_counter += 1;
-
-            match instruction {
-                Instruction::Null => unreachable!("null po' god!"),
+    pub fn run(&mut self, codes: &[u8]) {
+        while self.program_counter < codes.len() {
+            match Instruction::from_u8(self.read_u8(codes)).expect("valid instruction") {
                 Instruction::Nil => {
                     self.stack.push_value(NIL);
                 }
                 Instruction::Float64 => {
-                    let value = self.read_u64(instructions);
-                    self.stack.push_value(f64::from_bits(value).into());
+                    let value = self.read_f64(codes);
+                    self.stack.push_value(value.into());
                 }
                 Instruction::Symbol => {
-                    let len = self.read_u8(instructions);
-                    let value = str::from_utf8(self.read_bytes(instructions, len as usize))
+                    let len = self.read_u8(codes);
+                    let value = str::from_utf8(self.read_bytes(codes, len as usize))
                         .unwrap()
                         .into();
 
@@ -106,12 +104,12 @@ impl Vm {
                 }
                 Instruction::Call => todo!(),
                 Instruction::Closure => {
-                    let id = self.read_u32(instructions);
-                    let environment_size = self.read_u8(instructions) as usize;
+                    let id = self.read_u32(codes);
+                    let environment_size = self.read_u8(codes) as usize;
                     let mut closure = Closure::new(id, environment_size);
 
                     for index in 0..environment_size {
-                        let variable_index = self.read_u8(instructions);
+                        let variable_index = self.read_u8(codes);
 
                         closure.write_environment(
                             index,
@@ -124,53 +122,31 @@ impl Vm {
                 Instruction::Local => {
                     // TODO Check a frame pointer.
                     // TODO Move local variables when possible.
-                    let index = self.read_u8(instructions);
+                    let index = self.read_u8(codes);
                     self.stack
                         .push_value(self.stack.get(index as usize).clone());
                 }
                 Instruction::Equal => todo!(),
                 Instruction::Array => todo!(),
-                Instruction::Jump => self.program_counter = self.read_u32(instructions) as usize,
+                Instruction::Jump => self.program_counter = self.read_u32(codes) as usize,
                 Instruction::Return => todo!(),
             }
         }
     }
 
-    fn read_u64(&mut self, instructions: &[u8]) -> u64 {
-        const SIZE: usize = size_of::<u64>();
-        let mut bytes = [0u8; SIZE];
-
-        bytes.copy_from_slice(&instructions[self.program_counter..self.program_counter + SIZE]);
-
-        self.program_counter += SIZE;
-
-        u64::from_le_bytes(bytes)
+    fn read_f64(&mut self, codes: &[u8]) -> f64 {
+        decode_f64(codes, &mut self.program_counter)
     }
 
-    fn read_u32(&mut self, instructions: &[u8]) -> u32 {
-        const SIZE: usize = size_of::<u32>();
-        let mut bytes = [0u8; SIZE];
-
-        bytes.copy_from_slice(&instructions[self.program_counter..self.program_counter + SIZE]);
-
-        self.program_counter += SIZE;
-
-        u32::from_le_bytes(bytes)
+    fn read_u32(&mut self, codes: &[u8]) -> u32 {
+        decode_u32(codes, &mut self.program_counter)
     }
 
-    fn read_u8(&mut self, instructions: &[u8]) -> u8 {
-        let value = instructions[self.program_counter];
-
-        self.program_counter += 1;
-
-        value
+    fn read_u8(&mut self, codes: &[u8]) -> u8 {
+        decode_u8(codes, &mut self.program_counter)
     }
 
-    fn read_bytes<'a>(&mut self, instructions: &'a [u8], len: usize) -> &'a [u8] {
-        let value = &instructions[self.program_counter..self.program_counter + len];
-
-        self.program_counter += len;
-
-        value
+    fn read_bytes<'a>(&mut self, codes: &'a [u8], len: usize) -> &'a [u8] {
+        decode_bytes(codes, len, &mut self.program_counter)
     }
 }

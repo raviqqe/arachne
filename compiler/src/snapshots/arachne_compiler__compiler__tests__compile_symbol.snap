@@ -1,13 +1,12 @@
 ---
 source: compiler/src/compiler.rs
-expression: codes.borrow()
+expression: decode_instructions(&codes.borrow()).unwrap()
 ---
 [
-    3,
-    3,
-    102,
-    111,
-    111,
-    17,
-    16,
+    Symbol {
+        len: 3,
+        string: "foo",
+    },
+    Dump,
+    Drop,
 ]

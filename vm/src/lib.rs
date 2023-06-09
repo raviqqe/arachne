@@ -1,6 +1,7 @@
+mod decode;
 mod instruction;
 mod stack;
 mod vm;
 
-pub use instruction::Instruction;
+pub use instruction::*;
 pub use vm::Vm;
