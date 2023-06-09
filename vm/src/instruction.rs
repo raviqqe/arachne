@@ -3,7 +3,8 @@
 pub enum Instruction {
     Null,
     Nil,
-    Constant,
+    Float64,
+    Symbol,
     Local,
     Get,
     Set,
@@ -13,9 +14,11 @@ pub enum Instruction {
     Multiply,
     Divide,
     Call,
-    Lambda,
+    Closure,
     Equal,
     Array,
     Drop,
     Dump,
+    Jump,
+    Return,
 }

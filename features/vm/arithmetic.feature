@@ -12,8 +12,8 @@ Feature: Arithmetic
     """
 
     Examples:
-      | literal  | result |
-      | (+ 1 2)  | 3      |
-      | (- 2 1)  | 1      |
-      | (* 2 3)  | 6      |
-      | (/ 6 2)  | 3      |
+      | literal | result |
+      | (+ 1 2) | 3      |
+      | (- 2 1) | 1      |
+      | (* 2 3) | 6      |
+      | (/ 6 2) | 3      |

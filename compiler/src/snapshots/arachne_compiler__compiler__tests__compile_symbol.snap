@@ -1,0 +1,13 @@
+---
+source: compiler/src/compiler.rs
+expression: codes.borrow()
+---
+[
+    3,
+    3,
+    102,
+    111,
+    111,
+    17,
+    16,
+]

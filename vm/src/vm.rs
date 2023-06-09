@@ -1,7 +1,7 @@
 use crate::{stack::Stack, Instruction};
 use num_traits::FromPrimitive;
-use runtime::{Value, NIL};
-use std::mem::size_of;
+use runtime::{Closure, NIL};
+use std::{mem::size_of, str};
 
 macro_rules! binary_operation {
     ($self:expr, $operator:tt) => {
@@ -42,8 +42,16 @@ impl Vm {
                 Instruction::Nil => {
                     self.stack.push_value(NIL);
                 }
-                Instruction::Constant => {
-                    let value = self.read_value(instructions);
+                Instruction::Float64 => {
+                    let value = self.read_u64(instructions);
+                    self.stack.push_value(f64::from_bits(value).into());
+                }
+                Instruction::Symbol => {
+                    let len = self.read_u8(instructions);
+                    let value = str::from_utf8(self.read_bytes(instructions, len as usize))
+                        .unwrap()
+                        .into();
+
                     self.stack.push_value(value);
                 }
                 Instruction::Get => {
@@ -97,34 +105,71 @@ impl Vm {
                     self.stack.push_value(value);
                 }
                 Instruction::Call => todo!(),
-                Instruction::Lambda => todo!(),
+                Instruction::Closure => {
+                    let id = self.read_u32(instructions);
+                    let environment_size = self.read_u8(instructions) as usize;
+                    let mut closure = Closure::new(id, environment_size);
+
+                    for index in 0..environment_size {
+                        let variable_index = self.read_u8(instructions);
+
+                        closure.write_environment(
+                            index,
+                            self.stack.get(variable_index as usize).clone(),
+                        );
+                    }
+
+                    self.stack.push_value(closure.into());
+                }
                 Instruction::Local => {
                     // TODO Check a frame pointer.
+                    // TODO Move local variables when possible.
                     let index = self.read_u8(instructions);
                     self.stack
                         .push_value(self.stack.get(index as usize).clone());
                 }
                 Instruction::Equal => todo!(),
                 Instruction::Array => todo!(),
+                Instruction::Jump => self.program_counter = self.read_u32(instructions) as usize,
+                Instruction::Return => todo!(),
             }
         }
     }
 
-    fn read_value(&mut self, instructions: &[u8]) -> Value {
-        const SIZE: usize = size_of::<Value>();
+    fn read_u64(&mut self, instructions: &[u8]) -> u64 {
+        const SIZE: usize = size_of::<u64>();
         let mut bytes = [0u8; SIZE];
 
         bytes.copy_from_slice(&instructions[self.program_counter..self.program_counter + SIZE]);
 
         self.program_counter += SIZE;
 
-        unsafe { Value::from_raw(u64::from_le_bytes(bytes)) }
+        u64::from_le_bytes(bytes)
+    }
+
+    fn read_u32(&mut self, instructions: &[u8]) -> u32 {
+        const SIZE: usize = size_of::<u32>();
+        let mut bytes = [0u8; SIZE];
+
+        bytes.copy_from_slice(&instructions[self.program_counter..self.program_counter + SIZE]);
+
+        self.program_counter += SIZE;
+
+        u32::from_le_bytes(bytes)
     }
 
     fn read_u8(&mut self, instructions: &[u8]) -> u8 {
         let value = instructions[self.program_counter];
 
         self.program_counter += 1;
+
+        value
+    }
+
+    fn read_bytes<'a>(&mut self, instructions: &'a [u8], len: usize) -> &'a [u8] {
+        let value = &instructions[self.program_counter..self.program_counter + len];
+
+        self.program_counter += len;
 
         value
     }

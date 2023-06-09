@@ -3,6 +3,7 @@
     "dashmap",
     "dealloc",
     "deque",
+    "insta",
     "melior",
     "minilisp",
     "mlir",
