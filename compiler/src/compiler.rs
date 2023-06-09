@@ -187,6 +187,6 @@ mod tests {
             result.unwrap();
         }
 
-        insta::assert_debug_snapshot!(decode_instructions(&codes.borrow()));
+        insta::assert_debug_snapshot!(decode_instructions(&codes.borrow()).unwrap());
     }
 }
