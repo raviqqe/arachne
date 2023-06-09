@@ -1,8 +1,11 @@
-use crate::decode::{decode_bytes, decode_u32, decode_u64, decode_u8};
-use crate::{stack::Stack, Instruction};
+use crate::{
+    decode::{decode_bytes, decode_u32, decode_u64, decode_u8},
+    stack::Stack,
+    Instruction,
+};
 use num_traits::FromPrimitive;
 use runtime::{Closure, NIL};
-use std::{str};
+use std::str;
 
 macro_rules! binary_operation {
     ($self:expr, $operator:tt) => {

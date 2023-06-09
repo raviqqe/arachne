@@ -4,9 +4,10 @@ use crate::{
 };
 use core::fmt;
 use num_traits::FromPrimitive;
-use std::{self, error::Error, fmt::Display};
 use std::{
-    fmt::Formatter,
+    self,
+    error::Error,
+    fmt::{Display, Formatter},
     str::{self, Utf8Error},
 };
 
