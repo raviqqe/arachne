@@ -1,6 +1,8 @@
 use core::fmt;
-use std::error::Error;
-use std::fmt::{Display, Formatter};
+use std::{
+    error::Error,
+    fmt::{Display, Formatter},
+};
 
 #[derive(Debug)]
 pub enum CompileError {
