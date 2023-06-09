@@ -78,6 +78,8 @@ impl<'a> Compiler<'a> {
                                 self.compile_statement(array.get_usize(index));
                             }
 
+                            codes.push(Instruction::Return as u8);
+
                             let current_index = codes.len();
 
                             codes[jump_target_index..jump_target_index + size_of::<u32>()]
