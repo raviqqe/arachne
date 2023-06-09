@@ -6,10 +6,10 @@ edition = "2021"
 [dependencies]
 async-stream = "0.3.5"
 futures = "0.3.28"
-insta = "1.29.0"
 runtime = { package = "arachne-runtime", path = "../runtime" }
-tokio = "1.28.2"
 vm = { package = "arachne-vm", path = "../vm" }
 
 [dev-dependencies]
+insta = "1.29.0"
 pretty_assertions = "1.3.0"
+tokio = "1.28.2"
