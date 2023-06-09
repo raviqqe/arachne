@@ -1,8 +1,7 @@
 use crate::{stack::Stack, Instruction};
 use num_traits::FromPrimitive;
 use runtime::{Closure, NIL};
-use std::mem::size_of;
-use std::str;
+use std::{mem::size_of, str};
 
 macro_rules! binary_operation {
     ($self:expr, $operator:tt) => {
