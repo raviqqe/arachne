@@ -2,8 +2,13 @@ use crate::{
     decode::{decode_bytes, decode_u32, decode_u64, decode_u8},
     Instruction,
 };
+use core::fmt;
 use num_traits::FromPrimitive;
-use std::str::{self, Utf8Error};
+use std::{self, error::Error, fmt::Display};
+use std::{
+    fmt::Formatter,
+    str::{self, Utf8Error},
+};
 
 #[derive(Clone, Debug)]
 pub enum InstructionIr {
@@ -42,7 +47,7 @@ pub fn decode_bytecodes(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeError>
 
     while !instructions.is_empty() {
         let instruction =
-            Instruction::from_u8(codes[0]).ok_or(DecodeError::InvalidInstruction)?;
+            Instruction::from_u8(codes[0]).ok_or(DecodeError::InvalidInstruction(codes[0]))?;
 
         instructions.push(match instruction {
             Instruction::Null => InstructionIr::Null,
@@ -90,9 +95,25 @@ pub fn decode_bytecodes(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeError>
     Ok(instructions)
 }
 
+#[derive(Debug)]
 pub enum DecodeError {
-    InvalidInstruction,
+    InvalidInstruction(u8),
     Utf8(Utf8Error),
+}
+
+impl Error for DecodeError {}
+
+impl Display for DecodeError {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        match self {
+            Self::InvalidInstruction(instruction) => {
+                write!(formatter, "invalid instruction: {:x}", instruction)
+            }
+            Self::Utf8(error) => {
+                write!(formatter, "{}", error)
+            }
+        }
+    }
 }
 
 impl From<Utf8Error> for DecodeError {
