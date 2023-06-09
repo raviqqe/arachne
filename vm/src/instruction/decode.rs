@@ -13,7 +13,6 @@ use std::{
 
 #[derive(Clone, Debug)]
 pub enum InstructionIr {
-    Null,
     Nil,
     Float64(f64),
     Symbol {
@@ -52,7 +51,6 @@ pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeErr
             .ok_or(DecodeError::InvalidInstruction(instruction))?;
 
         instructions.push(match instruction {
-            Instruction::Null => InstructionIr::Null,
             Instruction::Nil => InstructionIr::Nil,
             Instruction::Float64 => {
                 InstructionIr::Float64(f64::from_bits(decode_u64(codes, &mut index)))
