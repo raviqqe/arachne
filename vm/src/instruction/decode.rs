@@ -47,49 +47,52 @@ pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeErr
 
     while index < codes.len() {
         let instruction = decode_u8(codes, &mut index);
-        let instruction = Instruction::from_u8(instruction)
-            .ok_or(DecodeError::InvalidInstruction(instruction))?;
 
-        instructions.push(match instruction {
-            Instruction::Nil => InstructionIr::Nil,
-            Instruction::Float64 => {
-                InstructionIr::Float64(f64::from_bits(decode_u64(codes, &mut index)))
-            }
-            Instruction::Symbol => {
-                let len = decode_u8(codes, &mut index);
-
-                InstructionIr::Symbol {
-                    len,
-                    string: str::from_utf8(decode_bytes(codes, len as usize, &mut index))?.into(),
+        instructions.push(
+            match Instruction::from_u8(instruction)
+                .ok_or(DecodeError::InvalidInstruction(instruction))?
+            {
+                Instruction::Nil => InstructionIr::Nil,
+                Instruction::Float64 => {
+                    InstructionIr::Float64(f64::from_bits(decode_u64(codes, &mut index)))
                 }
-            }
-            Instruction::Local => InstructionIr::Local(decode_u8(codes, &mut index)),
-            Instruction::Get => InstructionIr::Get,
-            Instruction::Set => InstructionIr::Set,
-            Instruction::Length => InstructionIr::Length,
-            Instruction::Add => InstructionIr::Add,
-            Instruction::Subtract => InstructionIr::Subtract,
-            Instruction::Multiply => InstructionIr::Multiply,
-            Instruction::Divide => InstructionIr::Divide,
-            Instruction::Call => InstructionIr::Call,
-            Instruction::Closure => {
-                let pointer = decode_u32(codes, &mut index);
-                let environment_size = decode_u8(codes, &mut index);
+                Instruction::Symbol => {
+                    let len = decode_u8(codes, &mut index);
 
-                InstructionIr::Closure {
-                    pointer,
-                    environment_size,
-                    environment: decode_bytes(codes, environment_size as usize, &mut index)
-                        .to_vec(),
+                    InstructionIr::Symbol {
+                        len,
+                        string: str::from_utf8(decode_bytes(codes, len as usize, &mut index))?
+                            .into(),
+                    }
                 }
-            }
-            Instruction::Equal => InstructionIr::Equal,
-            Instruction::Array => InstructionIr::Array,
-            Instruction::Drop => InstructionIr::Drop,
-            Instruction::Dump => InstructionIr::Dump,
-            Instruction::Jump => InstructionIr::Jump,
-            Instruction::Return => InstructionIr::Return,
-        });
+                Instruction::Local => InstructionIr::Local(decode_u8(codes, &mut index)),
+                Instruction::Get => InstructionIr::Get,
+                Instruction::Set => InstructionIr::Set,
+                Instruction::Length => InstructionIr::Length,
+                Instruction::Add => InstructionIr::Add,
+                Instruction::Subtract => InstructionIr::Subtract,
+                Instruction::Multiply => InstructionIr::Multiply,
+                Instruction::Divide => InstructionIr::Divide,
+                Instruction::Call => InstructionIr::Call,
+                Instruction::Closure => {
+                    let pointer = decode_u32(codes, &mut index);
+                    let environment_size = decode_u8(codes, &mut index);
+
+                    InstructionIr::Closure {
+                        pointer,
+                        environment_size,
+                        environment: decode_bytes(codes, environment_size as usize, &mut index)
+                            .to_vec(),
+                    }
+                }
+                Instruction::Equal => InstructionIr::Equal,
+                Instruction::Array => InstructionIr::Array,
+                Instruction::Drop => InstructionIr::Drop,
+                Instruction::Dump => InstructionIr::Dump,
+                Instruction::Jump => InstructionIr::Jump,
+                Instruction::Return => InstructionIr::Return,
+            },
+        );
     }
 
     Ok(instructions)
