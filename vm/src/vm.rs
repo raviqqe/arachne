@@ -1,4 +1,4 @@
-use crate::decode::{decode_u32, decode_u64};
+use crate::decode::{decode_bytes, decode_u32, decode_u64, decode_u8};
 use crate::{stack::Stack, Instruction};
 use num_traits::FromPrimitive;
 use runtime::{Closure, NIL};
@@ -138,34 +138,18 @@ impl Vm {
     }
 
     fn read_u64(&mut self, codes: &[u8]) -> u64 {
-        let value = decode_u64(&codes[self.program_counter..]);
-
-        self.program_counter += size_of::<u64>();
-
-        value
+        decode_u64(&codes, &mut self.program_counter)
     }
 
     fn read_u32(&mut self, codes: &[u8]) -> u32 {
-        let value = decode_u32(&codes[self.program_counter..]);
-
-        self.program_counter += size_of::<u32>();
-
-        value
+        decode_u32(&codes, &mut self.program_counter)
     }
 
     fn read_u8(&mut self, codes: &[u8]) -> u8 {
-        let value = codes[self.program_counter];
-
-        self.program_counter += 1;
-
-        value
+        decode_u8(codes, &mut self.program_counter)
     }
 
     fn read_bytes<'a>(&mut self, codes: &'a [u8], len: usize) -> &'a [u8] {
-        let value = &codes[self.program_counter..self.program_counter + len];
-
-        self.program_counter += len;
-
-        value
+        decode_bytes(codes, len, &mut self.program_counter)
     }
 }
