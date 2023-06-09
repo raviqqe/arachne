@@ -2,7 +2,7 @@ use crate::decode::{decode_bytes, decode_u32, decode_u64, decode_u8};
 use crate::{stack::Stack, Instruction};
 use num_traits::FromPrimitive;
 use runtime::{Closure, NIL};
-use std::{mem::size_of, str};
+use std::{str};
 
 macro_rules! binary_operation {
     ($self:expr, $operator:tt) => {
@@ -138,11 +138,11 @@ impl Vm {
     }
 
     fn read_u64(&mut self, codes: &[u8]) -> u64 {
-        decode_u64(&codes, &mut self.program_counter)
+        decode_u64(codes, &mut self.program_counter)
     }
 
     fn read_u32(&mut self, codes: &[u8]) -> u32 {
-        decode_u32(&codes, &mut self.program_counter)
+        decode_u32(codes, &mut self.program_counter)
     }
 
     fn read_u8(&mut self, codes: &[u8]) -> u8 {

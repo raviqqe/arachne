@@ -40,9 +40,9 @@ pub fn decode_bytecodes(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeError>
     let mut index = 0;
     let mut instructions = Vec::new();
 
-    while instructions.len() > 0 {
+    while !instructions.is_empty() {
         let instruction =
-            Instruction::from_u8(codes[0]).ok_or_else(|| DecodeError::InvalidInstruction)?;
+            Instruction::from_u8(codes[0]).ok_or(DecodeError::InvalidInstruction)?;
 
         instructions.push(match instruction {
             Instruction::Null => InstructionIr::Null,
