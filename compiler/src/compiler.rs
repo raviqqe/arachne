@@ -1,10 +1,9 @@
+use crate::CompileError;
 use async_stream::try_stream;
 use futures::{Stream, StreamExt};
 use runtime::{Array, Symbol, TypedValue, Value};
 use std::{cell::RefCell, collections::HashMap, error::Error, mem::size_of};
 use vm::Instruction;
-
-use crate::CompileError;
 
 const VARIABLE_CAPACITY: usize = 1 << 8;
 
