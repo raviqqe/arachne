@@ -1,5 +1,5 @@
 use crate::{
-    decode::{decode_bytes, decode_u32, decode_u64, decode_u8},
+    decode::{decode_bytes, decode_f64, decode_u32, decode_u8},
     stack::Stack,
     Instruction,
 };
@@ -44,8 +44,8 @@ impl Vm {
                     self.stack.push_value(NIL);
                 }
                 Instruction::Float64 => {
-                    let value = self.read_u64(codes);
-                    self.stack.push_value(f64::from_bits(value).into());
+                    let value = self.read_f64(codes);
+                    self.stack.push_value(value.into());
                 }
                 Instruction::Symbol => {
                     let len = self.read_u8(codes);
@@ -137,8 +137,8 @@ impl Vm {
         }
     }
 
-    fn read_u64(&mut self, codes: &[u8]) -> u64 {
-        decode_u64(codes, &mut self.program_counter)
+    fn read_f64(&mut self, codes: &[u8]) -> f64 {
+        decode_f64(codes, &mut self.program_counter)
     }
 
     fn read_u32(&mut self, codes: &[u8]) -> u32 {
