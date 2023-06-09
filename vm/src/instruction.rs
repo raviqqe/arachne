@@ -23,7 +23,6 @@ pub enum Instruction {
     Return,
 }
 
-
 // Only for debugging.
 #[derive(Clone, Debug)]
 enum InstructionNode {
@@ -56,8 +55,8 @@ enum InstructionNode {
     Return,
 }
 
-pub fn decode(&[u8]) -> Vec<InstructionNode> { 
-let mut instructions = Vec::new();
+pub fn decode(codes: &[u8]) -> Vec<InstructionNode> {
+    let mut instructions = Vec::new();
 
     instructions
 }
