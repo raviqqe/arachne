@@ -1,7 +1,8 @@
 use crate::{stack::Stack, Instruction};
 use num_traits::FromPrimitive;
-use runtime::{Closure, Value, NIL};
+use runtime::{Closure, NIL};
 use std::mem::size_of;
+use std::str;
 
 macro_rules! binary_operation {
     ($self:expr, $operator:tt) => {
@@ -42,8 +43,16 @@ impl Vm {
                 Instruction::Nil => {
                     self.stack.push_value(NIL);
                 }
-                Instruction::Constant => {
-                    let value = self.read_value(instructions);
+                Instruction::Float64 => {
+                    let value = self.read_u64(instructions);
+                    self.stack.push_value(f64::from_bits(value).into());
+                }
+                Instruction::Symbol => {
+                    let len = self.read_u8(instructions);
+                    let value = str::from_utf8(self.read_bytes(instructions, len as usize))
+                        .unwrap()
+                        .into();
+
                     self.stack.push_value(value);
                 }
                 Instruction::Get => {
@@ -128,15 +137,15 @@ impl Vm {
         }
     }
 
-    fn read_value(&mut self, instructions: &[u8]) -> Value {
-        const SIZE: usize = size_of::<Value>();
+    fn read_u64(&mut self, instructions: &[u8]) -> u64 {
+        const SIZE: usize = size_of::<u64>();
         let mut bytes = [0u8; SIZE];
 
         bytes.copy_from_slice(&instructions[self.program_counter..self.program_counter + SIZE]);
 
         self.program_counter += SIZE;
 
-        unsafe { Value::from_raw(u64::from_le_bytes(bytes)) }
+        u64::from_le_bytes(bytes)
     }
 
     fn read_u32(&mut self, instructions: &[u8]) -> u32 {
@@ -154,6 +163,14 @@ impl Vm {
         let value = instructions[self.program_counter];
 
         self.program_counter += 1;
+
+        value
+    }
+
+    fn read_bytes<'a>(&mut self, instructions: &'a [u8], len: usize) -> &'a [u8] {
+        let value = &instructions[self.program_counter..self.program_counter + len];
+
+        self.program_counter += len;
 
         value
     }

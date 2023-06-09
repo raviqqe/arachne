@@ -110,9 +110,27 @@ impl<'a> Compiler<'a> {
                         self.compile_call(array)
                     }
                 }
-                TypedValue::Closure(closure) => self.compile_constant(closure),
-                TypedValue::Float64(number) => self.compile_constant(number),
-                TypedValue::Symbol(symbol) => self.compile_variable(symbol),
+                TypedValue::Closure(_) => todo!(),
+                TypedValue::Float64(number) => {
+                    self.codes.borrow_mut().push(Instruction::Float64 as u8);
+                    self.codes
+                        .borrow_mut()
+                        .extend(number.to_f64().to_le_bytes());
+                }
+                TypedValue::Symbol(symbol) => {
+                    let mut codes = self.codes.borrow_mut();
+
+                    if let Some(&index) = self.variables.get(&symbol) {
+                        codes.push(Instruction::Local as u8);
+                        codes.push(index as u8);
+                    } else if symbol.as_str().len() >= 1 << 8 {
+                        todo!();
+                    } else {
+                        codes.push(Instruction::Symbol as u8);
+                        codes.push(symbol.as_str().len() as u8);
+                        codes.extend(symbol.as_str().as_bytes());
+                    }
+                }
             }
         } else {
             self.codes.borrow_mut().push(Instruction::Nil as u8);
@@ -123,22 +141,6 @@ impl<'a> Compiler<'a> {
         // TODO Fix an evaluation order.
         for index in (1..array.len_usize()).rev() {
             self.compile_expression(array.get_usize(index));
-        }
-    }
-
-    fn compile_constant<T: Into<Value>>(&self, value: T) {
-        self.codes.borrow_mut().push(Instruction::Constant as u8);
-        self.codes
-            .borrow_mut()
-            .extend(value.into().into_raw().to_le_bytes());
-    }
-
-    fn compile_variable(&self, symbol: Symbol) {
-        if let Some(&index) = self.variables.get(&symbol) {
-            self.codes.borrow_mut().push(Instruction::Local as u8);
-            self.codes.borrow_mut().push(index as u8);
-        } else {
-            self.compile_constant(symbol);
         }
     }
 
@@ -172,5 +174,7 @@ mod tests {
         while let Some(result) = results.next().await {
             result.unwrap();
         }
+
+        insta::assert_debug_snapshot!(codes.borrow());
     }
 }

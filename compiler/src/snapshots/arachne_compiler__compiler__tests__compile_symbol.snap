@@ -3,15 +3,11 @@ source: compiler/src/compiler.rs
 expression: codes.borrow()
 ---
 [
-    2,
-    32,
-    64,
-    7,
-    1,
-    0,
-    96,
-    242,
-    127,
+    3,
+    3,
+    102,
+    111,
+    111,
+    17,
     16,
-    15,
 ]
