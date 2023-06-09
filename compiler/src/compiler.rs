@@ -1,3 +1,4 @@
+use crate::CompileError;
 use async_stream::try_stream;
 use futures::{Stream, StreamExt};
 use runtime::{Array, Symbol, TypedValue, Value};
@@ -22,44 +23,48 @@ impl<'a> Compiler<'a> {
     pub fn compile<E: Error + 'static>(
         &'a mut self,
         values: &'a mut (impl Stream<Item = Result<Value, E>> + Unpin),
-    ) -> impl Stream<Item = Result<(), E>> + 'a {
+    ) -> impl Stream<Item = Result<(), CompileError>> + 'a {
         try_stream! {
             while let Some(value) = values.next().await {
-                self.compile_statement(value?);
+                self.compile_statement(value.map_err(|error| CompileError::Other(error.into()))?)?;
                 yield ();
             }
         }
     }
 
-    fn compile_statement(&mut self, value: Value) {
+    fn compile_statement(&mut self, value: Value) -> Result<(), CompileError> {
         match Array::try_from(value) {
             Ok(array) => {
                 if let Some(symbol) = array.get_usize(0).to_symbol() {
                     match symbol.as_str() {
                         "let" => {
                             if let Some(symbol) = array.get_usize(1).to_symbol() {
-                                self.compile_expression(array.get_usize(2));
+                                self.compile_expression(array.get_usize(2))?;
                                 self.variables.insert(symbol, self.variables.len());
                                 // Keep a value on a stack.
                             }
                         }
-                        _ => self.compile_top_expression(array.into()),
+                        _ => self.compile_top_expression(array.into())?,
                     }
                 } else {
-                    self.compile_top_expression(array.into());
+                    self.compile_top_expression(array.into())?;
                 }
             }
-            Err(value) => self.compile_top_expression(value),
+            Err(value) => self.compile_top_expression(value)?,
         }
+
+        Ok(())
     }
 
-    fn compile_top_expression(&mut self, value: Value) {
-        self.compile_expression(value);
+    fn compile_top_expression(&mut self, value: Value) -> Result<(), CompileError> {
+        self.compile_expression(value)?;
         self.codes.borrow_mut().push(Instruction::Dump as u8);
         self.codes.borrow_mut().push(Instruction::Drop as u8);
+
+        Ok(())
     }
 
-    fn compile_expression(&mut self, value: Value) {
+    fn compile_expression(&mut self, value: Value) -> Result<(), CompileError> {
         if let Some(value) = value.into_typed() {
             match value {
                 TypedValue::Array(array) => {
@@ -75,7 +80,7 @@ impl<'a> Compiler<'a> {
                             let function_index = codes.len();
 
                             for index in 0..array.len_usize() - 2 {
-                                self.compile_statement(array.get_usize(index));
+                                self.compile_statement(array.get_usize(index))?;
                             }
 
                             codes.push(Instruction::Return as u8);
@@ -101,16 +106,16 @@ impl<'a> Compiler<'a> {
                             "/" => Some(Instruction::Divide),
                             _ => None,
                         } {
-                            self.compile_arguments(array);
+                            self.compile_arguments(array)?;
                             self.codes.borrow_mut().push(instruction as u8);
                         } else {
-                            self.compile_call(array);
+                            self.compile_call(array)?;
                         }
                     } else {
-                        self.compile_call(array)
+                        self.compile_call(array)?
                     }
                 }
-                TypedValue::Closure(_) => todo!(),
+                TypedValue::Closure(_) => return Err(CompileError::Closure),
                 TypedValue::Float64(number) => {
                     self.codes.borrow_mut().push(Instruction::Float64 as u8);
                     self.codes
@@ -124,7 +129,7 @@ impl<'a> Compiler<'a> {
                         codes.push(Instruction::Local as u8);
                         codes.push(index as u8);
                     } else if symbol.as_str().len() >= 1 << 8 {
-                        todo!();
+                        return Err(CompileError::SymbolLength(symbol.as_str().into()));
                     } else {
                         codes.push(Instruction::Symbol as u8);
                         codes.push(symbol.as_str().len() as u8);
@@ -135,19 +140,25 @@ impl<'a> Compiler<'a> {
         } else {
             self.codes.borrow_mut().push(Instruction::Nil as u8);
         }
+
+        Ok(())
     }
 
-    fn compile_arguments(&mut self, array: Array) {
+    fn compile_arguments(&mut self, array: Array) -> Result<(), CompileError> {
         // TODO Fix an evaluation order.
         for index in (1..array.len_usize()).rev() {
-            self.compile_expression(array.get_usize(index));
+            self.compile_expression(array.get_usize(index))?;
         }
+
+        Ok(())
     }
 
-    fn compile_call(&mut self, array: Array) {
-        self.compile_arguments(array.clone());
-        self.compile_expression(array.get_usize(0));
+    fn compile_call(&mut self, array: Array) -> Result<(), CompileError> {
+        self.compile_arguments(array.clone())?;
+        self.compile_expression(array.get_usize(0))?;
         self.codes.borrow_mut().push(Instruction::Call as u8);
+
+        Ok(())
     }
 }
 
