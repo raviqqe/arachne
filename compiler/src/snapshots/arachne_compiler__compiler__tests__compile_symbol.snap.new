@@ -1,0 +1,15 @@
+---
+source: compiler/src/compiler.rs
+assertion_line: 190
+expression: decode_instructions(&codes.borrow())
+---
+Ok(
+    [
+        Symbol {
+            len: 3,
+            string: "foo",
+        },
+        Dump,
+        Drop,
+    ],
+)

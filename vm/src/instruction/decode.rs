@@ -46,9 +46,10 @@ pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeErr
     let mut index = 0;
     let mut instructions = Vec::new();
 
-    while !instructions.is_empty() {
-        let instruction =
-            Instruction::from_u8(codes[0]).ok_or(DecodeError::InvalidInstruction(codes[0]))?;
+    while index < codes.len() {
+        let instruction = decode_u8(codes, &mut index);
+        let instruction = Instruction::from_u8(instruction)
+            .ok_or(DecodeError::InvalidInstruction(instruction))?;
 
         instructions.push(match instruction {
             Instruction::Null => InstructionIr::Null,

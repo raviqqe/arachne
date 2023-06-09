@@ -167,6 +167,7 @@ mod tests {
     use super::*;
     use futures::{pin_mut, FutureExt};
     use std::io;
+    use vm::decode_instructions;
 
     type Error = io::Error;
 
@@ -186,6 +187,6 @@ mod tests {
             result.unwrap();
         }
 
-        insta::assert_debug_snapshot!(codes.borrow());
+        insta::assert_debug_snapshot!(decode_instructions(&codes.borrow()));
     }
 }
