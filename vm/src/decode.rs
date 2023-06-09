@@ -13,15 +13,11 @@ pub fn read_u32(instructions: &[u8]) -> u32 {
     const SIZE: usize = size_of::<u32>();
     let mut bytes = [0u8; SIZE];
 
-    bytes.copy_from_slice(&instructions[self.program_counter..self.program_counter + SIZE]);
+    bytes.copy_from_slice(&instructions[0..SIZE]);
 
     u32::from_le_bytes(bytes)
 }
 
 pub fn read_u8(instructions: &[u8]) -> u8 {
-    let value = instructions[self.program_counter];
-
-    self.program_counter += 1;
-
-    value
+    instructions[0]
 }
