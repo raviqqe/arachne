@@ -36,10 +36,7 @@ impl Vm {
 
     pub fn run(&mut self, codes: &[u8]) {
         while self.program_counter < codes.len() {
-            let instruction =
-                Instruction::from_u8(codes[self.program_counter]).expect("valid instruction");
-
-            self.program_counter += 1;
+            let instruction = Instruction::from_u8(self.read_u8(codes)).expect("valid instruction");
 
             match instruction {
                 Instruction::Null => unreachable!("null po' god!"),
