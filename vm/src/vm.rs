@@ -10,8 +10,8 @@ use std::str;
 macro_rules! binary_operation {
     ($self:expr, $operator:tt) => {
         let value = (|| {
-            let lhs = $self.stack.pop_value().to_float64()?;
             let rhs = $self.stack.pop_value().to_float64()?;
+            let lhs = $self.stack.pop_value().to_float64()?;
 
             Some((lhs.to_f64() $operator rhs.to_f64()).into())
         })()
@@ -52,9 +52,10 @@ impl Vm {
                 }
                 Instruction::Get => {
                     let value = (|| {
+                        let index = self.stack.pop_value();
                         let array = self.stack.pop_value().into_array()?;
 
-                        Some(array.get(self.stack.pop_value()))
+                        Some(array.get(index))
                     })()
                     .unwrap_or(NIL);
 
@@ -62,9 +63,9 @@ impl Vm {
                 }
                 Instruction::Set => {
                     let value = (|| {
-                        let array = self.stack.pop_value().into_array()?;
-                        let index = self.stack.pop_value();
                         let value = self.stack.pop_value();
+                        let index = self.stack.pop_value();
+                        let array = self.stack.pop_value().into_array()?;
 
                         Some(array.set(index, value).into())
                     })()
