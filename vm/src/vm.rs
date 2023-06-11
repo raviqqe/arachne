@@ -37,9 +37,7 @@ impl Vm {
     pub fn run(&mut self, codes: &[u8]) {
         while self.program_counter < codes.len() {
             match Instruction::from_u8(self.read_u8(codes)).expect("valid instruction") {
-                Instruction::Nil => {
-                    self.stack.push_value(NIL);
-                }
+                Instruction::Nil => self.stack.push_value(NIL),
                 Instruction::Float64 => {
                     let value = self.read_f64(codes);
                     self.stack.push_value(value.into());
