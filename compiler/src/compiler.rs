@@ -145,8 +145,7 @@ impl<'a> Compiler<'a> {
     }
 
     fn compile_arguments(&mut self, array: Array) -> Result<(), CompileError> {
-        // TODO Fix an evaluation order.
-        for index in (1..array.len_usize()).rev() {
+        for index in (1..array.len_usize()) {
             self.compile_expression(array.get_usize(index))?;
         }
 
