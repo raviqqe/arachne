@@ -97,6 +97,8 @@ impl<'a> Compiler<'a> {
                             let arity = u8::try_from(arguments.len_usize())?;
                             let mut frame_size = arity;
 
+                            self.local_variables.clear();
+
                             for index in 0..arguments.len_usize() {
                                 if let Some(argument) = arguments.get_usize(index).to_symbol() {
                                     self.local_variables.insert(argument, index);
