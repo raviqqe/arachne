@@ -80,12 +80,13 @@ impl<'a> Compiler<'a> {
         dump: bool,
     ) -> Result<(), CompileError> {
         self.compile_expression(value, variables)?;
+        let mut codes = self.codes.borrow_mut();
 
         if dump {
-            self.codes.borrow_mut().push(Instruction::Dump as u8);
+            codes.push(Instruction::Dump as u8);
         }
 
-        self.codes.borrow_mut().push(Instruction::Drop as u8);
+        codes.push(Instruction::Drop as u8);
 
         Ok(())
     }
@@ -167,10 +168,10 @@ impl<'a> Compiler<'a> {
                 }
                 TypedValue::Closure(_) => return Err(CompileError::Closure),
                 TypedValue::Float64(number) => {
-                    self.codes.borrow_mut().push(Instruction::Float64 as u8);
-                    self.codes
-                        .borrow_mut()
-                        .extend(number.to_f64().to_le_bytes());
+                    let mut codes = self.codes.borrow_mut();
+
+                    codes.push(Instruction::Float64 as u8);
+                    codes.extend(number.to_f64().to_le_bytes());
                 }
                 TypedValue::Symbol(symbol) => {
                     let mut codes = self.codes.borrow_mut();
