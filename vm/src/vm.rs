@@ -157,10 +157,9 @@ impl Vm {
                 // TODO Make this relative jump.
                 Instruction::Jump => self.program_counter = self.read_u16(codes) as usize,
                 Instruction::Return => {
-                    let frame_size = self.read_u8(codes);
                     let value = self.stack.pop_value();
 
-                    for _ in 0..frame_size {
+                    for _ in 0..self.read_u8(codes) {
                         self.stack.pop_value();
                     }
 
