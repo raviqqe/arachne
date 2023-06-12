@@ -100,34 +100,47 @@ impl<'a> Compiler<'a> {
                             codes.extend(0u32.to_le_bytes()); // stub address
 
                             let function_index = codes.len();
+                            drop(codes);
+
                             let arguments = array.get_usize(1);
                             let arguments = arguments.as_array().expect("arguments");
                             let arity = u8::try_from(arguments.len_usize())?;
-                            let mut frame_size = arity;
 
-                            let mut frame = Frame::with_capacity(arguments.len_usize());
+                            {
+                                let mut frame_size = arity;
 
-                            for index in 0..arguments.len_usize() {
-                                if let Some(argument) = arguments.get_usize(index).to_symbol() {
-                                    frame.insert_variable(argument);
+                                let mut frame = Frame::with_capacity(arguments.len_usize());
+
+                                for index in 0..arguments.len_usize() {
+                                    if let Some(argument) = arguments.get_usize(index).to_symbol() {
+                                        frame.insert_variable(argument);
+                                    }
                                 }
-                            }
 
-                            for index in 0..array.len_usize() - 2 {
-                                if self.compile_statement(
-                                    array.get_usize(index),
+                                for index in 2..array.len_usize() - 1 {
+                                    if self.compile_statement(
+                                        array.get_usize(index),
+                                        &mut frame,
+                                        false,
+                                    )? {
+                                        frame_size += 1
+                                    };
+                                }
+
+                                self.compile_expression(
+                                    array.get_usize(array.len_usize() - 1),
                                     &mut frame,
-                                    false,
-                                )? {
-                                    frame_size += 1
-                                };
+                                )?;
+
+                                let mut codes = self.codes.borrow_mut();
+
+                                codes.push(Instruction::Return as u8);
+                                codes.push(frame_size);
+                                *frame.temporary_count_mut() -= 1;
+                                assert_eq!(*frame.temporary_count_mut(), 0);
                             }
 
-                            codes.push(Instruction::Return as u8);
-                            codes.push(frame_size);
-                            *frame.temporary_count_mut() -= 1;
-                            assert_eq!(*frame.temporary_count_mut(), 0);
-
+                            let mut codes = self.codes.borrow_mut();
                             let current_index = codes.len();
 
                             codes[jump_target_index..jump_target_index + size_of::<u32>()]
@@ -249,6 +262,17 @@ mod tests {
     #[tokio::test]
     async fn compile_symbol() {
         insta::assert_debug_snapshot!(compile(["foo".into()]).await);
+    }
+
+    mod function {
+        use super::*;
+
+        #[tokio::test]
+        async fn compile_let() {
+            insta::assert_debug_snapshot!(
+                compile([["fn".into(), ["x".into()].into(), 42.0.into()].into()]).await
+            );
+        }
     }
 
     mod r#let {
