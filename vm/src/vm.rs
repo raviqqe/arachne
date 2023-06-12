@@ -166,6 +166,9 @@ impl Vm {
                         self.stack.pop_value();
                     }
 
+                    // TODO Pop a return address.
+                    self.program_counter = 42;
+
                     self.stack.push_value(value);
                 }
             }
