@@ -212,7 +212,9 @@ impl<'a> Compiler<'a> {
         self.compile_expression(array.get_usize(0), frame)?;
         self.compile_arguments(array.clone(), frame)?;
 
-        self.codes.borrow_mut().push(Instruction::Call as u8);
+        let mut codes = self.codes.borrow_mut();
+        codes.push(Instruction::Call as u8);
+        codes.push((array.len_usize() - 1) as u8);
         *frame.temporary_count_mut() -= array.len_usize() - 1;
 
         Ok(())
