@@ -42,7 +42,7 @@ impl<'a> Compiler<'a> {
                             if let Some(symbol) = array.get_usize(1).to_symbol() {
                                 self.compile_expression(array.get_usize(2), frame)?;
                                 frame.insert_variable(symbol);
-                                // Keep a value on a stack.
+                                *frame.temporary_count_mut() -= 1;
 
                                 true
                             } else {
@@ -266,7 +266,31 @@ mod tests {
             insta::assert_debug_snapshot!(
                 compile([
                     ["let".into(), "x".into(), 42.0.into()].into(),
-                    ["let".into(), "y".into(), "x".into()].into()
+                    ["let".into(), "y".into(), "x".into()].into(),
+                ])
+                .await
+            );
+        }
+
+        #[tokio::test]
+        async fn compile_three_let() {
+            insta::assert_debug_snapshot!(
+                compile([
+                    ["let".into(), "x".into(), 42.0.into()].into(),
+                    ["let".into(), "y".into(), "x".into()].into(),
+                    ["let".into(), "z".into(), "y".into()].into(),
+                ])
+                .await
+            );
+        }
+
+        #[tokio::test]
+        async fn compile_three_let_referencing_old() {
+            insta::assert_debug_snapshot!(
+                compile([
+                    ["let".into(), "x".into(), 1.0.into()].into(),
+                    ["let".into(), "y".into(), 2.0.into()].into(),
+                    ["let".into(), "z".into(), "x".into()].into(),
                 ])
                 .await
             );

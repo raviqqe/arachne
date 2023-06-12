@@ -1,7 +1,7 @@
 use super::Value;
 use crate::value::SYMBOL_MASK;
 use alloc::{borrow::ToOwned, boxed::Box, string::String};
-use core::fmt::{self, Display, Formatter};
+use core::fmt::{self, Debug, Display, Formatter};
 use dashmap::DashMap;
 use once_cell::sync::Lazy;
 
@@ -9,7 +9,7 @@ use once_cell::sync::Lazy;
 #[allow(clippy::box_collection)]
 static CACHE: Lazy<DashMap<Box<String>, ()>> = Lazy::new(Default::default);
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct Symbol(u64);
 
 impl Symbol {
@@ -19,6 +19,12 @@ impl Symbol {
 
     pub fn as_str(&self) -> &str {
         unsafe { &*((self.0 & !SYMBOL_MASK) as *const u8 as *const String) }
+    }
+}
+
+impl Debug for Symbol {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        write!(formatter, "{}", self.as_str())
     }
 }
 

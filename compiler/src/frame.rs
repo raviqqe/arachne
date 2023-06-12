@@ -1,6 +1,7 @@
 use runtime::Symbol;
 use std::collections::HashMap;
 
+#[derive(Debug)]
 pub struct Frame<'a> {
     // TODO Support blocks.
     #[allow(dead_code)]
@@ -37,7 +38,10 @@ impl<'a> Frame<'a> {
     }
 
     pub fn get_variable(&mut self, name: Symbol) -> Option<usize> {
-        self.variables.get(&name).copied()
+        self.variables
+            .get(&name)
+            .copied()
+            .map(|index| self.variables.len() + self.temporary_count - index - 1)
     }
 
     pub fn insert_variable(&mut self, name: Symbol) {

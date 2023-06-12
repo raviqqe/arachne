@@ -1,0 +1,15 @@
+---
+source: compiler/src/compiler.rs
+expression: "compile([[\"let\".into(), \"x\".into(), 42.0.into()].into(),\n                [\"let\".into(), \"y\".into(), \"x\".into()].into(),\n                [\"let\".into(), \"z\".into(), \"y\".into()].into()]).await"
+---
+[
+    Float64(
+        42.0,
+    ),
+    Local(
+        0,
+    ),
+    Local(
+        0,
+    ),
+]
