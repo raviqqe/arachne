@@ -119,7 +119,6 @@ impl Vm {
                     self.stack.push_value(closure.into());
                 }
                 Instruction::Local => {
-                    // TODO Check a frame pointer.
                     // TODO Move local variables when possible.
                     let index = self.read_u8(codes);
 
