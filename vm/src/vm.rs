@@ -103,6 +103,7 @@ impl Vm {
                 }
                 Instruction::Call => {
                     let arity = self.read_u8(codes) as usize;
+
                     if let Some(closure) = self.stack.get(self.stack.len() - arity - 1).as_closure()
                     {
                         self.program_counter = closure.id() as usize;
