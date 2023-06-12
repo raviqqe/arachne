@@ -32,8 +32,8 @@ impl<'a> Compiler<'a> {
         }
     }
 
-    fn compile_statement(&mut self, value: Value) -> Result<(), CompileError> {
-        match Array::try_from(value) {
+    fn compile_statement(&mut self, value: Value) -> Result<bool, CompileError> {
+        Ok(match Array::try_from(value) {
             Ok(array) => {
                 if let Some(symbol) = array.get_usize(0).to_symbol() {
                     match symbol.as_str() {
@@ -42,18 +42,27 @@ impl<'a> Compiler<'a> {
                                 self.compile_expression(array.get_usize(2))?;
                                 self.variables.insert(symbol, self.variables.len());
                                 // Keep a value on a stack.
+
+                                true
+                            } else {
+                                false
                             }
                         }
-                        _ => self.compile_top_expression(array.into())?,
+                        _ => {
+                            self.compile_top_expression(array.into())?;
+                            false
+                        }
                     }
                 } else {
                     self.compile_top_expression(array.into())?;
+                    false
                 }
             }
-            Err(value) => self.compile_top_expression(value)?,
-        }
-
-        Ok(())
+            Err(value) => {
+                self.compile_top_expression(value)?;
+                false
+            }
+        })
     }
 
     fn compile_top_expression(&mut self, value: Value) -> Result<(), CompileError> {
@@ -68,7 +77,7 @@ impl<'a> Compiler<'a> {
         if let Some(value) = value.into_typed() {
             match value {
                 TypedValue::Array(array) => {
-                    if let Some(symbol) = (array.get_usize(0)).to_symbol() {
+                    if let Some(symbol) = array.get_usize(0).to_symbol() {
                         let symbol = symbol.as_str();
 
                         if symbol == "fn" {
@@ -76,24 +85,32 @@ impl<'a> Compiler<'a> {
 
                             codes.push(Instruction::Jump as u8);
                             let jump_target_index = codes.len();
-                            codes.extend(0u32.to_le_bytes());
+                            codes.extend(0u32.to_le_bytes()); // stub address
+
                             let function_index = codes.len();
+                            let arguments = array.get_usize(1);
+                            let arguments = arguments.as_array().expect("arguments");
+                            let arity = u8::try_from(arguments.len_usize())?;
+                            let mut frame_size = arity;
 
                             for index in 0..array.len_usize() - 2 {
-                                self.compile_statement(array.get_usize(index))?;
+                                if self.compile_statement(array.get_usize(index))? {
+                                    frame_size += 1
+                                };
                             }
 
                             codes.push(Instruction::Return as u8);
+                            codes.push(frame_size);
 
                             let current_index = codes.len();
 
                             codes[jump_target_index..jump_target_index + size_of::<u32>()]
                                 .copy_from_slice(&(current_index as u32).to_le_bytes());
 
-                            codes.push(Instruction::Closure as u8);
-                            codes.extend(function_index.to_le_bytes());
-                            // TODO Initialize environment.
-                            codes.extend(0u8.to_le_bytes());
+                            codes.push(Instruction::Close as u8);
+                            codes.extend((function_index as u32).to_le_bytes());
+                            codes.push(arity); // arity
+                            codes.push(0u8); // TODO environment size
                         } else if let Some(instruction) = match symbol {
                             "array" => Some(Instruction::Array),
                             "eq" => Some(Instruction::Equal),

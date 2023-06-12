@@ -23,4 +23,8 @@ impl Stack {
     pub fn pop_value(&mut self) -> Value {
         unsafe { Value::from_raw(self.values.pop().expect("stack value")) }
     }
+
+    pub fn len(&self) -> usize {
+        self.values.len()
+    }
 }

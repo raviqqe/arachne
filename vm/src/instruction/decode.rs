@@ -27,9 +27,12 @@ pub enum InstructionIr {
     Subtract,
     Multiply,
     Divide,
-    Call,
-    Closure {
+    Call {
+        arity: u8,
+    },
+    Close {
         pointer: u32,
+        arity: u8,
         environment_size: u8,
         environment: Vec<u8>,
     },
@@ -38,7 +41,9 @@ pub enum InstructionIr {
     Drop,
     Dump,
     Jump,
-    Return,
+    Return {
+        frame_size: u8,
+    },
 }
 
 pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeError> {
@@ -65,6 +70,7 @@ pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeErr
                             .into(),
                     }
                 }
+                Instruction::Global => todo!(),
                 Instruction::Local => InstructionIr::Local(decode_u8(codes, &mut index)),
                 Instruction::Get => InstructionIr::Get,
                 Instruction::Set => InstructionIr::Set,
@@ -73,13 +79,17 @@ pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeErr
                 Instruction::Subtract => InstructionIr::Subtract,
                 Instruction::Multiply => InstructionIr::Multiply,
                 Instruction::Divide => InstructionIr::Divide,
-                Instruction::Call => InstructionIr::Call,
-                Instruction::Closure => {
+                Instruction::Call => InstructionIr::Call {
+                    arity: decode_u8(codes, &mut index),
+                },
+                Instruction::Close => {
                     let pointer = decode_u32(codes, &mut index);
+                    let arity = decode_u8(codes, &mut index);
                     let environment_size = decode_u8(codes, &mut index);
 
-                    InstructionIr::Closure {
+                    InstructionIr::Close {
                         pointer,
+                        arity,
                         environment_size,
                         environment: decode_bytes(codes, environment_size as usize, &mut index)
                             .to_vec(),
@@ -90,7 +100,9 @@ pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeErr
                 Instruction::Drop => InstructionIr::Drop,
                 Instruction::Dump => InstructionIr::Dump,
                 Instruction::Jump => InstructionIr::Jump,
-                Instruction::Return => InstructionIr::Return,
+                Instruction::Return => InstructionIr::Return {
+                    frame_size: decode_u8(codes, &mut index),
+                },
             },
         );
     }

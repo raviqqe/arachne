@@ -101,34 +101,68 @@ impl Vm {
 
                     self.stack.push_value(value);
                 }
-                Instruction::Call => todo!(),
-                Instruction::Closure => {
+                Instruction::Call => {
+                    let arity = self.read_u8(codes) as usize;
+
+                    if let Some(closure) = self.stack.get(self.stack.len() - arity - 1).as_closure()
+                    {
+                        self.program_counter = closure.id() as usize;
+                        let closure_arity = closure.arity() as usize;
+
+                        for _ in 0..arity.saturating_sub(closure_arity) {
+                            self.stack.pop_value();
+                        }
+
+                        for _ in 0..closure_arity.saturating_sub(arity) {
+                            self.stack.push_value(NIL);
+                        }
+                    } else {
+                        for _ in 0..arity + 1 {
+                            self.stack.pop_value();
+                        }
+
+                        self.stack.push_value(NIL);
+                    }
+                }
+                Instruction::Close => {
                     let id = self.read_u32(codes);
-                    let environment_size = self.read_u8(codes) as usize;
-                    let mut closure = Closure::new(id, environment_size);
+                    let arity = self.read_u8(codes);
+                    let environment_size = self.read_u8(codes);
+                    let mut closure = Closure::new(id, arity, environment_size);
 
                     for index in 0..environment_size {
                         let variable_index = self.read_u8(codes);
 
                         closure.write_environment(
-                            index,
+                            index as usize,
                             self.stack.get(variable_index as usize).clone(),
                         );
                     }
 
                     self.stack.push_value(closure.into());
                 }
+                Instruction::Global => todo!(),
                 Instruction::Local => {
-                    // TODO Check a frame pointer.
                     // TODO Move local variables when possible.
                     let index = self.read_u8(codes);
+
                     self.stack
                         .push_value(self.stack.get(index as usize).clone());
                 }
                 Instruction::Equal => todo!(),
                 Instruction::Array => todo!(),
+                // TODO Make this relative jump.
                 Instruction::Jump => self.program_counter = self.read_u32(codes) as usize,
-                Instruction::Return => todo!(),
+                Instruction::Return => {
+                    let frame_size = self.read_u8(codes);
+                    let value = self.stack.pop_value();
+
+                    for _ in 0..frame_size {
+                        self.stack.pop_value();
+                    }
+
+                    self.stack.push_value(value);
+                }
             }
         }
     }
