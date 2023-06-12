@@ -15,6 +15,7 @@ pub struct Closure(u64);
 struct Header {
     count: usize,
     id: ClosureId,
+    arity: u8,
     environment_size: u32,
 }
 
