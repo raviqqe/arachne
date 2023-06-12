@@ -55,4 +55,8 @@ impl<'a> Frame<'a> {
     pub fn temporary_count_mut(&mut self) -> &mut usize {
         &mut self.temporary_count
     }
+
+    pub fn size(&self) -> usize {
+        self.variables.len() + self.temporary_count
+    }
 }

@@ -33,8 +33,8 @@ impl<'a> Compiler<'a> {
         value: Value,
         frame: &mut Frame,
         dump: bool,
-    ) -> Result<bool, CompileError> {
-        Ok(match Array::try_from(value) {
+    ) -> Result<(), CompileError> {
+        match Array::try_from(value) {
             Ok(array) => {
                 if let Some(symbol) = array.get_usize(0).to_symbol() {
                     match symbol.as_str() {
@@ -43,27 +43,18 @@ impl<'a> Compiler<'a> {
                                 self.compile_expression(array.get_usize(2), frame)?;
                                 frame.insert_variable(symbol);
                                 *frame.temporary_count_mut() -= 1;
-
-                                true
-                            } else {
-                                false
                             }
                         }
-                        _ => {
-                            self.compile_expression_statement(array.into(), frame, dump)?;
-                            false
-                        }
+                        _ => self.compile_expression_statement(array.into(), frame, dump)?,
                     }
                 } else {
-                    self.compile_expression_statement(array.into(), frame, dump)?;
-                    false
+                    self.compile_expression_statement(array.into(), frame, dump)?
                 }
             }
-            Err(value) => {
-                self.compile_expression_statement(value, frame, dump)?;
-                false
-            }
-        })
+            Err(value) => self.compile_expression_statement(value, frame, dump)?,
+        }
+
+        Ok(())
     }
 
     fn compile_expression_statement(
@@ -107,8 +98,6 @@ impl<'a> Compiler<'a> {
                             let arity = u8::try_from(arguments.len_usize())?;
 
                             {
-                                let mut frame_size = arity;
-
                                 let mut frame = Frame::with_capacity(arguments.len_usize());
 
                                 for index in 0..arguments.len_usize() {
@@ -118,13 +107,11 @@ impl<'a> Compiler<'a> {
                                 }
 
                                 for index in 2..array.len_usize() - 1 {
-                                    if self.compile_statement(
+                                    self.compile_statement(
                                         array.get_usize(index),
                                         &mut frame,
                                         false,
-                                    )? {
-                                        frame_size += 1
-                                    };
+                                    )?;
                                 }
 
                                 self.compile_expression(
@@ -135,8 +122,8 @@ impl<'a> Compiler<'a> {
                                 let mut codes = self.codes.borrow_mut();
 
                                 codes.push(Instruction::Return as u8);
-                                codes.push(frame_size);
                                 *frame.temporary_count_mut() -= 1;
+                                codes.push(frame.size() as u8);
                                 assert_eq!(*frame.temporary_count_mut(), 0);
                             }
 
@@ -293,7 +280,14 @@ mod tests {
         #[tokio::test]
         async fn compile_function_with_let() {
             insta::assert_debug_snapshot!(
-                compile([["fn".into(), ["x".into()].into(), 42.0.into()].into()]).await
+                compile([[
+                    "fn".into(),
+                    ["x".into()].into(),
+                    ["let".into(), "y".into(), "x".into()].into(),
+                    "y".into()
+                ]
+                .into()])
+                .await
             );
         }
     }

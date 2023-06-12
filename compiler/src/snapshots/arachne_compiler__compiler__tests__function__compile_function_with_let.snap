@@ -1,16 +1,19 @@
 ---
 source: compiler/src/compiler.rs
-expression: "compile([[\"fn\".into(), [\"x\".into()].into(), 42.0.into()].into()]).await"
+expression: "compile([[\"fn\".into(), [\"x\".into()].into(),\n                            [\"let\".into(), \"y\".into(), \"x\".into()].into(),\n                            \"y\".into()].into()]).await"
 ---
 [
     Jump {
-        pointer: 14,
+        pointer: 9,
     },
-    Float64(
-        42.0,
+    Local(
+        0,
+    ),
+    Local(
+        0,
     ),
     Return {
-        frame_size: 1,
+        frame_size: 2,
     },
     Close {
         pointer: 3,
