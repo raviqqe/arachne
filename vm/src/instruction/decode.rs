@@ -65,6 +65,7 @@ pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeErr
                             .into(),
                     }
                 }
+                Instruction::Global => todo!(),
                 Instruction::Local => InstructionIr::Local(decode_u8(codes, &mut index)),
                 Instruction::Get => InstructionIr::Get,
                 Instruction::Set => InstructionIr::Set,
