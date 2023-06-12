@@ -152,7 +152,7 @@ impl<'a> Compiler<'a> {
                             _ => None,
                         } {
                             self.compile_arguments(array, variables)?;
-                            codes.borrow_mut().push(instruction as u8);
+                            codes.push(instruction as u8);
                         } else {
                             self.compile_call(array, variables)?;
                         }
