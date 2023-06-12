@@ -90,7 +90,8 @@ impl<'a> Compiler<'a> {
                             let function_index = codes.len();
                             let arguments = array.get_usize(1);
                             let arguments = arguments.as_array().expect("arguments");
-                            let mut frame_size = u8::try_from(arguments.len_usize())?;
+                            let arity = u8::try_from(arguments.len_usize())?;
+                            let mut frame_size = arity;
 
                             for index in 0..array.len_usize() - 2 {
                                 if self.compile_statement(array.get_usize(index))? {
@@ -107,9 +108,9 @@ impl<'a> Compiler<'a> {
                                 .copy_from_slice(&(current_index as u32).to_le_bytes());
 
                             codes.push(Instruction::Close as u8);
-                            codes.extend(function_index.to_le_bytes());
-                            // TODO Initialize environment.
-                            codes.extend(0u8.to_le_bytes());
+                            codes.extend((function_index as u32).to_le_bytes());
+                            codes.push(arity); // arity
+                            codes.push(0u8); // TODO environment size
                         } else if let Some(instruction) = match symbol {
                             "array" => Some(Instruction::Array),
                             "eq" => Some(Instruction::Equal),

@@ -30,8 +30,9 @@ pub enum InstructionIr {
     Call {
         arity: u8,
     },
-    Closure {
+    Close {
         pointer: u32,
+        arity: u8,
         environment_size: u8,
         environment: Vec<u8>,
     },
@@ -83,10 +84,12 @@ pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeErr
                 },
                 Instruction::Close => {
                     let pointer = decode_u32(codes, &mut index);
+                    let arity = decode_u8(codes, &mut index);
                     let environment_size = decode_u8(codes, &mut index);
 
-                    InstructionIr::Closure {
+                    InstructionIr::Close {
                         pointer,
+                        arity,
                         environment_size,
                         environment: decode_bytes(codes, environment_size as usize, &mut index)
                             .to_vec(),
