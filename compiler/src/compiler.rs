@@ -9,7 +9,7 @@ const GLOBAL_VARIABLE_CAPACITY: usize = 1 << 8;
 
 struct Stack {
     variables: HashMap<Symbol, usize>,
-    len: usize,
+    temporary_count: usize,
 }
 
 pub struct Compiler<'a> {
