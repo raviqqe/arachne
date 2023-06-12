@@ -268,7 +268,7 @@ mod tests {
         use super::*;
 
         #[tokio::test]
-        async fn compile_let() {
+        async fn compile_function() {
             insta::assert_debug_snapshot!(
                 compile([["fn".into(), ["x".into()].into(), 42.0.into()].into()]).await
             );
