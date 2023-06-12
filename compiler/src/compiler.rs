@@ -99,7 +99,7 @@ impl<'a> Compiler<'a> {
 
                             for index in 0..arguments.len_usize() {
                                 if let Some(argument) = arguments.get_usize(index).to_symbol() {
-                                    self.local_variables.insert(argument, 0);
+                                    self.local_variables.insert(argument, index);
                                 }
                             }
 
