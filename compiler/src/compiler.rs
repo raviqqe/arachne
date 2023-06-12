@@ -290,6 +290,21 @@ mod tests {
                 .await
             );
         }
+
+        #[tokio::test]
+        async fn compile_function_with_two_let() {
+            insta::assert_debug_snapshot!(
+                compile([[
+                    "fn".into(),
+                    ["x".into()].into(),
+                    ["let".into(), "y".into(), "x".into()].into(),
+                    ["let".into(), "z".into(), "y".into()].into(),
+                    "z".into()
+                ]
+                .into()])
+                .await
+            );
+        }
     }
 
     mod r#let {

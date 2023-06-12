@@ -1,0 +1,29 @@
+---
+source: compiler/src/compiler.rs
+expression: "compile([[\"fn\".into(), [\"x\".into()].into(),\n                            [\"let\".into(), \"y\".into(), \"x\".into()].into(),\n                            [\"let\".into(), \"z\".into(), \"y\".into()].into(),\n                            \"z\".into()].into()]).await"
+---
+[
+    Jump {
+        pointer: 11,
+    },
+    Local(
+        0,
+    ),
+    Local(
+        0,
+    ),
+    Local(
+        0,
+    ),
+    Return {
+        frame_size: 3,
+    },
+    Close {
+        pointer: 3,
+        arity: 1,
+        environment_size: 0,
+        environment: [],
+    },
+    Dump,
+    Drop,
+]
