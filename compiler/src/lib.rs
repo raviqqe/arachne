@@ -1,6 +1,6 @@
 mod compiler;
 mod error;
-mod stack;
+mod frame;
 
 pub use compiler::Compiler;
 pub use error::CompileError;
