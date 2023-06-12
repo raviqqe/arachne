@@ -27,7 +27,9 @@ pub enum InstructionIr {
     Subtract,
     Multiply,
     Divide,
-    Call,
+    Call {
+        arity: u8,
+    },
     Closure {
         pointer: u32,
         environment_size: u8,
@@ -74,7 +76,9 @@ pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeErr
                 Instruction::Subtract => InstructionIr::Subtract,
                 Instruction::Multiply => InstructionIr::Multiply,
                 Instruction::Divide => InstructionIr::Divide,
-                Instruction::Call => InstructionIr::Call,
+                Instruction::Call => InstructionIr::Call {
+                    arity: decode_u8(codes, &mut index),
+                },
                 Instruction::Closure => {
                     let pointer = decode_u32(codes, &mut index);
                     let environment_size = decode_u8(codes, &mut index);
