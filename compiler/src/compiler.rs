@@ -268,7 +268,28 @@ mod tests {
         use super::*;
 
         #[tokio::test]
-        async fn compile_function() {
+        async fn compile_function_with_zero_argument() {
+            insta::assert_debug_snapshot!(
+                compile([["fn".into(), [].into(), 42.0.into()].into()]).await
+            );
+        }
+
+        #[tokio::test]
+        async fn compile_function_with_one_argument() {
+            insta::assert_debug_snapshot!(
+                compile([["fn".into(), ["x".into()].into(), 42.0.into()].into()]).await
+            );
+        }
+
+        #[tokio::test]
+        async fn compile_function_with_two_arguments() {
+            insta::assert_debug_snapshot!(
+                compile([["fn".into(), ["x".into(), "y".into()].into(), 42.0.into()].into()]).await
+            );
+        }
+
+        #[tokio::test]
+        async fn compile_function_with_let() {
             insta::assert_debug_snapshot!(
                 compile([["fn".into(), ["x".into()].into(), 42.0.into()].into()]).await
             );
