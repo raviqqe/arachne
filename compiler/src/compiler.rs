@@ -214,7 +214,7 @@ impl<'a> Compiler<'a> {
     }
 
     fn push_instruction(&self, codes: &mut Vec<u8>, instruction: Instruction) {
-        codes.push()
+        codes.push(instruction as u8)
     }
 }
 
