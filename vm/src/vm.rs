@@ -122,6 +122,7 @@ impl Vm {
                     // TODO Check a frame pointer.
                     // TODO Move local variables when possible.
                     let index = self.read_u8(codes);
+
                     self.stack
                         .push_value(self.stack.get(index as usize).clone());
                 }
