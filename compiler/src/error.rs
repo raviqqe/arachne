@@ -2,6 +2,7 @@ use core::fmt;
 use std::{
     error::Error,
     fmt::{Display, Formatter},
+    num::TryFromIntError,
 };
 
 #[derive(Debug)]
@@ -26,5 +27,11 @@ impl Display for CompileError {
                 write!(formatter, "symbol too long: {}", symbol)
             }
         }
+    }
+}
+
+impl From<TryFromIntError> for CompileError {
+    fn from(error: TryFromIntError) -> Self {
+        Self::Other(error.into())
     }
 }

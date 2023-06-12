@@ -57,6 +57,7 @@ impl Array {
         ptr
     }
 
+    // TODO Do not clone
     pub fn get(&self, index: Value) -> Value {
         let Ok(index) = Float64::try_from(index) else { return NIL; };
         let index = index.to_f64();
@@ -68,6 +69,7 @@ impl Array {
         }
     }
 
+    // TODO Do not clone
     pub fn get_usize(&self, index: usize) -> Value {
         if self.is_nil() {
             NIL
