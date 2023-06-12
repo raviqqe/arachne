@@ -220,17 +220,16 @@ impl<'a> Compiler<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use futures::{pin_mut, FutureExt};
+    use futures::{pin_mut, stream::iter};
     use std::io;
-    use vm::decode_instructions;
+    use vm::{decode_instructions, InstructionIr};
 
     type Error = io::Error;
 
-    #[tokio::test]
-    async fn compile_symbol() {
+    async fn compile<const N: usize>(values: [Value; N]) -> Vec<InstructionIr> {
         let codes = vec![].into();
         let mut compiler = Compiler::new(&codes);
-        let values = async { Ok("foo".into()) }.into_stream();
+        let values = iter(values).map(Ok);
 
         pin_mut!(values);
 
@@ -242,6 +241,35 @@ mod tests {
             result.unwrap();
         }
 
-        insta::assert_debug_snapshot!(decode_instructions(&codes.borrow()).unwrap());
+        let instructions = decode_instructions(&codes.borrow()).unwrap();
+
+        instructions
+    }
+
+    #[tokio::test]
+    async fn compile_symbol() {
+        insta::assert_debug_snapshot!(compile(["foo".into()]).await);
+    }
+
+    mod r#let {
+        use super::*;
+
+        #[tokio::test]
+        async fn compile_let() {
+            insta::assert_debug_snapshot!(
+                compile([["let".into(), "x".into(), 42.0.into()].into()]).await
+            );
+        }
+
+        #[tokio::test]
+        async fn compile_two_let() {
+            insta::assert_debug_snapshot!(
+                compile([
+                    ["let".into(), "x".into(), 42.0.into()].into(),
+                    ["let".into(), "y".into(), "x".into()].into()
+                ])
+                .await
+            );
+        }
     }
 }

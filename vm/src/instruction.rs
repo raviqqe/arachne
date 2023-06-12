@@ -1,6 +1,6 @@
 mod decode;
 
-pub use decode::{decode_instructions, DecodeError};
+pub use decode::{decode_instructions, DecodeError, InstructionIr};
 
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, num_derive::FromPrimitive)]
