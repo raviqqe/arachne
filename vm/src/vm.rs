@@ -103,13 +103,22 @@ impl Vm {
                 }
                 Instruction::Call => {
                     let arity = self.read_u8(codes) as usize;
-                    let closure = self.stack.get(self.stack.len() - arity - 1).as_closure();
+                    if let Some(closure) = self.stack.get(self.stack.len() - arity - 1).as_closure()
+                    {
+                        for _ in 0..arity.saturating_sub(closure.arity()) {
+                            self.stack.pop_value();
+                        }
 
-                    for _ in 0..arity.saturating_sub(closure.arity()) {
-                        self.stack.pop_value(NIL);
-                    }
+                        for _ in 0..closure.arity().saturating_sub(arity) {
+                            self.stack.push_value(NIL);
+                        }
 
-                    for _ in 0..closure.arity().saturating_sub(arity) {
+                        self.program_counter = closure.id() as usize;
+                    } else {
+                        for _ in 0..arity + 1 {
+                            self.stack.pop_value();
+                        }
+
                         self.stack.push_value(NIL);
                     }
                 }
