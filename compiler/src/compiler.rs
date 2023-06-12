@@ -75,12 +75,13 @@ impl<'a> Compiler<'a> {
         dump: bool,
     ) -> Result<(), CompileError> {
         self.compile_expression(value, variables)?;
+        let mut codes = self.codes.borrow_mut();
 
         if dump {
-            self.codes.borrow_mut().push(Instruction::Dump as u8);
+            codes.push(Instruction::Dump as u8);
         }
 
-        self.codes.borrow_mut().push(Instruction::Drop as u8);
+        codes.push(Instruction::Drop as u8);
 
         Ok(())
     }
