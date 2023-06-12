@@ -212,6 +212,10 @@ impl<'a> Compiler<'a> {
 
         Ok(())
     }
+
+    fn push_instruction(&self, codes: &mut Vec<u8>, instruction: Instruction) {
+        codes.push()
+    }
 }
 
 #[cfg(test)]
