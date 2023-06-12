@@ -4,8 +4,8 @@ use crate::{
     Instruction,
 };
 use num_traits::FromPrimitive;
-use runtime::{Closure, NIL};
-use std::str;
+use runtime::{Closure, Symbol, Value, NIL};
+use std::{collections::HashMap, str};
 
 macro_rules! binary_operation {
     ($self:expr, $operator:tt) => {
@@ -23,6 +23,7 @@ macro_rules! binary_operation {
 
 pub struct Vm {
     program_counter: usize,
+    global_variables: HashMap<Symbol, Value>,
     stack: Stack,
 }
 
