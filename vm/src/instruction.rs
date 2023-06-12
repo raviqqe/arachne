@@ -18,7 +18,7 @@ pub enum Instruction {
     Multiply,
     Divide,
     Call,
-    Closure,
+    Close,
     Equal,
     Array,
     Drop,

@@ -81,7 +81,7 @@ pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeErr
                 Instruction::Call => InstructionIr::Call {
                     arity: decode_u8(codes, &mut index),
                 },
-                Instruction::Closure => {
+                Instruction::Close => {
                     let pointer = decode_u32(codes, &mut index);
                     let environment_size = decode_u8(codes, &mut index);
 

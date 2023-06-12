@@ -106,7 +106,7 @@ impl<'a> Compiler<'a> {
                             codes[jump_target_index..jump_target_index + size_of::<u32>()]
                                 .copy_from_slice(&(current_index as u32).to_le_bytes());
 
-                            codes.push(Instruction::Closure as u8);
+                            codes.push(Instruction::Close as u8);
                             codes.extend(function_index.to_le_bytes());
                             // TODO Initialize environment.
                             codes.extend(0u8.to_le_bytes());

@@ -124,7 +124,7 @@ impl Vm {
                         self.stack.push_value(NIL);
                     }
                 }
-                Instruction::Closure => {
+                Instruction::Close => {
                     let id = self.read_u32(codes);
                     let arity = self.read_u8(codes);
                     let environment_size = self.read_u8(codes);
