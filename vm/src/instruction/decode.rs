@@ -40,7 +40,9 @@ pub enum InstructionIr {
     Drop,
     Dump,
     Jump,
-    Return,
+    Return {
+        frame_size: u8,
+    },
 }
 
 pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeError> {
@@ -95,7 +97,9 @@ pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeErr
                 Instruction::Drop => InstructionIr::Drop,
                 Instruction::Dump => InstructionIr::Dump,
                 Instruction::Jump => InstructionIr::Jump,
-                Instruction::Return => InstructionIr::Return,
+                Instruction::Return => InstructionIr::Return {
+                    frame_size: decode_u8(codes, &mut index),
+                },
             },
         );
     }
