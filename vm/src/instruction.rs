@@ -8,6 +8,7 @@ pub enum Instruction {
     Nil,
     Float64,
     Symbol,
+    Global,
     Local,
     Get,
     Set,
