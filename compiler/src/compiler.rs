@@ -5,18 +5,21 @@ use runtime::{Array, Symbol, TypedValue, Value};
 use std::{cell::RefCell, collections::HashMap, error::Error, mem::size_of};
 use vm::Instruction;
 
-const VARIABLE_CAPACITY: usize = 1 << 8;
+const GLOBAL_VARIABLE_CAPACITY: usize = 1 << 8;
+const LOCAL_VARIABLE_CAPACITY: usize = 1 << 8;
 
 pub struct Compiler<'a> {
     codes: &'a RefCell<Vec<u8>>,
-    variables: HashMap<Symbol, usize>,
+    global_variables: HashMap<Symbol, usize>,
+    local_variables: HashMap<Symbol, usize>,
 }
 
 impl<'a> Compiler<'a> {
     pub fn new(codes: &'a RefCell<Vec<u8>>) -> Self {
         Self {
             codes,
-            variables: HashMap::with_capacity(VARIABLE_CAPACITY),
+            global_variables: HashMap::with_capacity(GLOBAL_VARIABLE_CAPACITY),
+            local_variables: HashMap::with_capacity(LOCAL_VARIABLE_CAPACITY),
         }
     }
 
@@ -40,7 +43,8 @@ impl<'a> Compiler<'a> {
                         "let" => {
                             if let Some(symbol) = array.get_usize(1).to_symbol() {
                                 self.compile_expression(array.get_usize(2))?;
-                                self.variables.insert(symbol, self.variables.len());
+                                self.global_variables
+                                    .insert(symbol, self.global_variables.len());
                                 // Keep a value on a stack.
 
                                 true
@@ -93,6 +97,12 @@ impl<'a> Compiler<'a> {
                             let arity = u8::try_from(arguments.len_usize())?;
                             let mut frame_size = arity;
 
+                            for index in 0..arguments.len_usize() {
+                                if let Some(argument) = arguments.get_usize(index).to_symbol() {
+                                    self.local_variables.insert(argument, 0);
+                                }
+                            }
+
                             for index in 0..array.len_usize() - 2 {
                                 if self.compile_statement(array.get_usize(index))? {
                                     frame_size += 1
@@ -142,7 +152,7 @@ impl<'a> Compiler<'a> {
                 TypedValue::Symbol(symbol) => {
                     let mut codes = self.codes.borrow_mut();
 
-                    if let Some(&index) = self.variables.get(&symbol) {
+                    if let Some(&index) = self.global_variables.get(&symbol) {
                         codes.push(Instruction::Local as u8);
                         codes.push(index as u8);
                     } else if symbol.as_str().len() >= 1 << 8 {
