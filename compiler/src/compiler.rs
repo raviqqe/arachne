@@ -273,6 +273,18 @@ mod tests {
         }
 
         #[tokio::test]
+        async fn compile_two_let_with_same_name() {
+            insta::assert_debug_snapshot!(
+                compile([
+                    ["let".into(), "x".into(), 42.0.into()].into(),
+                    ["let".into(), "x".into(), 2045.0.into()].into(),
+                    ["let".into(), "y".into(), "x".into()].into(),
+                ])
+                .await
+            );
+        }
+
+        #[tokio::test]
         async fn compile_three_let() {
             insta::assert_debug_snapshot!(
                 compile([

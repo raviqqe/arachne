@@ -45,6 +45,10 @@ impl<'a> Frame<'a> {
     }
 
     pub fn insert_variable(&mut self, name: Symbol) {
+        if self.variables.contains_key(&name) {
+            self.temporary_count += 1;
+        }
+
         self.variables.insert(name, self.variables.len());
     }
 
