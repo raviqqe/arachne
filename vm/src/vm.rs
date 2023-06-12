@@ -127,6 +127,7 @@ impl Vm {
                 }
                 Instruction::Equal => todo!(),
                 Instruction::Array => todo!(),
+                // TODO Make this relative jump.
                 Instruction::Jump => self.program_counter = self.read_u32(codes) as usize,
                 Instruction::Return => todo!(),
             }
