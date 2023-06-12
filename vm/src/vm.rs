@@ -155,7 +155,10 @@ impl Vm {
                 Instruction::Equal => todo!(),
                 Instruction::Array => todo!(),
                 // TODO Make this relative jump.
-                Instruction::Jump => self.program_counter = self.read_u16(codes) as usize,
+                Instruction::Jump => {
+                    self.program_counter += self.read_u16(codes) as usize;
+                    self.program_counter -= 3; // jump instruction size
+                }
                 Instruction::Return => {
                     let value = self.stack.pop_value();
 
