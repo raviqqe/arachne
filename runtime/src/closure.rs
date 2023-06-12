@@ -14,6 +14,8 @@ pub struct Closure(u64);
 #[repr(C)]
 struct Header {
     count: usize,
+    // In the current implementation, function IDs are equivalent to function pointers in
+    // bytecodes.
     id: ClosureId,
     arity: u8,
     environment_size: u8,
