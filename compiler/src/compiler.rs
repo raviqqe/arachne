@@ -209,11 +209,11 @@ impl<'a> Compiler<'a> {
     }
 
     fn compile_call(&mut self, array: Array, frame: &mut Frame) -> Result<(), CompileError> {
-        self.compile_arguments(array.clone(), frame)?;
         self.compile_expression(array.get_usize(0), frame)?;
+        self.compile_arguments(array.clone(), frame)?;
 
         self.codes.borrow_mut().push(Instruction::Call as u8);
-        *frame.temporary_count_mut() += 1 - array.len_usize();
+        *frame.temporary_count_mut() -= array.len_usize() - 1;
 
         Ok(())
     }
