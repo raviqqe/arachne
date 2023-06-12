@@ -20,7 +20,7 @@ struct Header {
 }
 
 impl Closure {
-    pub fn new(id: ClosureId, environment_size: usize) -> Self {
+    pub fn new(id: ClosureId, arity: u8, environment_size: usize) -> Self {
         let (layout, _) = Layout::new::<Header>()
             .extend(Layout::array::<Value>(environment_size).unwrap())
             .unwrap();
@@ -30,11 +30,16 @@ impl Closure {
             *this.header_mut() = Header {
                 count: 0,
                 id,
+                arity,
                 environment_size: environment_size as u32,
             };
         }
 
         this
+    }
+
+    pub fn arity(&self) -> u8 {
+        self.header().arity
     }
 
     pub fn write_environment(&mut self, index: usize, value: Value) {
