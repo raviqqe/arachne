@@ -3,11 +3,9 @@ source: compiler/src/compiler.rs
 expression: "compile([[\"fn\".into(), [\"x\".into()].into(), 42.0.into()].into()]).await"
 ---
 [
-    Jump,
-    Drop,
-    Nil,
-    Nil,
-    Nil,
+    Jump {
+        pointer: 14,
+    },
     Float64(
         42.0,
     ),
@@ -15,7 +13,7 @@ expression: "compile([[\"fn\".into(), [\"x\".into()].into(), 42.0.into()].into()
         frame_size: 1,
     },
     Close {
-        pointer: 5,
+        pointer: 3,
         arity: 1,
         environment_size: 0,
         environment: [],

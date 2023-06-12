@@ -1,5 +1,5 @@
 use crate::{
-    decode::{decode_bytes, decode_f64, decode_u32, decode_u8},
+    decode::{decode_bytes, decode_f64, decode_u16, decode_u32, decode_u8},
     stack::Stack,
     Instruction,
 };
@@ -155,7 +155,7 @@ impl Vm {
                 Instruction::Equal => todo!(),
                 Instruction::Array => todo!(),
                 // TODO Make this relative jump.
-                Instruction::Jump => self.program_counter = self.read_u32(codes) as usize,
+                Instruction::Jump => self.program_counter = self.read_u16(codes) as usize,
                 Instruction::Return => {
                     let frame_size = self.read_u8(codes);
                     let value = self.stack.pop_value();
@@ -176,6 +176,10 @@ impl Vm {
 
     fn read_u32(&mut self, codes: &[u8]) -> u32 {
         decode_u32(codes, &mut self.program_counter)
+    }
+
+    fn read_u16(&mut self, codes: &[u8]) -> u16 {
+        decode_u16(codes, &mut self.program_counter)
     }
 
     fn read_u8(&mut self, codes: &[u8]) -> u8 {

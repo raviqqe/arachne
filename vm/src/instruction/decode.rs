@@ -1,5 +1,5 @@
 use crate::{
-    decode::{decode_bytes, decode_u32, decode_u64, decode_u8},
+    decode::{decode_bytes, decode_u16, decode_u32, decode_u64, decode_u8},
     Instruction,
 };
 use core::fmt;
@@ -40,7 +40,9 @@ pub enum InstructionIr {
     Array,
     Drop,
     Dump,
-    Jump,
+    Jump {
+        pointer: u16,
+    },
     Return {
         frame_size: u8,
     },
@@ -99,7 +101,9 @@ pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeErr
                 Instruction::Array => InstructionIr::Array,
                 Instruction::Drop => InstructionIr::Drop,
                 Instruction::Dump => InstructionIr::Dump,
-                Instruction::Jump => InstructionIr::Jump,
+                Instruction::Jump => InstructionIr::Jump {
+                    pointer: decode_u16(codes, &mut index),
+                },
                 Instruction::Return => InstructionIr::Return {
                     frame_size: decode_u8(codes, &mut index),
                 },

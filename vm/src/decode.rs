@@ -26,6 +26,17 @@ pub fn decode_u32(codes: &[u8], index: &mut usize) -> u32 {
     u32::from_le_bytes(bytes)
 }
 
+pub fn decode_u16(codes: &[u8], index: &mut usize) -> u16 {
+    const SIZE: usize = size_of::<u16>();
+    let mut bytes = [0u8; SIZE];
+
+    bytes.copy_from_slice(&codes[*index..*index + SIZE]);
+
+    *index += SIZE;
+
+    u16::from_le_bytes(bytes)
+}
+
 pub fn decode_u8(codes: &[u8], index: &mut usize) -> u8 {
     let value = codes[*index];
 
