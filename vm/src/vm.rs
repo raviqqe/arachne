@@ -146,8 +146,11 @@ impl Vm {
                     // TODO Move local variables when possible.
                     let index = self.read_u8(codes);
 
-                    self.stack
-                        .push_value(self.stack.get(index as usize).clone());
+                    self.stack.push_value(
+                        self.stack
+                            .get(self.stack.len() - 1 - index as usize)
+                            .clone(),
+                    );
                 }
                 Instruction::Equal => todo!(),
                 Instruction::Array => todo!(),
