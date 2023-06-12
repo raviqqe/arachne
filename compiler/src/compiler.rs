@@ -6,21 +6,14 @@ use std::{cell::RefCell, collections::HashMap, error::Error, mem::size_of};
 use vm::Instruction;
 
 const GLOBAL_VARIABLE_CAPACITY: usize = 1 << 8;
-const LOCAL_VARIABLE_CAPACITY: usize = 1 << 8;
 
 pub struct Compiler<'a> {
     codes: &'a RefCell<Vec<u8>>,
-    global_variables: HashMap<Symbol, usize>,
-    local_variables: HashMap<Symbol, usize>,
 }
 
 impl<'a> Compiler<'a> {
     pub fn new(codes: &'a RefCell<Vec<u8>>) -> Self {
-        Self {
-            codes,
-            global_variables: HashMap::with_capacity(GLOBAL_VARIABLE_CAPACITY),
-            local_variables: HashMap::with_capacity(LOCAL_VARIABLE_CAPACITY),
-        }
+        Self { codes }
     }
 
     pub fn compile<E: Error + 'static>(
@@ -28,23 +21,29 @@ impl<'a> Compiler<'a> {
         values: &'a mut (impl Stream<Item = Result<Value, E>> + Unpin),
     ) -> impl Stream<Item = Result<(), CompileError>> + 'a {
         try_stream! {
+            let mut global_variables = HashMap::with_capacity(GLOBAL_VARIABLE_CAPACITY);
+
             while let Some(value) = values.next().await {
-                self.compile_statement(value.map_err(|error| CompileError::Other(error.into()))?)?;
+                self.compile_statement(value.map_err(|error| CompileError::Other(error.into()))?, &mut global_variables, true)?;
                 yield ();
             }
         }
     }
 
-    fn compile_statement(&mut self, value: Value) -> Result<bool, CompileError> {
+    fn compile_statement(
+        &mut self,
+        value: Value,
+        variables: &mut HashMap<Symbol, usize>,
+        dump: bool,
+    ) -> Result<bool, CompileError> {
         Ok(match Array::try_from(value) {
             Ok(array) => {
                 if let Some(symbol) = array.get_usize(0).to_symbol() {
                     match symbol.as_str() {
                         "let" => {
                             if let Some(symbol) = array.get_usize(1).to_symbol() {
-                                self.compile_expression(array.get_usize(2))?;
-                                self.global_variables
-                                    .insert(symbol, self.global_variables.len());
+                                self.compile_expression(array.get_usize(2), variables)?;
+                                variables.insert(symbol, variables.len());
                                 // Keep a value on a stack.
 
                                 true
@@ -53,31 +52,44 @@ impl<'a> Compiler<'a> {
                             }
                         }
                         _ => {
-                            self.compile_top_expression(array.into())?;
+                            self.compile_expression_statement(array.into(), variables, dump)?;
                             false
                         }
                     }
                 } else {
-                    self.compile_top_expression(array.into())?;
+                    self.compile_expression_statement(array.into(), variables, dump)?;
                     false
                 }
             }
             Err(value) => {
-                self.compile_top_expression(value)?;
+                self.compile_expression_statement(value, variables, dump)?;
                 false
             }
         })
     }
 
-    fn compile_top_expression(&mut self, value: Value) -> Result<(), CompileError> {
-        self.compile_expression(value)?;
-        self.codes.borrow_mut().push(Instruction::Dump as u8);
+    fn compile_expression_statement(
+        &mut self,
+        value: Value,
+        variables: &mut HashMap<Symbol, usize>,
+        dump: bool,
+    ) -> Result<(), CompileError> {
+        self.compile_expression(value, variables)?;
+
+        if dump {
+            self.codes.borrow_mut().push(Instruction::Dump as u8);
+        }
+
         self.codes.borrow_mut().push(Instruction::Drop as u8);
 
         Ok(())
     }
 
-    fn compile_expression(&mut self, value: Value) -> Result<(), CompileError> {
+    fn compile_expression(
+        &mut self,
+        value: Value,
+        variables: &mut HashMap<Symbol, usize>,
+    ) -> Result<(), CompileError> {
         if let Some(value) = value.into_typed() {
             match value {
                 TypedValue::Array(array) => {
@@ -97,16 +109,20 @@ impl<'a> Compiler<'a> {
                             let arity = u8::try_from(arguments.len_usize())?;
                             let mut frame_size = arity;
 
-                            self.local_variables.clear();
+                            let mut variables = HashMap::with_capacity(arguments.len_usize());
 
                             for index in 0..arguments.len_usize() {
                                 if let Some(argument) = arguments.get_usize(index).to_symbol() {
-                                    self.local_variables.insert(argument, index);
+                                    variables.insert(argument, index);
                                 }
                             }
 
                             for index in 0..array.len_usize() - 2 {
-                                if self.compile_statement(array.get_usize(index))? {
+                                if self.compile_statement(
+                                    array.get_usize(index),
+                                    &mut variables,
+                                    false,
+                                )? {
                                     frame_size += 1
                                 };
                             }
@@ -135,13 +151,13 @@ impl<'a> Compiler<'a> {
                             "/" => Some(Instruction::Divide),
                             _ => None,
                         } {
-                            self.compile_arguments(array)?;
+                            self.compile_arguments(array, variables)?;
                             self.codes.borrow_mut().push(instruction as u8);
                         } else {
-                            self.compile_call(array)?;
+                            self.compile_call(array, variables)?;
                         }
                     } else {
-                        self.compile_call(array)?
+                        self.compile_call(array, variables)?
                     }
                 }
                 TypedValue::Closure(_) => return Err(CompileError::Closure),
@@ -154,7 +170,7 @@ impl<'a> Compiler<'a> {
                 TypedValue::Symbol(symbol) => {
                     let mut codes = self.codes.borrow_mut();
 
-                    if let Some(&index) = self.global_variables.get(&symbol) {
+                    if let Some(&index) = variables.get(&symbol) {
                         codes.push(Instruction::Local as u8);
                         codes.push(index as u8);
                     } else if symbol.as_str().len() >= 1 << 8 {
@@ -173,17 +189,25 @@ impl<'a> Compiler<'a> {
         Ok(())
     }
 
-    fn compile_arguments(&mut self, array: Array) -> Result<(), CompileError> {
+    fn compile_arguments(
+        &mut self,
+        array: Array,
+        variables: &mut HashMap<Symbol, usize>,
+    ) -> Result<(), CompileError> {
         for index in 1..array.len_usize() {
-            self.compile_expression(array.get_usize(index))?;
+            self.compile_expression(array.get_usize(index), variables)?;
         }
 
         Ok(())
     }
 
-    fn compile_call(&mut self, array: Array) -> Result<(), CompileError> {
-        self.compile_arguments(array.clone())?;
-        self.compile_expression(array.get_usize(0))?;
+    fn compile_call(
+        &mut self,
+        array: Array,
+        variables: &mut HashMap<Symbol, usize>,
+    ) -> Result<(), CompileError> {
+        self.compile_arguments(array.clone(), variables)?;
+        self.compile_expression(array.get_usize(0), variables)?;
         self.codes.borrow_mut().push(Instruction::Call as u8);
 
         Ok(())
