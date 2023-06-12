@@ -94,11 +94,10 @@ impl<'a> Compiler<'a> {
             match value {
                 TypedValue::Array(array) => {
                     if let Some(symbol) = array.get_usize(0).to_symbol() {
+                        let mut codes = self.codes.borrow_mut();
                         let symbol = symbol.as_str();
 
                         if symbol == "fn" {
-                            let mut codes = self.codes.borrow_mut();
-
                             codes.push(Instruction::Jump as u8);
                             let jump_target_index = codes.len();
                             codes.extend(0u32.to_le_bytes()); // stub address
@@ -152,7 +151,7 @@ impl<'a> Compiler<'a> {
                             _ => None,
                         } {
                             self.compile_arguments(array, variables)?;
-                            self.codes.borrow_mut().push(instruction as u8);
+                            codes.borrow_mut().push(instruction as u8);
                         } else {
                             self.compile_call(array, variables)?;
                         }
@@ -162,10 +161,10 @@ impl<'a> Compiler<'a> {
                 }
                 TypedValue::Closure(_) => return Err(CompileError::Closure),
                 TypedValue::Float64(number) => {
-                    self.codes.borrow_mut().push(Instruction::Float64 as u8);
-                    self.codes
-                        .borrow_mut()
-                        .extend(number.to_f64().to_le_bytes());
+                    let mut codes = self.codes.borrow_mut();
+
+                    codes.push(Instruction::Float64 as u8);
+                    codes.extend(number.to_f64().to_le_bytes());
                 }
                 TypedValue::Symbol(symbol) => {
                     let mut codes = self.codes.borrow_mut();
