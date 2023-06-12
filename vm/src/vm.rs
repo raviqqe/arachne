@@ -101,7 +101,18 @@ impl Vm {
 
                     self.stack.push_value(value);
                 }
-                Instruction::Call => todo!(),
+                Instruction::Call => {
+                    let arity = self.read_u8(codes) as usize;
+                    let closure = self.stack.get(self.stack.len() - arity - 1).as_closure();
+
+                    for _ in 0..arity.saturating_sub(closure.arity()) {
+                        self.stack.pop_value(NIL);
+                    }
+
+                    for _ in 0..closure.arity().saturating_sub(arity) {
+                        self.stack.push_value(NIL);
+                    }
+                }
                 Instruction::Closure => {
                     let id = self.read_u32(codes);
                     let environment_size = self.read_u8(codes) as usize;
