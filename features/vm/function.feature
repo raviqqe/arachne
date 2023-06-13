@@ -22,3 +22,16 @@ Feature: Function
       | (fn (x) (let y x) y)                 | (f 42)      | 42     |
       | (fn (x) (let y x) (let z (+ x y)) z) | (f 42)      | 84     |
       | (fn (x) (+ x x))                     | (f (f 2))   | 8      |
+
+  Scenario: Define a top-level function
+    Given a file named "main.arc" with:
+    """
+    (fn f () 42)
+    (f)
+    """
+    When I run `arachne` interactively
+    And I pipe in the file "main.arc"
+    Then the stdout should contain exactly:
+    """
+    42
+    """
