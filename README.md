@@ -73,13 +73,13 @@ If a value is invalid, the `set` function does nothing and returns the original 
 #### Self recursion
 
 ```lisp
-(let foo (fn () (foo)))
+(let-rec foo (fn () (foo)))
 ```
 
 #### Mutual recursion
 
 ```lisp
-(let
+(let-rec
   foo (fn () (bar))
   bar (fn () (foo)))
 ```
