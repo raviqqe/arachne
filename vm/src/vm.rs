@@ -24,6 +24,7 @@ macro_rules! binary_operation {
 pub struct Vm {
     program_counter: usize,
     stack: Stack,
+    // TODO Change this into frames and add frame pointers?
     return_addresses: Vec<u32>,
 }
 
