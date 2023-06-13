@@ -1,7 +1,7 @@
 use crate::{frame::Frame, CompileError};
 use async_stream::try_stream;
 use futures::{Stream, StreamExt};
-use runtime::{Array, TypedValue, Value};
+use runtime::{Array, Symbol, TypedValue, Value};
 use std::{cell::RefCell, error::Error, mem::size_of};
 use vm::Instruction;
 
@@ -45,6 +45,16 @@ impl<'a> Compiler<'a> {
                                 *frame.temporary_count_mut() -= 1;
                             }
                         }
+                        "let-rec" => {
+                            if let (Some(symbol), Some(array)) = (
+                                array.get_usize(1).to_symbol(),
+                                array.get_usize(2).as_array(),
+                            ) {
+                                self.compile_function(Some(symbol), array, frame)?;
+                                frame.insert_variable(symbol);
+                                *frame.temporary_count_mut() -= 1;
+                            }
+                        }
                         _ => self.compile_expression_statement(array.into(), frame, dump)?,
                     }
                 } else {
@@ -84,61 +94,7 @@ impl<'a> Compiler<'a> {
                         let symbol = symbol.as_str();
 
                         if symbol == "fn" {
-                            let mut codes = self.codes.borrow_mut();
-
-                            codes.push(Instruction::Jump as u8);
-                            codes.extend(0u16.to_le_bytes()); // stub address
-                            let jump_index = codes.len();
-
-                            let function_index = codes.len();
-                            drop(codes);
-
-                            let arguments = array.get_usize(1);
-                            let arguments = arguments.as_array().expect("arguments");
-                            let arity = u8::try_from(arguments.len_usize())?;
-
-                            {
-                                let mut frame = Frame::with_capacity(arguments.len_usize());
-
-                                for index in 0..arguments.len_usize() {
-                                    if let Some(argument) = arguments.get_usize(index).to_symbol() {
-                                        frame.insert_variable(argument);
-                                    }
-                                }
-
-                                for index in 2..array.len_usize() - 1 {
-                                    self.compile_statement(
-                                        array.get_usize(index),
-                                        &mut frame,
-                                        false,
-                                    )?;
-                                }
-
-                                self.compile_expression(
-                                    array.get_usize(array.len_usize() - 1),
-                                    &mut frame,
-                                )?;
-
-                                let mut codes = self.codes.borrow_mut();
-
-                                codes.push(Instruction::Return as u8);
-                                *frame.temporary_count_mut() -= 1;
-                                codes.push(frame.size() as u8);
-                                assert_eq!(*frame.temporary_count_mut(), 0);
-                            }
-
-                            let mut codes = self.codes.borrow_mut();
-                            let current_index = codes.len();
-
-                            codes[jump_index - size_of::<u16>()..jump_index].copy_from_slice(
-                                &((current_index - jump_index) as u16).to_le_bytes(),
-                            );
-
-                            codes.push(Instruction::Close as u8);
-                            codes.extend((function_index as u32).to_le_bytes());
-                            codes.push(arity); // arity
-                            codes.push(0u8); // TODO environment size
-                            *frame.temporary_count_mut() += 1;
+                            self.compile_function(None, &array, frame)?;
                         } else if symbol == "if" {
                             self.compile_if(&array, 1, frame)?;
                         } else if let Some(instruction) = match symbol {
@@ -202,6 +158,65 @@ impl<'a> Compiler<'a> {
             self.codes.borrow_mut().push(Instruction::Nil as u8);
             *frame.temporary_count_mut() += 1;
         }
+
+        Ok(())
+    }
+
+    fn compile_function(
+        &mut self,
+        name: Option<Symbol>,
+        array: &Array,
+        frame: &mut Frame,
+    ) -> Result<(), CompileError> {
+        let mut codes = self.codes.borrow_mut();
+
+        codes.push(Instruction::Jump as u8);
+        codes.extend(0u16.to_le_bytes()); // stub address
+        let jump_index = codes.len();
+
+        let function_index = codes.len();
+        drop(codes);
+
+        let arguments = array.get_usize(1);
+        let arguments = arguments.as_array().expect("arguments");
+        let arity = u8::try_from(arguments.len_usize())?;
+
+        {
+            let mut frame = Frame::with_capacity(arguments.len_usize() + 1);
+
+            frame.insert_variable(name.unwrap_or_else(|| "".into()));
+
+            for index in 0..arguments.len_usize() {
+                if let Some(argument) = arguments.get_usize(index).to_symbol() {
+                    frame.insert_variable(argument);
+                }
+            }
+
+            for index in 2..array.len_usize() - 1 {
+                self.compile_statement(array.get_usize(index), &mut frame, false)?;
+            }
+
+            self.compile_expression(array.get_usize(array.len_usize() - 1), &mut frame)?;
+
+            let mut codes = self.codes.borrow_mut();
+
+            codes.push(Instruction::Return as u8);
+            *frame.temporary_count_mut() -= 1;
+            codes.push(frame.size() as u8);
+            assert_eq!(*frame.temporary_count_mut(), 0);
+        }
+
+        let mut codes = self.codes.borrow_mut();
+        let current_index = codes.len();
+
+        codes[jump_index - size_of::<u16>()..jump_index]
+            .copy_from_slice(&((current_index - jump_index) as u16).to_le_bytes());
+
+        codes.push(Instruction::Close as u8);
+        codes.extend((function_index as u32).to_le_bytes());
+        codes.push(arity); // arity
+        codes.push(0u8); // TODO environment size
+        *frame.temporary_count_mut() += 1;
 
         Ok(())
     }
