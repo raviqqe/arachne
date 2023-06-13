@@ -159,7 +159,12 @@ impl Vm {
                             .clone(),
                     );
                 }
-                Instruction::Equal => todo!(),
+                Instruction::Equal => {
+                    let rhs = self.stack.pop_value();
+                    let lhs = self.stack.pop_value();
+
+                    self.stack.push_value(((lhs == rhs) as usize as f64).into());
+                }
                 Instruction::Jump => {
                     let address = self.read_u16(codes);
 
