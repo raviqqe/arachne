@@ -1,6 +1,7 @@
 {
   "words": [
     "arity",
+    "bytecodes",
     "dashmap",
     "dealloc",
     "deque",

@@ -4,7 +4,7 @@ expression: "compile([[\"fn\".into(), [\"x\".into()].into(),\n                  
 ---
 [
     Jump {
-        pointer: 11,
+        pointer: 8,
     },
     Local(
         0,

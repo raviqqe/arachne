@@ -24,13 +24,15 @@ macro_rules! binary_operation {
 pub struct Vm {
     program_counter: usize,
     stack: Stack,
+    return_addresses: Vec<u32>,
 }
 
 impl Vm {
-    pub fn new(stack_size: usize) -> Self {
+    pub fn new(stack_size: usize, return_address_capacity: usize) -> Self {
         Self {
             program_counter: 0,
             stack: Stack::new(stack_size),
+            return_addresses: Vec::with_capacity(return_address_capacity),
         }
     }
 
@@ -110,6 +112,7 @@ impl Vm {
 
                     if let Some(closure) = self.stack.get(self.stack.len() - arity - 1).as_closure()
                     {
+                        self.return_addresses.push(self.program_counter as u32);
                         self.program_counter = closure.id() as usize;
                         let closure_arity = closure.arity() as usize;
 
@@ -158,17 +161,22 @@ impl Vm {
                 }
                 Instruction::Equal => todo!(),
                 Instruction::Array => todo!(),
-                // TODO Make this relative jump.
                 Instruction::Jump => {
-                    self.program_counter += self.read_u16(codes) as usize;
-                    self.program_counter -= 3; // jump instruction size
+                    let difference = self.read_u16(codes);
+
+                    self.program_counter = self
+                        .program_counter
+                        .wrapping_add(difference as i16 as isize as usize);
                 }
                 Instruction::Return => {
                     let value = self.stack.pop_value();
 
-                    for _ in 0..self.read_u8(codes) {
+                    for _ in 0..self.read_u8(codes) + 1 {
                         self.stack.pop_value();
                     }
+
+                    self.program_counter =
+                        self.return_addresses.pop().expect("return address") as usize;
 
                     self.stack.push_value(value);
                 }

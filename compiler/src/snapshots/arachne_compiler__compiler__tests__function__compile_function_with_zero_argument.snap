@@ -4,7 +4,7 @@ expression: "compile([[\"fn\".into(), [].into(), 42.0.into()].into()]).await"
 ---
 [
     Jump {
-        pointer: 14,
+        pointer: 11,
     },
     Float64(
         42.0,

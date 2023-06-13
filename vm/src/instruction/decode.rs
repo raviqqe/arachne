@@ -42,7 +42,7 @@ pub enum InstructionIr {
     Drop,
     Dump,
     Jump {
-        pointer: u16,
+        pointer: i16,
     },
     Return {
         frame_size: u8,
@@ -106,7 +106,7 @@ pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeErr
                 Instruction::Drop => InstructionIr::Drop,
                 Instruction::Dump => InstructionIr::Dump,
                 Instruction::Jump => InstructionIr::Jump {
-                    pointer: decode_u16(codes, &mut index),
+                    pointer: decode_u16(codes, &mut index) as i16,
                 },
                 Instruction::Return => InstructionIr::Return {
                     frame_size: decode_u8(codes, &mut index),

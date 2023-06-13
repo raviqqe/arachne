@@ -86,9 +86,9 @@ impl<'a> Compiler<'a> {
                         if symbol == "fn" {
                             let mut codes = self.codes.borrow_mut();
 
-                            let jump_index = codes.len();
                             codes.push(Instruction::Jump as u8);
                             codes.extend(0u16.to_le_bytes()); // stub address
+                            let jump_index = codes.len();
 
                             let function_index = codes.len();
                             drop(codes);
@@ -130,10 +130,9 @@ impl<'a> Compiler<'a> {
                             let mut codes = self.codes.borrow_mut();
                             let current_index = codes.len();
 
-                            codes[jump_index + 1..jump_index + 1 + size_of::<u16>()]
-                                .copy_from_slice(
-                                    &((current_index - jump_index) as u16).to_le_bytes(),
-                                );
+                            codes[jump_index - size_of::<u16>()..jump_index].copy_from_slice(
+                                &((current_index - jump_index) as u16).to_le_bytes(),
+                            );
 
                             codes.push(Instruction::Close as u8);
                             codes.extend((function_index as u32).to_le_bytes());
@@ -216,11 +215,13 @@ impl<'a> Compiler<'a> {
     }
 
     fn compile_call(&mut self, array: Array, frame: &mut Frame) -> Result<(), CompileError> {
-        self.compile_arguments(array.clone(), frame)?;
         self.compile_expression(array.get_usize(0), frame)?;
+        self.compile_arguments(array.clone(), frame)?;
 
-        self.codes.borrow_mut().push(Instruction::Call as u8);
-        *frame.temporary_count_mut() += 1 - array.len_usize();
+        let mut codes = self.codes.borrow_mut();
+        codes.push(Instruction::Call as u8);
+        codes.push((array.len_usize() - 1) as u8);
+        *frame.temporary_count_mut() -= array.len_usize() - 1;
 
         Ok(())
     }
