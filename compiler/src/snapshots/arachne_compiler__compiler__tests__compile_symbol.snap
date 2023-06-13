@@ -2,7 +2,6 @@
 source: compiler/src/compiler.rs
 expression: "compile([\"foo\".into()]).await"
 ---
-symbol 3 foo
+symbol 3 "foo"
 dump
 drop
-

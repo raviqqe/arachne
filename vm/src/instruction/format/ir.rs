@@ -49,7 +49,7 @@ impl Display for InstructionIr {
             Self::Nil => write!(formatter, "nil"),
             Self::Float64(number) => write!(formatter, "float64 {}", number),
             Self::Integer32(number) => write!(formatter, "integer32 {}", number),
-            Self::Symbol { len, string } => write!(formatter, "symbol {} {}", len, string),
+            Self::Symbol { len, string } => write!(formatter, "symbol {} {:?}", len, string),
             Self::Close {
                 pointer,
                 arity,
