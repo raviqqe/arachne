@@ -374,6 +374,37 @@ mod tests {
                 compile([["if".into(), 1.0.into(), 42.0.into(), 13.0.into()].into()]).await
             );
         }
+
+        #[tokio::test]
+        async fn compile_without_else() {
+            insta::assert_display_snapshot!(
+                compile([["if".into(), 1.0.into(), 42.0.into()].into()]).await
+            );
+        }
+
+        #[tokio::test]
+        async fn compile_two_branches() {
+            insta::assert_display_snapshot!(
+                compile([[
+                    "if".into(),
+                    1.0.into(),
+                    2.0.into(),
+                    3.0.into(),
+                    4.0.into(),
+                    5.0.into()
+                ]
+                .into()])
+                .await
+            );
+        }
+
+        #[tokio::test]
+        async fn compile_two_branches_without_else() {
+            insta::assert_display_snapshot!(
+                compile([["if".into(), 1.0.into(), 2.0.into(), 3.0.into(), 4.0.into()].into()])
+                    .await
+            );
+        }
     }
 
     mod r#let {
