@@ -166,7 +166,7 @@ impl Vm {
                 Instruction::Return => {
                     let value = self.stack.pop_value();
 
-                    for _ in 0..self.read_u8(codes) {
+                    for _ in 0..self.read_u8(codes) + 1 {
                         self.stack.pop_value();
                     }
 
