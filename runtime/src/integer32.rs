@@ -1,18 +1,12 @@
 use super::Value;
 use crate::value::SYMBOL_MASK;
-use alloc::{borrow::ToOwned, boxed::Box, string::String};
+use alloc::{borrow::ToOwned, string::String};
 use core::fmt::{self, Debug, Display, Formatter};
-use dashmap::DashMap;
-use once_cell::sync::Lazy;
-
-// TODO Should we use Box::pin()?
-#[allow(clippy::box_collection)]
-static CACHE: Lazy<DashMap<Box<String>, ()>> = Lazy::new(Default::default);
 
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
-pub struct Symbol(u64);
+pub struct Integer32(u64);
 
-impl Symbol {
+impl Integer32 {
     pub(crate) fn to_raw(self) -> u64 {
         self.0
     }
@@ -22,19 +16,19 @@ impl Symbol {
     }
 }
 
-impl Debug for Symbol {
+impl Debug for Integer32 {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        write!(formatter, "{}", self.to_i32())
+    }
+}
+
+impl Display for Integer32 {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         write!(formatter, "{}", self.as_str())
     }
 }
 
-impl Display for Symbol {
-    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
-        write!(formatter, "{}", self.as_str())
-    }
-}
-
-impl From<String> for Symbol {
+impl From<String> for Integer32 {
     fn from(symbol: String) -> Self {
         let entry = CACHE.entry(symbol.into()).or_insert_with(Default::default);
 
@@ -42,7 +36,7 @@ impl From<String> for Symbol {
     }
 }
 
-impl From<&str> for Symbol {
+impl From<&str> for Integer32 {
     fn from(symbol: &str) -> Self {
         // TODO Can we use String keys instead to check if those keys exist or not ahead
         // of allocating heap?
@@ -50,7 +44,7 @@ impl From<&str> for Symbol {
     }
 }
 
-impl TryFrom<&Value> for Symbol {
+impl TryFrom<&Value> for Integer32 {
     type Error = ();
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
@@ -62,7 +56,7 @@ impl TryFrom<&Value> for Symbol {
     }
 }
 
-impl TryFrom<Value> for Symbol {
+impl TryFrom<Value> for Integer32 {
     type Error = Value;
 
     fn try_from(value: Value) -> Result<Self, Self::Error> {
@@ -81,12 +75,11 @@ mod tests {
 
     #[test]
     fn eq() {
-        assert_eq!(Symbol::from("foo"), Symbol::from("foo"));
-        assert_ne!(Symbol::from("foo"), Symbol::from("bar"));
+        assert_eq!(Integer32::from(42i32), Integer32::from(42i32));
     }
 
     #[test]
     fn display() {
-        assert_eq!(&Symbol::from("foo").to_string(), "foo");
+        assert_eq!(&Integer32::from("foo").to_string(), "foo");
     }
 }
