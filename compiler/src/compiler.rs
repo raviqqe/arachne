@@ -140,45 +140,7 @@ impl<'a> Compiler<'a> {
                             codes.push(0u8); // TODO environment size
                             *frame.temporary_count_mut() += 1;
                         } else if symbol == "if" {
-                            self.compile_expression(array.get_usize(1), frame)?;
-
-                            let mut codes = self.codes.borrow_mut();
-                            codes.push(Instruction::Branch as u8);
-                            codes.extend(0u16.to_le_bytes());
-                            let branch_index = codes.len();
-                            drop(codes);
-                            *frame.temporary_count_mut() -= 1;
-
-                            let else_index = {
-                                let mut frame = frame.fork();
-                                self.compile_expression(array.get_usize(3), &mut frame)?;
-
-                                let mut codes = self.codes.borrow_mut();
-                                codes.push(Instruction::Jump as u8);
-                                codes.extend(0u16.to_le_bytes());
-                                codes.len()
-                            };
-
-                            {
-                                let mut codes = self.codes.borrow_mut();
-                                let current_index = codes.len();
-                                codes[branch_index - size_of::<u16>()..branch_index]
-                                    .copy_from_slice(
-                                        &((current_index - branch_index) as i16).to_le_bytes(),
-                                    );
-                                drop(codes);
-
-                                let mut frame = frame.fork();
-                                self.compile_expression(array.get_usize(2), &mut frame)?;
-                            }
-
-                            let mut codes = self.codes.borrow_mut();
-                            let current_index = codes.len();
-                            codes[else_index - size_of::<u16>()..else_index].copy_from_slice(
-                                &((current_index - else_index) as i16).to_le_bytes(),
-                            );
-
-                            *frame.temporary_count_mut() += 1;
+                            self.compile_if(&array, 1, frame)?;
                         } else if let Some(instruction) = match symbol {
                             "eq" => Some(Instruction::Equal),
                             "get" => Some(Instruction::Get),
@@ -260,6 +222,56 @@ impl<'a> Compiler<'a> {
         codes.push(Instruction::Call as u8);
         codes.push((array.len_usize() - 1) as u8);
         *frame.temporary_count_mut() -= array.len_usize() - 1;
+
+        Ok(())
+    }
+
+    fn compile_if(
+        &mut self,
+        array: &Array,
+        condition_index: usize,
+        frame: &mut Frame,
+    ) -> Result<(), CompileError> {
+        self.compile_expression(array.get_usize(condition_index), frame)?;
+
+        let mut codes = self.codes.borrow_mut();
+        codes.push(Instruction::Branch as u8);
+        codes.extend(0u16.to_le_bytes());
+        let branch_index = codes.len();
+        drop(codes);
+        *frame.temporary_count_mut() -= 1;
+
+        let else_index = {
+            if condition_index + 3 < array.len_usize() {
+                self.compile_if(&array, condition_index + 2, frame)?;
+            } else {
+                let mut frame = frame.fork();
+                self.compile_expression(array.get_usize(condition_index + 2), &mut frame)?;
+            }
+
+            let mut codes = self.codes.borrow_mut();
+            codes.push(Instruction::Jump as u8);
+            codes.extend(0u16.to_le_bytes());
+            codes.len()
+        };
+
+        {
+            let mut codes = self.codes.borrow_mut();
+            let current_index = codes.len();
+            codes[branch_index - size_of::<u16>()..branch_index]
+                .copy_from_slice(&((current_index - branch_index) as i16).to_le_bytes());
+            drop(codes);
+
+            let mut frame = frame.fork();
+            self.compile_expression(array.get_usize(condition_index + 1), &mut frame)?;
+        }
+
+        let mut codes = self.codes.borrow_mut();
+        let current_index = codes.len();
+        codes[else_index - size_of::<u16>()..else_index]
+            .copy_from_slice(&((current_index - else_index) as i16).to_le_bytes());
+
+        *frame.temporary_count_mut() += 1;
 
         Ok(())
     }
