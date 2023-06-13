@@ -13,5 +13,6 @@ Feature: Control flow
 
     Examples:
       | expression   | result |
-      | (if 0 42 13) | 42     |
+      | (if 0 13 42) | 42     |
+      | (if 1 42 13) | 42     |
       | (if 0 42)    | ()     |
