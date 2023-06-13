@@ -1,6 +1,6 @@
 use super::Value;
 use crate::value::SYMBOL_MASK;
-use alloc::{borrow::ToOwned, string::String};
+use alloc::string::String;
 use core::fmt::{self, Debug, Display, Formatter};
 
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
