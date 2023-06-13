@@ -80,27 +80,18 @@ mod tests {
     }
 
     #[test]
-    fn get_first_of_two_variables() {
+    fn get_two_variables() {
         let mut frame = Frame::new();
 
         frame.insert_variable("x".into());
         frame.insert_variable("y".into());
 
         assert_eq!(frame.get_variable("x".into()), Some(1));
-    }
-
-    #[test]
-    fn get_second_of_two_variables() {
-        let mut frame = Frame::new();
-
-        frame.insert_variable("x".into());
-        frame.insert_variable("y".into());
-
         assert_eq!(frame.get_variable("y".into()), Some(0));
     }
 
     #[test]
-    fn get_first_of_three_variables() {
+    fn get_three_variables() {
         let mut frame = Frame::new();
 
         frame.insert_variable("x".into());
@@ -108,27 +99,7 @@ mod tests {
         frame.insert_variable("z".into());
 
         assert_eq!(frame.get_variable("x".into()), Some(2));
-    }
-
-    #[test]
-    fn get_second_of_three_variables() {
-        let mut frame = Frame::new();
-
-        frame.insert_variable("x".into());
-        frame.insert_variable("y".into());
-        frame.insert_variable("z".into());
-
         assert_eq!(frame.get_variable("y".into()), Some(1));
-    }
-
-    #[test]
-    fn get_third_of_three_variables() {
-        let mut frame = Frame::new();
-
-        frame.insert_variable("x".into());
-        frame.insert_variable("y".into());
-        frame.insert_variable("z".into());
-
         assert_eq!(frame.get_variable("z".into()), Some(0));
     }
 
@@ -144,7 +115,7 @@ mod tests {
     }
 
     #[test]
-    fn get_first_variable_of_two_in_parent() {
+    fn get_two_variables_with_parent() {
         let mut frame = Frame::new();
 
         frame.insert_variable("x".into());
@@ -158,7 +129,7 @@ mod tests {
     }
 
     #[test]
-    fn get_first_variable_of_three_in_parent() {
+    fn get_three_variables_with_parent() {
         let mut frame = Frame::new();
 
         frame.insert_variable("x".into());
@@ -174,7 +145,7 @@ mod tests {
     }
 
     #[test]
-    fn get_first_variable_of_four_in_parent() {
+    fn get_four_variables_with_parent() {
         let mut frame = Frame::new();
 
         frame.insert_variable("x".into());
