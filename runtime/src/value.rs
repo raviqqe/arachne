@@ -1,5 +1,5 @@
 use super::{Array, Float64};
-use crate::{r#type::Type, symbol::Symbol, Closure, TypedValue};
+use crate::{integer32::Integer32, r#type::Type, symbol::Symbol, Closure, TypedValue};
 use alloc::{string::String, vec::Vec};
 use core::{
     fmt::{self, Display, Formatter},
@@ -92,6 +92,7 @@ impl Value {
                 Type::Array => TypedValue::Array(self.try_into().unwrap()),
                 Type::Closure => TypedValue::Closure(self.try_into().unwrap()),
                 Type::Float64 => TypedValue::Float64(self.try_into().unwrap()),
+                Type::Integer32 => TypedValue::Integer32(self.try_into().unwrap()),
                 Type::Symbol => TypedValue::Symbol(self.try_into().unwrap()),
             })
         }
@@ -189,6 +190,12 @@ impl From<Float64> for Value {
     }
 }
 
+impl From<Integer32> for Value {
+    fn from(number: Integer32) -> Self {
+        Self(number.to_raw())
+    }
+}
+
 impl From<Symbol> for Value {
     fn from(symbol: Symbol) -> Self {
         Self(symbol.to_raw())
@@ -198,6 +205,18 @@ impl From<Symbol> for Value {
 impl From<f64> for Value {
     fn from(number: f64) -> Self {
         Float64::from(number).into()
+    }
+}
+
+impl From<i32> for Value {
+    fn from(number: i32) -> Self {
+        Integer32::from(number).into()
+    }
+}
+
+impl From<u32> for Value {
+    fn from(number: u32) -> Self {
+        Integer32::from(number).into()
     }
 }
 
