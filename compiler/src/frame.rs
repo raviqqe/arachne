@@ -144,7 +144,7 @@ mod tests {
     }
 
     #[test]
-    fn get_first_variable_in_parent() {
+    fn get_first_variable_of_two_in_parent() {
         let mut frame = Frame::new();
 
         frame.insert_variable("x".into());
@@ -154,5 +154,34 @@ mod tests {
         frame.insert_variable("y".into());
 
         assert_eq!(frame.get_variable("x".into()), Some(1));
+    }
+
+    #[test]
+    fn get_first_variable_of_three_in_parent() {
+        let mut frame = Frame::new();
+
+        frame.insert_variable("x".into());
+        frame.insert_variable("y".into());
+
+        let mut frame = frame.fork();
+
+        frame.insert_variable("z".into());
+
+        assert_eq!(frame.get_variable("x".into()), Some(2));
+    }
+
+    #[test]
+    fn get_first_variable_of_four_in_parent() {
+        let mut frame = Frame::new();
+
+        frame.insert_variable("x".into());
+        frame.insert_variable("y".into());
+
+        let mut frame = frame.fork();
+
+        frame.insert_variable("z".into());
+        frame.insert_variable("v".into());
+
+        assert_eq!(frame.get_variable("x".into()), Some(3));
     }
 }
