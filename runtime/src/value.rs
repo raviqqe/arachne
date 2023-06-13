@@ -11,9 +11,11 @@ const EXPONENT_MASK: u64 = 0x7ff0_0000_0000_0000;
 const ARRAY_SUB_MASK: u64 = 0x0004_0000_0000_0000;
 const CLOSURE_SUB_MASK: u64 = 0x0001_0000_0000_0000;
 const SYMBOL_SUB_MASK: u64 = 0x0002_0000_0000_0000;
+const INTEGER32_SUB_MASK: u64 = 0x0000_8000_0000_0000;
 pub(crate) const ARRAY_MASK: u64 = ARRAY_SUB_MASK | EXPONENT_MASK;
 pub(crate) const CLOSURE_MASK: u64 = CLOSURE_SUB_MASK | EXPONENT_MASK;
 pub(crate) const SYMBOL_MASK: u64 = SYMBOL_SUB_MASK | EXPONENT_MASK;
+pub(crate) const INTEGER32_MASK: u64 = INTEGER32_SUB_MASK | EXPONENT_MASK;
 
 #[derive(Debug)]
 pub struct Value(u64);
@@ -43,6 +45,10 @@ impl Value {
 
     pub fn is_float64(&self) -> bool {
         self.is_nil() || self.r#type() == Type::Float64
+    }
+
+    pub fn is_integer32(&self) -> bool {
+        self.is_nil() || self.r#type() == Type::Integer32
     }
 
     pub fn is_closure(&self) -> bool {
