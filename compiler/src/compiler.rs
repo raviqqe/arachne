@@ -149,10 +149,15 @@ impl<'a> Compiler<'a> {
                             drop(codes);
                             *frame.temporary_count_mut() -= 1;
 
-                            {
+                            let else_index = {
                                 let mut frame = frame.fork();
                                 self.compile_expression(array.get_usize(3), &mut frame)?;
-                            }
+
+                                let mut codes = self.codes.borrow_mut();
+                                codes.push(Instruction::Jump as u8);
+                                codes.extend(0u16.to_le_bytes());
+                                codes.len()
+                            };
 
                             {
                                 let mut codes = self.codes.borrow_mut();
@@ -166,6 +171,12 @@ impl<'a> Compiler<'a> {
                                 let mut frame = frame.fork();
                                 self.compile_expression(array.get_usize(2), &mut frame)?;
                             }
+
+                            let mut codes = self.codes.borrow_mut();
+                            let current_index = codes.len();
+                            codes[else_index - size_of::<u16>()..else_index].copy_from_slice(
+                                &((current_index - else_index) as i16).to_le_bytes(),
+                            );
 
                             *frame.temporary_count_mut() += 1;
                         } else if let Some(instruction) = match symbol {

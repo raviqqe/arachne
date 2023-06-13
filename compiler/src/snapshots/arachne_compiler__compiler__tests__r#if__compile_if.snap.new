@@ -1,0 +1,12 @@
+---
+source: compiler/src/compiler.rs
+assertion_line: 361
+expression: "compile([[\"if\".into(), 1.0.into(), 42.0.into(), 13.0.into()].into()]).await"
+---
+float64 1
+branch c
+float64 13
+jump 9
+float64 42
+dump
+drop
