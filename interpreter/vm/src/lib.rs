@@ -9,6 +9,7 @@ use std::{cell::RefCell, error::Error};
 use vm::Vm;
 
 const VM_STACK_SIZE: usize = 1 << 10;
+const RETURN_ADDRESS_CAPACITY: usize = 1 << 8;
 
 pub struct Interpreter {
     codes: RefCell<Vec<u8>>,
@@ -27,7 +28,7 @@ impl Interpreter {
     ) -> impl Stream<Item = Result<(), InterpretError>> + 'a {
         try_stream! {
             let mut compiler = Compiler::new(&self.codes);
-            let mut vm = Vm::new(VM_STACK_SIZE);
+            let mut vm = Vm::new(VM_STACK_SIZE, RETURN_ADDRESS_CAPACITY);
             let results = compiler.compile(values);
 
             pin_mut!(results);
