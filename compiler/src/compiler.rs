@@ -230,7 +230,7 @@ mod tests {
     use super::*;
     use futures::{pin_mut, stream::iter};
     use std::io;
-    use vm::{decode_instructions, InstructionIr};
+    use vm::{format_instructions, InstructionIr};
 
     type Error = io::Error;
 
@@ -249,7 +249,7 @@ mod tests {
             result.unwrap();
         }
 
-        let instructions = decode_instructions(&codes.borrow()).unwrap();
+        let instructions = format_instructions(&codes.borrow()).unwrap();
 
         instructions
     }

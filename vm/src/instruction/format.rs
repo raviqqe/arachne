@@ -51,7 +51,7 @@ pub enum InstructionIr {
     Dump,
 }
 
-pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeError> {
+pub fn format_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, FormatError> {
     let mut index = 0;
     let mut instructions = Vec::new();
 
@@ -60,7 +60,7 @@ pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeErr
 
         instructions.push(
             match Instruction::from_u8(instruction)
-                .ok_or(DecodeError::InvalidInstruction(instruction))?
+                .ok_or(FormatError::InvalidInstruction(instruction))?
             {
                 Instruction::Nil => InstructionIr::Nil,
                 Instruction::Float64 => {
@@ -122,14 +122,14 @@ pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeErr
 }
 
 #[derive(Debug)]
-pub enum DecodeError {
+pub enum FormatError {
     InvalidInstruction(u8),
     Utf8(Utf8Error),
 }
 
-impl Error for DecodeError {}
+impl Error for FormatError {}
 
-impl Display for DecodeError {
+impl Display for FormatError {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         match self {
             Self::InvalidInstruction(instruction) => {
@@ -142,7 +142,7 @@ impl Display for DecodeError {
     }
 }
 
-impl From<Utf8Error> for DecodeError {
+impl From<Utf8Error> for FormatError {
     fn from(error: Utf8Error) -> Self {
         Self::Utf8(error)
     }
