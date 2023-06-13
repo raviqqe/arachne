@@ -140,7 +140,6 @@ impl<'a> Compiler<'a> {
                             codes.push(0u8); // TODO environment size
                             *frame.temporary_count_mut() += 1;
                         } else if let Some(instruction) = match symbol {
-                            "array" => Some(Instruction::Array),
                             "eq" => Some(Instruction::Equal),
                             "get" => Some(Instruction::Get),
                             "set" => Some(Instruction::Set),
@@ -154,7 +153,6 @@ impl<'a> Compiler<'a> {
                             self.compile_arguments(array, frame)?;
                             self.codes.borrow_mut().push(instruction as u8);
                             *frame.temporary_count_mut() -= match instruction {
-                                Instruction::Array => todo!(),
                                 Instruction::Length => 0,
                                 Instruction::Set => 2,
                                 _ => 1,
@@ -185,7 +183,7 @@ impl<'a> Compiler<'a> {
                     let mut codes = self.codes.borrow_mut();
 
                     if let Some(index) = frame.get_variable(symbol) {
-                        codes.push(Instruction::Local as u8);
+                        codes.push(Instruction::Peek as u8);
                         codes.push(index as u8);
                         *frame.temporary_count_mut() += 1;
                     } else if symbol.as_str().len() >= 1 << 8 {

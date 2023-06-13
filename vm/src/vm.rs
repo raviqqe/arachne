@@ -148,8 +148,7 @@ impl Vm {
 
                     self.stack.push_value(closure.into());
                 }
-                Instruction::Global => todo!(),
-                Instruction::Local => {
+                Instruction::Peek => {
                     // TODO Move local variables when possible.
                     let index = self.read_u8(codes);
 
@@ -160,7 +159,6 @@ impl Vm {
                     );
                 }
                 Instruction::Equal => todo!(),
-                Instruction::Array => todo!(),
                 Instruction::Jump => {
                     let difference = self.read_u16(codes);
 

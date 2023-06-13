@@ -20,7 +20,7 @@ pub enum InstructionIr {
         len: u8,
         string: String,
     },
-    Local(u8),
+    Peek(u8),
     Get,
     Set,
     Length,
@@ -38,7 +38,6 @@ pub enum InstructionIr {
         environment: Vec<u8>,
     },
     Equal,
-    Array,
     Drop,
     Dump,
     Jump {
@@ -76,8 +75,7 @@ pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeErr
                             .into(),
                     }
                 }
-                Instruction::Global => todo!(),
-                Instruction::Local => InstructionIr::Local(decode_u8(codes, &mut index)),
+                Instruction::Peek => InstructionIr::Peek(decode_u8(codes, &mut index)),
                 Instruction::Get => InstructionIr::Get,
                 Instruction::Set => InstructionIr::Set,
                 Instruction::Length => InstructionIr::Length,
@@ -102,7 +100,6 @@ pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeErr
                     }
                 }
                 Instruction::Equal => InstructionIr::Equal,
-                Instruction::Array => InstructionIr::Array,
                 Instruction::Drop => InstructionIr::Drop,
                 Instruction::Dump => InstructionIr::Dump,
                 Instruction::Jump => InstructionIr::Jump {
