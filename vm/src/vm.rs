@@ -42,6 +42,10 @@ impl Vm {
                     let value = self.read_f64(codes);
                     self.stack.push_value(value.into());
                 }
+                Instruction::Integer32 => {
+                    let value = self.read_u32(codes);
+                    self.stack.push_value(value.into());
+                }
                 Instruction::Symbol => {
                     let len = self.read_u8(codes);
                     let value = str::from_utf8(self.read_bytes(codes, len as usize))

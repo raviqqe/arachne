@@ -7,6 +7,7 @@ extern crate std;
 mod array;
 mod closure;
 mod float64;
+mod integer32;
 mod symbol;
 mod r#type;
 mod typed_value;
