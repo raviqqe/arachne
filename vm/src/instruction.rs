@@ -23,5 +23,6 @@ pub enum Instruction {
     Drop,
     Dump,
     Jump,
+    Branch,
     Return,
 }

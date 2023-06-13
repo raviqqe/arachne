@@ -13,6 +13,8 @@ use std::{
 
 #[derive(Clone, Debug)]
 pub enum InstructionIr {
+    Drop,
+    Peek(u8),
     Nil,
     Float64(f64),
     Integer32(i32),
@@ -20,17 +22,13 @@ pub enum InstructionIr {
         len: u8,
         string: String,
     },
-    Peek(u8),
-    Get,
-    Set,
-    Length,
     Add,
     Subtract,
     Multiply,
     Divide,
-    Call {
-        arity: u8,
-    },
+    Get,
+    Set,
+    Length,
     Close {
         pointer: u32,
         arity: u8,
@@ -38,14 +36,19 @@ pub enum InstructionIr {
         environment: Vec<u8>,
     },
     Equal,
-    Drop,
-    Dump,
+    Call {
+        arity: u8,
+    },
     Jump {
+        pointer: i16,
+    },
+    Branch {
         pointer: i16,
     },
     Return {
         frame_size: u8,
     },
+    Dump,
 }
 
 pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeError> {
@@ -103,6 +106,9 @@ pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeErr
                 Instruction::Drop => InstructionIr::Drop,
                 Instruction::Dump => InstructionIr::Dump,
                 Instruction::Jump => InstructionIr::Jump {
+                    pointer: decode_u16(codes, &mut index) as i16,
+                },
+                Instruction::Branch => InstructionIr::Branch {
                     pointer: decode_u16(codes, &mut index) as i16,
                 },
                 Instruction::Return => InstructionIr::Return {
