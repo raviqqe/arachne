@@ -329,7 +329,7 @@ mod tests {
         use super::*;
 
         #[tokio::test]
-        async fn compile_function_with_zero_argument() {
+        async fn compile_if() {
             insta::assert_display_snapshot!(
                 compile([["if".into(), 1.0.into(), 42.0.into(), 13.0.into()].into()]).await
             );
