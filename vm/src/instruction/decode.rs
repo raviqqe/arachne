@@ -15,6 +15,7 @@ use std::{
 pub enum InstructionIr {
     Nil,
     Float64(f64),
+    Integer32(i32),
     Symbol {
         len: u8,
         string: String,
@@ -62,6 +63,9 @@ pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeErr
                 Instruction::Nil => InstructionIr::Nil,
                 Instruction::Float64 => {
                     InstructionIr::Float64(f64::from_bits(decode_u64(codes, &mut index)))
+                }
+                Instruction::Integer32 => {
+                    InstructionIr::Integer32(decode_u32(codes, &mut index) as i32)
                 }
                 Instruction::Symbol => {
                     let len = decode_u8(codes, &mut index);

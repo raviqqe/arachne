@@ -175,6 +175,13 @@ impl<'a> Compiler<'a> {
                     codes.extend(number.to_f64().to_le_bytes());
                     *frame.temporary_count_mut() += 1;
                 }
+                TypedValue::Integer32(number) => {
+                    let mut codes = self.codes.borrow_mut();
+
+                    codes.push(Instruction::Integer32 as u8);
+                    codes.extend(number.to_i32().to_le_bytes());
+                    *frame.temporary_count_mut() += 1;
+                }
                 TypedValue::Symbol(symbol) => {
                     let mut codes = self.codes.borrow_mut();
 

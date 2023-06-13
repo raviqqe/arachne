@@ -1,5 +1,5 @@
 use super::{Array, Float64};
-use crate::{r#type::Type, symbol::Symbol, Closure, TypedValue};
+use crate::{integer32::Integer32, r#type::Type, symbol::Symbol, Closure, TypedValue};
 use alloc::{string::String, vec::Vec};
 use core::{
     fmt::{self, Display, Formatter},
@@ -11,14 +11,17 @@ const EXPONENT_MASK: u64 = 0x7ff0_0000_0000_0000;
 const ARRAY_SUB_MASK: u64 = 0x0004_0000_0000_0000;
 const CLOSURE_SUB_MASK: u64 = 0x0001_0000_0000_0000;
 const SYMBOL_SUB_MASK: u64 = 0x0002_0000_0000_0000;
+const INTEGER32_SUB_MASK: u64 = 0x0000_8000_0000_0000;
 pub(crate) const ARRAY_MASK: u64 = ARRAY_SUB_MASK | EXPONENT_MASK;
 pub(crate) const CLOSURE_MASK: u64 = CLOSURE_SUB_MASK | EXPONENT_MASK;
 pub(crate) const SYMBOL_MASK: u64 = SYMBOL_SUB_MASK | EXPONENT_MASK;
+pub(crate) const INTEGER32_MASK: u64 = INTEGER32_SUB_MASK | EXPONENT_MASK;
 
 #[derive(Debug)]
 pub struct Value(u64);
 
 impl Value {
+    // TODO Optimize bit pattern match.
     pub fn r#type(&self) -> Type {
         if self.0 & EXPONENT_MASK == 0 {
             Type::Float64
@@ -26,6 +29,8 @@ impl Value {
             Type::Array
         } else if self.0 & CLOSURE_MASK == CLOSURE_MASK {
             Type::Closure
+        } else if self.0 & INTEGER32_MASK == INTEGER32_MASK {
+            Type::Integer32
         } else if self.0 & SYMBOL_MASK == SYMBOL_MASK {
             Type::Symbol
         } else {
@@ -45,6 +50,10 @@ impl Value {
         self.is_nil() || self.r#type() == Type::Float64
     }
 
+    pub fn is_integer32(&self) -> bool {
+        self.is_nil() || self.r#type() == Type::Integer32
+    }
+
     pub fn is_closure(&self) -> bool {
         // TODO Should closures be non-nil?
         self.is_nil() || self.r#type() == Type::Closure
@@ -55,6 +64,10 @@ impl Value {
     }
 
     pub fn to_float64(&self) -> Option<Float64> {
+        self.try_into().ok()
+    }
+
+    pub fn to_integer32(&self) -> Option<Integer32> {
         self.try_into().ok()
     }
 
@@ -86,6 +99,7 @@ impl Value {
                 Type::Array => TypedValue::Array(self.try_into().unwrap()),
                 Type::Closure => TypedValue::Closure(self.try_into().unwrap()),
                 Type::Float64 => TypedValue::Float64(self.try_into().unwrap()),
+                Type::Integer32 => TypedValue::Integer32(self.try_into().unwrap()),
                 Type::Symbol => TypedValue::Symbol(self.try_into().unwrap()),
             })
         }
@@ -113,9 +127,11 @@ impl Value {
 
 impl PartialEq for Value {
     fn eq(&self, other: &Self) -> bool {
-        if let (Some(one), Some(other)) = (self.to_float64(), other.to_float64()) {
+        if let (Some(one), Some(other)) = (self.as_array(), other.as_array()) {
             one == other
-        } else if let (Some(one), Some(other)) = (self.as_array(), other.as_array()) {
+        } else if let (Some(one), Some(other)) = (self.to_float64(), other.to_float64()) {
+            one == other
+        } else if let (Some(one), Some(other)) = (self.to_integer32(), other.to_integer32()) {
             one == other
         } else if let (Some(one), Some(other)) = (self.to_symbol(), other.to_symbol()) {
             one == other
@@ -183,6 +199,12 @@ impl From<Float64> for Value {
     }
 }
 
+impl From<Integer32> for Value {
+    fn from(number: Integer32) -> Self {
+        Self(number.to_raw())
+    }
+}
+
 impl From<Symbol> for Value {
     fn from(symbol: Symbol) -> Self {
         Self(symbol.to_raw())
@@ -192,6 +214,18 @@ impl From<Symbol> for Value {
 impl From<f64> for Value {
     fn from(number: f64) -> Self {
         Float64::from(number).into()
+    }
+}
+
+impl From<i32> for Value {
+    fn from(number: i32) -> Self {
+        Integer32::from(number).into()
+    }
+}
+
+impl From<u32> for Value {
+    fn from(number: u32) -> Self {
+        Integer32::from(number).into()
     }
 }
 
@@ -277,6 +311,14 @@ mod tests {
         assert_eq!(Value::from(1.0), Value::from(1.0));
         assert_ne!(Value::from(0.0), Value::from(1.0));
         assert_eq!(Value::from(f64::NAN), Value::from(f64::NAN));
+    }
+
+    #[test]
+    fn compare_integer32() {
+        assert_eq!(Value::from(0i32), Value::from(0i32));
+        assert_eq!(Value::from(42i32), Value::from(42i32));
+        assert_eq!(Value::from(-42i32), Value::from(-42i32));
+        assert_ne!(Value::from(0i32), Value::from(1i32));
     }
 
     #[test]

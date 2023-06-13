@@ -2,6 +2,7 @@
 pub enum Type {
     Array,
     Float64,
+    Integer32,
     Closure,
     Symbol,
 }

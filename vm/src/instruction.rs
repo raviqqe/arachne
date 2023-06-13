@@ -7,6 +7,7 @@ pub use decode::{decode_instructions, DecodeError, InstructionIr};
 pub enum Instruction {
     Nil,
     Float64,
+    Integer32,
     Symbol,
     Global,
     Local,
