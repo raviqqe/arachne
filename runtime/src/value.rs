@@ -317,7 +317,8 @@ mod tests {
     fn compare_integer32() {
         assert_eq!(Value::from(0i32), Value::from(0i32));
         assert_eq!(Value::from(42i32), Value::from(42i32));
-        assert_ne!(Value::from(-42i32), Value::from(-42i32));
+        assert_eq!(Value::from(-42i32), Value::from(-42i32));
+        assert_ne!(Value::from(0i32), Value::from(1i32));
     }
 
     #[test]
