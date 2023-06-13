@@ -68,11 +68,11 @@ mod tests {
 
     #[test]
     fn eq() {
-        assert_eq!(Integer32::from(42i32), Integer32::from(42i32));
+        assert_eq!(Integer32::from(42), Integer32::from(42));
     }
 
     #[test]
     fn display() {
-        assert_eq!(&Integer32::from("foo").to_string(), "foo");
+        assert_eq!(&Integer32::from(42).to_string(), "foo");
     }
 }
