@@ -1,7 +1,7 @@
 use crate::{frame::Frame, CompileError};
 use async_stream::try_stream;
 use futures::{Stream, StreamExt};
-use runtime::{Array, TypedValue, Value};
+use runtime::{Array, Symbol, TypedValue, Value};
 use std::{cell::RefCell, error::Error, mem::size_of};
 use vm::Instruction;
 
@@ -46,8 +46,11 @@ impl<'a> Compiler<'a> {
                             }
                         }
                         "let-rec" => {
-                            if let Some(symbol) = array.get_usize(1).to_symbol() {
-                                self.compile_expression(array.get_usize(2), frame)?;
+                            if let (Some(symbol), Some(array)) = (
+                                array.get_usize(1).to_symbol(),
+                                array.get_usize(2).as_array(),
+                            ) {
+                                self.compile_function(Some(symbol), array, frame)?;
                                 frame.insert_variable(symbol);
                                 *frame.temporary_count_mut() -= 1;
                             }
@@ -91,7 +94,7 @@ impl<'a> Compiler<'a> {
                         let symbol = symbol.as_str();
 
                         if symbol == "fn" {
-                            self.compile_function(&array, frame)?;
+                            self.compile_function(None, &array, frame)?;
                         } else if symbol == "if" {
                             self.compile_if(&array, 1, frame)?;
                         } else if let Some(instruction) = match symbol {
@@ -159,7 +162,12 @@ impl<'a> Compiler<'a> {
         Ok(())
     }
 
-    fn compile_function(&mut self, array: &Array, frame: &mut Frame) -> Result<(), CompileError> {
+    fn compile_function(
+        &mut self,
+        name: Option<Symbol>,
+        array: &Array,
+        frame: &mut Frame,
+    ) -> Result<(), CompileError> {
         let mut codes = self.codes.borrow_mut();
 
         codes.push(Instruction::Jump as u8);
@@ -174,7 +182,9 @@ impl<'a> Compiler<'a> {
         let arity = u8::try_from(arguments.len_usize())?;
 
         {
-            let mut frame = Frame::with_capacity(arguments.len_usize());
+            let mut frame = Frame::with_capacity(arguments.len_usize() + 1);
+
+            frame.insert_variable(name.unwrap_or_else(|| "".into()));
 
             for index in 0..arguments.len_usize() {
                 if let Some(argument) = arguments.get_usize(index).to_symbol() {

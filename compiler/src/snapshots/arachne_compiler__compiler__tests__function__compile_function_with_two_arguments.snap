@@ -4,8 +4,7 @@ expression: "compile([[\"fn\".into(), [\"x\".into(), \"y\".into()].into(),\n    
 ---
 jump b
 float64 42
-return 2
+return 3
 close 3 2 0 []
 dump
 drop
-
