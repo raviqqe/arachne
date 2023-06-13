@@ -160,11 +160,21 @@ impl Vm {
                 }
                 Instruction::Equal => todo!(),
                 Instruction::Jump => {
-                    let difference = self.read_u16(codes);
+                    let address = self.read_u16(codes);
 
                     self.program_counter = self
                         .program_counter
-                        .wrapping_add(difference as i16 as isize as usize);
+                        .wrapping_add(address as i16 as isize as usize);
+                }
+                Instruction::Branch => {
+                    let address = self.read_u16(codes);
+                    let value = self.stack.pop_value();
+
+                    if value != NIL {
+                        self.program_counter = self
+                            .program_counter
+                            .wrapping_add(address as i16 as isize as usize);
+                    }
                 }
                 Instruction::Return => {
                     let value = self.stack.pop_value();
