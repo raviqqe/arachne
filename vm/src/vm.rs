@@ -162,10 +162,11 @@ impl Vm {
                 Instruction::Equal => todo!(),
                 Instruction::Array => todo!(),
                 Instruction::Jump => {
+                    let difference = self.read_u16(codes);
+
                     self.program_counter = self
                         .program_counter
-                        .wrapping_add(self.read_u16(codes) as i16 as isize as usize);
-                    self.program_counter -= 3; // jump instruction size
+                        .wrapping_add(difference as i16 as isize as usize);
                 }
                 Instruction::Return => {
                     let value = self.stack.pop_value();
