@@ -139,6 +139,18 @@ impl<'a> Compiler<'a> {
                             codes.push(arity); // arity
                             codes.push(0u8); // TODO environment size
                             *frame.temporary_count_mut() += 1;
+                        } else if symbol == "if" {
+                            self.compile_expression(array.get_usize(0), frame)?;
+                            self.codes.borrow_mut().push(Instruction::Branch as u8);
+                            *frame.temporary_count_mut() -= 1;
+
+                            {
+                                let mut frame = frame.fork();
+                                self.compile_expression(array.get_usize(2), &mut frame)?;
+                            }
+
+                            let mut frame = frame.fork();
+                            self.compile_expression(array.get_usize(1), &mut frame)?;
                         } else if let Some(instruction) = match symbol {
                             "eq" => Some(Instruction::Equal),
                             "get" => Some(Instruction::Get),
@@ -309,6 +321,17 @@ mod tests {
                 ]
                 .into()])
                 .await
+            );
+        }
+    }
+
+    mod r#if {
+        use super::*;
+
+        #[tokio::test]
+        async fn compile_function_with_zero_argument() {
+            insta::assert_display_snapshot!(
+                compile([["if".into(), 1.0.into(), 42.0.into(), 13.0.into()].into()]).await
             );
         }
     }

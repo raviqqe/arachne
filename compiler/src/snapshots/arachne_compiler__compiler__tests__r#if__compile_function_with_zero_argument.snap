@@ -1,0 +1,11 @@
+---
+source: compiler/src/compiler.rs
+expression: "compile([[\"if\".into(), 1.0.into(), 42.0.into(), 13.0.into()].into()]).await"
+---
+symbol 2 "if"
+float64 1
+float64 42
+float64 13
+call 3
+dump
+drop
