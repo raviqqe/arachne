@@ -1,21 +1,4 @@
-Feature: Syntax
-  Scenario Outline: Use literals
-    Given a file named "main.arc" with:
-    """
-    <literal>
-    """
-    When I run `arachne` interactively
-    And I pipe in the file "main.arc"
-    Then the stdout should contain exactly:
-    """
-    <result>
-    """
-
-    Examples:
-      | literal                  | result  |
-      | ()                       | ()      |
-      | 42                       | 42      |
-
+Feature: Variable
   Scenario: Define a variable
     Given a file named "main.arc" with:
     """
