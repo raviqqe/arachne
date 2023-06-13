@@ -1,8 +1,11 @@
+mod ir;
+
 use crate::{
     decode::{decode_bytes, decode_u16, decode_u32, decode_u64, decode_u8},
     Instruction,
 };
 use core::fmt;
+use ir::InstructionIr;
 use num_traits::FromPrimitive;
 use std::{
     self,
@@ -11,47 +14,7 @@ use std::{
     str::{self, Utf8Error},
 };
 
-#[derive(Clone, Debug)]
-pub enum InstructionIr {
-    Drop,
-    Peek(u8),
-    Nil,
-    Float64(f64),
-    Integer32(i32),
-    Symbol {
-        len: u8,
-        string: String,
-    },
-    Close {
-        pointer: u32,
-        arity: u8,
-        environment_size: u8,
-        environment: Vec<u8>,
-    },
-    Equal,
-    Add,
-    Subtract,
-    Multiply,
-    Divide,
-    Get,
-    Set,
-    Length,
-    Call {
-        arity: u8,
-    },
-    Jump {
-        pointer: i16,
-    },
-    Branch {
-        pointer: i16,
-    },
-    Return {
-        frame_size: u8,
-    },
-    Dump,
-}
-
-pub fn format_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, FormatError> {
+pub fn format_instructions(codes: &[u8]) -> Result<String, FormatError> {
     let mut index = 0;
     let mut instructions = Vec::new();
 
@@ -118,7 +81,12 @@ pub fn format_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, FormatErr
         );
     }
 
-    Ok(instructions)
+    Ok(instructions
+        .iter()
+        .map(ToString::to_string)
+        .collect::<Vec<_>>()
+        .join("\n")
+        + "\n")
 }
 
 #[derive(Debug)]

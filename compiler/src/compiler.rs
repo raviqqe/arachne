@@ -230,11 +230,11 @@ mod tests {
     use super::*;
     use futures::{pin_mut, stream::iter};
     use std::io;
-    use vm::{format_instructions, InstructionIr};
+    use vm::format_instructions;
 
     type Error = io::Error;
 
-    async fn compile<const N: usize>(values: [Value; N]) -> Vec<InstructionIr> {
+    async fn compile<const N: usize>(values: [Value; N]) -> String {
         let codes = vec![].into();
         let mut compiler = Compiler::new(&codes);
         let values = iter(values).map(Ok);
@@ -256,7 +256,7 @@ mod tests {
 
     #[tokio::test]
     async fn compile_symbol() {
-        insta::assert_debug_snapshot!(compile(["foo".into()]).await);
+        insta::assert_display_snapshot!(compile(["foo".into()]).await);
     }
 
     mod function {
@@ -264,28 +264,28 @@ mod tests {
 
         #[tokio::test]
         async fn compile_function_with_zero_argument() {
-            insta::assert_debug_snapshot!(
+            insta::assert_display_snapshot!(
                 compile([["fn".into(), [].into(), 42.0.into()].into()]).await
             );
         }
 
         #[tokio::test]
         async fn compile_function_with_one_argument() {
-            insta::assert_debug_snapshot!(
+            insta::assert_display_snapshot!(
                 compile([["fn".into(), ["x".into()].into(), 42.0.into()].into()]).await
             );
         }
 
         #[tokio::test]
         async fn compile_function_with_two_arguments() {
-            insta::assert_debug_snapshot!(
+            insta::assert_display_snapshot!(
                 compile([["fn".into(), ["x".into(), "y".into()].into(), 42.0.into()].into()]).await
             );
         }
 
         #[tokio::test]
         async fn compile_function_with_let() {
-            insta::assert_debug_snapshot!(
+            insta::assert_display_snapshot!(
                 compile([[
                     "fn".into(),
                     ["x".into()].into(),
@@ -299,7 +299,7 @@ mod tests {
 
         #[tokio::test]
         async fn compile_function_with_two_let() {
-            insta::assert_debug_snapshot!(
+            insta::assert_display_snapshot!(
                 compile([[
                     "fn".into(),
                     ["x".into()].into(),
@@ -318,14 +318,14 @@ mod tests {
 
         #[tokio::test]
         async fn compile_let() {
-            insta::assert_debug_snapshot!(
+            insta::assert_display_snapshot!(
                 compile([["let".into(), "x".into(), 42.0.into()].into()]).await
             );
         }
 
         #[tokio::test]
         async fn compile_two_let() {
-            insta::assert_debug_snapshot!(
+            insta::assert_display_snapshot!(
                 compile([
                     ["let".into(), "x".into(), 42.0.into()].into(),
                     ["let".into(), "y".into(), "x".into()].into(),
@@ -336,7 +336,7 @@ mod tests {
 
         #[tokio::test]
         async fn compile_two_let_with_same_name() {
-            insta::assert_debug_snapshot!(
+            insta::assert_display_snapshot!(
                 compile([
                     ["let".into(), "x".into(), 42.0.into()].into(),
                     ["let".into(), "x".into(), 2045.0.into()].into(),
@@ -348,7 +348,7 @@ mod tests {
 
         #[tokio::test]
         async fn compile_three_let() {
-            insta::assert_debug_snapshot!(
+            insta::assert_display_snapshot!(
                 compile([
                     ["let".into(), "x".into(), 42.0.into()].into(),
                     ["let".into(), "y".into(), "x".into()].into(),
@@ -360,7 +360,7 @@ mod tests {
 
         #[tokio::test]
         async fn compile_three_let_referencing_old() {
-            insta::assert_debug_snapshot!(
+            insta::assert_display_snapshot!(
                 compile([
                     ["let".into(), "x".into(), 1.0.into()].into(),
                     ["let".into(), "y".into(), 2.0.into()].into(),

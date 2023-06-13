@@ -1,6 +1,6 @@
 mod format;
 
-pub use format::{format_instructions, FormatError, InstructionIr};
+pub use format::{format_instructions, FormatError};
 
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, num_derive::FromPrimitive)]
