@@ -21,3 +21,4 @@ Feature: Arithmetic
       | (fn (x y z) (+ (* x y) z))           | (f 42 2 7)  | 91     |
       | (fn (x) (let y x) y)                 | (f 42)      | 42     |
       | (fn (x) (let y x) (let z (+ x y)) z) | (f 42)      | 84     |
+      | (fn (x) (+ x x))                     | (f (f 2))   | 8      |
