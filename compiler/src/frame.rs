@@ -154,6 +154,7 @@ mod tests {
         frame.insert_variable("y".into());
 
         assert_eq!(frame.get_variable("x".into()), Some(1));
+        assert_eq!(frame.get_variable("y".into()), Some(0));
     }
 
     #[test]
@@ -168,6 +169,8 @@ mod tests {
         frame.insert_variable("z".into());
 
         assert_eq!(frame.get_variable("x".into()), Some(2));
+        assert_eq!(frame.get_variable("y".into()), Some(1));
+        assert_eq!(frame.get_variable("z".into()), Some(0));
     }
 
     #[test]
@@ -183,5 +186,8 @@ mod tests {
         frame.insert_variable("v".into());
 
         assert_eq!(frame.get_variable("x".into()), Some(3));
+        assert_eq!(frame.get_variable("y".into()), Some(2));
+        assert_eq!(frame.get_variable("z".into()), Some(1));
+        assert_eq!(frame.get_variable("v".into()), Some(0));
     }
 }
