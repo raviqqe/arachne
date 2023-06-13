@@ -85,8 +85,7 @@ pub fn format_instructions(codes: &[u8]) -> Result<String, FormatError> {
         .iter()
         .map(ToString::to_string)
         .collect::<Vec<_>>()
-        .join("\n")
-        + "\n")
+        .join("\n"))
 }
 
 #[derive(Debug)]
