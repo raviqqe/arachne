@@ -257,10 +257,11 @@ impl<'a> Compiler<'a> {
         *frame.temporary_count_mut() -= 1;
 
         let else_index = {
+            let mut frame = frame.fork();
+
             if condition_index + 3 < array.len_usize() {
-                self.compile_if(array, condition_index + 2, frame)?;
+                self.compile_if(array, condition_index + 2, &mut frame)?;
             } else {
-                let mut frame = frame.fork();
                 self.compile_expression(array.get_usize(condition_index + 2), &mut frame)?;
             }
 
@@ -418,6 +419,35 @@ mod tests {
             insta::assert_display_snapshot!(
                 compile([["if".into(), 1.0.into(), 2.0.into(), 3.0.into(), 4.0.into()].into()])
                     .await
+            );
+        }
+
+        #[tokio::test]
+        async fn compile_two_branches_in_function() {
+            insta::assert_display_snapshot!(
+                compile(
+                    [[
+                        "let".into(),
+                        "f".into(),
+                        [
+                            "fn".into(),
+                            [].into(),
+                            [
+                                "if".into(),
+                                1.0.into(),
+                                2.0.into(),
+                                3.0.into(),
+                                4.0.into(),
+                                5.0.into()
+                            ]
+                            .into()
+                        ]
+                        .into()
+                    ]
+                    .into()]
+                    .into()
+                )
+                .await
             );
         }
     }
