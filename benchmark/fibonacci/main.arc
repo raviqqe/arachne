@@ -1,4 +1,5 @@
-(let f 
+(let-rec
+  f
   (fn (x) 
     (if 
       (= x 0) 0
