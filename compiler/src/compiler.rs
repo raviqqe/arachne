@@ -141,7 +141,12 @@ impl<'a> Compiler<'a> {
                             *frame.temporary_count_mut() += 1;
                         } else if symbol == "if" {
                             self.compile_expression(array.get_usize(0), frame)?;
-                            self.codes.borrow_mut().push(Instruction::Branch as u8);
+
+                            let mut codes = self.codes.borrow_mut();
+                            codes.push(Instruction::Branch as u8);
+                            codes.extend(0u16.to_le_bytes());
+                            let branch_index = codes.len();
+                            drop(codes);
                             *frame.temporary_count_mut() -= 1;
 
                             {
@@ -149,8 +154,12 @@ impl<'a> Compiler<'a> {
                                 self.compile_expression(array.get_usize(2), &mut frame)?;
                             }
 
-                            let mut frame = frame.fork();
-                            self.compile_expression(array.get_usize(1), &mut frame)?;
+                            {
+                                let mut frame = frame.fork();
+                                self.compile_expression(array.get_usize(1), &mut frame)?;
+                            }
+
+                            *frame.temporary_count_mut() += 1;
                         } else if let Some(instruction) = match symbol {
                             "eq" => Some(Instruction::Equal),
                             "get" => Some(Instruction::Get),
