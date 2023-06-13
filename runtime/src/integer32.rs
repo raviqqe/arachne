@@ -13,7 +13,7 @@ impl Integer32 {
     pub fn to_i32(&self) -> i32 {
         let mut buffer = [0u8; 4];
 
-        buffer.copy_from_slice(self.0.to_le_bytes()[..2]);
+        buffer.copy_from_slice(&self.0.to_le_bytes()[..2]);
 
         i32::from_le_bytes(buffer)
     }
