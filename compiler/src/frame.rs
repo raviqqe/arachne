@@ -37,11 +37,16 @@ impl<'a> Frame<'a> {
         }
     }
 
-    pub fn get_variable(&mut self, name: Symbol) -> Option<usize> {
-        self.variables
-            .get(&name)
-            .copied()
-            .map(|index| self.variables.len() + self.temporary_count - index - 1)
+    pub fn get_variable(&self, name: Symbol) -> Option<usize> {
+        let offset = self.variables.len() + self.temporary_count;
+
+        if let Some(index) = self.variables.get(&name) {
+            Some(offset - index - 1)
+        } else {
+            self.parent
+                .and_then(|parent| parent.get_variable(name))
+                .map(|index| index + offset)
+        }
     }
 
     pub fn insert_variable(&mut self, name: Symbol) {
@@ -58,5 +63,102 @@ impl<'a> Frame<'a> {
 
     pub fn size(&self) -> usize {
         self.variables.len() + self.temporary_count
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_variable() {
+        let mut frame = Frame::new();
+
+        frame.insert_variable("x".into());
+
+        assert_eq!(frame.get_variable("x".into()), Some(0));
+    }
+
+    #[test]
+    fn get_two_variables() {
+        let mut frame = Frame::new();
+
+        frame.insert_variable("x".into());
+        frame.insert_variable("y".into());
+
+        assert_eq!(frame.get_variable("x".into()), Some(1));
+        assert_eq!(frame.get_variable("y".into()), Some(0));
+    }
+
+    #[test]
+    fn get_three_variables() {
+        let mut frame = Frame::new();
+
+        frame.insert_variable("x".into());
+        frame.insert_variable("y".into());
+        frame.insert_variable("z".into());
+
+        assert_eq!(frame.get_variable("x".into()), Some(2));
+        assert_eq!(frame.get_variable("y".into()), Some(1));
+        assert_eq!(frame.get_variable("z".into()), Some(0));
+    }
+
+    #[test]
+    fn get_variable_in_parent() {
+        let mut frame = Frame::new();
+
+        frame.insert_variable("x".into());
+
+        let frame = frame.fork();
+
+        assert_eq!(frame.get_variable("x".into()), Some(0));
+    }
+
+    #[test]
+    fn get_two_variables_with_parent() {
+        let mut frame = Frame::new();
+
+        frame.insert_variable("x".into());
+
+        let mut frame = frame.fork();
+
+        frame.insert_variable("y".into());
+
+        assert_eq!(frame.get_variable("x".into()), Some(1));
+        assert_eq!(frame.get_variable("y".into()), Some(0));
+    }
+
+    #[test]
+    fn get_three_variables_with_parent() {
+        let mut frame = Frame::new();
+
+        frame.insert_variable("x".into());
+        frame.insert_variable("y".into());
+
+        let mut frame = frame.fork();
+
+        frame.insert_variable("z".into());
+
+        assert_eq!(frame.get_variable("x".into()), Some(2));
+        assert_eq!(frame.get_variable("y".into()), Some(1));
+        assert_eq!(frame.get_variable("z".into()), Some(0));
+    }
+
+    #[test]
+    fn get_four_variables_with_parent() {
+        let mut frame = Frame::new();
+
+        frame.insert_variable("x".into());
+        frame.insert_variable("y".into());
+
+        let mut frame = frame.fork();
+
+        frame.insert_variable("z".into());
+        frame.insert_variable("v".into());
+
+        assert_eq!(frame.get_variable("x".into()), Some(3));
+        assert_eq!(frame.get_variable("y".into()), Some(2));
+        assert_eq!(frame.get_variable("z".into()), Some(1));
+        assert_eq!(frame.get_variable("v".into()), Some(0));
     }
 }
