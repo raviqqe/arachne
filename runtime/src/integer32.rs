@@ -28,19 +28,9 @@ impl Display for Integer32 {
     }
 }
 
-impl From<String> for Integer32 {
-    fn from(symbol: String) -> Self {
-        let entry = CACHE.entry(symbol.into()).or_insert_with(Default::default);
-
-        Self(entry.key().as_ref() as *const String as *const _ as u64 | SYMBOL_MASK)
-    }
-}
-
-impl From<&str> for Integer32 {
-    fn from(symbol: &str) -> Self {
-        // TODO Can we use String keys instead to check if those keys exist or not ahead
-        // of allocating heap?
-        symbol.to_owned().into()
+impl From<i32> for Integer32 {
+    fn from(number: i32) -> Self {
+        Self(number as u32 as u64 | SYMBOL_MASK)
     }
 }
 
