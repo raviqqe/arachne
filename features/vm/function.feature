@@ -23,11 +23,11 @@ Feature: Function
       | (fn (x) (let y x) (let z (+ x y)) z) | (f 42)      | 84     |
       | (fn (x) (+ x x))                     | (f (f 2))   | 8      |
 
-  Scenario: Define a top-level function
+  Scenario: Define a recursive function
     Given a file named "main.arc" with:
     """
-    (fn f () 42)
-    (f)
+		(let-rec f (fn (x) (if (= x 0) 42 (f (- x 1)))))
+    (f 3)
     """
     When I run `arachne` interactively
     And I pipe in the file "main.arc"
