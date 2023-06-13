@@ -37,12 +37,6 @@ impl From<i32> for Integer32 {
     }
 }
 
-impl Into<i32> for Integer32 {
-    fn into(self) -> i32 {
-        self.to_i32()
-    }
-}
-
 impl TryFrom<&Value> for Integer32 {
     type Error = ();
 
@@ -79,8 +73,8 @@ mod tests {
 
     #[test]
     fn convert() {
-        assert_eq!(i32::from(Integer32::from(42)), 42);
-        assert_eq!(i32::from(Integer32::from(-42)), -42);
+        assert_eq!(Integer32::from(42).to_i32(), 42);
+        assert_eq!(Integer32::from(-42).to_i32(), -42);
     }
 
     #[test]
