@@ -2,9 +2,9 @@
 source: compiler/src/compiler.rs
 expression: "compile([[\"if\".into(), 1.0.into(), 42.0.into(), 13.0.into()].into()]).await"
 ---
-symbol 2 "if"
-branch 0
-float64 42
 float64 1
+branch 9
+float64 13
+float64 42
 dump
 drop

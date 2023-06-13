@@ -140,7 +140,7 @@ impl<'a> Compiler<'a> {
                             codes.push(0u8); // TODO environment size
                             *frame.temporary_count_mut() += 1;
                         } else if symbol == "if" {
-                            self.compile_expression(array.get_usize(0), frame)?;
+                            self.compile_expression(array.get_usize(1), frame)?;
 
                             let mut codes = self.codes.borrow_mut();
                             codes.push(Instruction::Branch as u8);
@@ -151,12 +151,20 @@ impl<'a> Compiler<'a> {
 
                             {
                                 let mut frame = frame.fork();
-                                self.compile_expression(array.get_usize(2), &mut frame)?;
+                                self.compile_expression(array.get_usize(3), &mut frame)?;
                             }
 
                             {
+                                let mut codes = self.codes.borrow_mut();
+                                let current_index = codes.len();
+                                codes[branch_index - size_of::<u16>()..branch_index]
+                                    .copy_from_slice(
+                                        &((current_index - branch_index) as i16).to_le_bytes(),
+                                    );
+                                drop(codes);
+
                                 let mut frame = frame.fork();
-                                self.compile_expression(array.get_usize(1), &mut frame)?;
+                                self.compile_expression(array.get_usize(2), &mut frame)?;
                             }
 
                             *frame.temporary_count_mut() += 1;
