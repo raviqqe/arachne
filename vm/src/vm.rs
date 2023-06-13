@@ -110,10 +110,9 @@ impl Vm {
                 Instruction::Call => {
                     let arity = self.read_u8(codes) as usize;
 
-                    self.return_addresses.push(self.program_counter);
-
                     if let Some(closure) = self.stack.get(self.stack.len() - arity - 1).as_closure()
                     {
+                        self.return_addresses.push(self.program_counter);
                         self.program_counter = closure.id();
                         let closure_arity = closure.arity() as usize;
 
