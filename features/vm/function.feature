@@ -26,7 +26,7 @@ Feature: Function
   Scenario: Define a recursive function
     Given a file named "main.arc" with:
     """
-		(let-rec f (fn (x) (if (= x 0) 42 (f (- x 1)))))
+    (let-rec f (fn (x) (if (= x 0) 42 (f (- x 1)))))
     (f 3)
     """
     When I run `arachne` interactively
