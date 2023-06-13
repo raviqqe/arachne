@@ -142,7 +142,7 @@ impl<'a> Compiler<'a> {
                         } else if symbol == "if" {
                             self.compile_if(&array, 1, frame)?;
                         } else if let Some(instruction) = match symbol {
-                            "eq" => Some(Instruction::Equal),
+                            "=" => Some(Instruction::Equal),
                             "get" => Some(Instruction::Get),
                             "set" => Some(Instruction::Set),
                             "len" => Some(Instruction::Length),
