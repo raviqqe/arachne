@@ -9,7 +9,7 @@ pub enum Instruction {
     Float64,
     Integer32,
     Symbol,
-    Local,
+    Peek,
     Get,
     Set,
     Length,

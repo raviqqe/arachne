@@ -185,7 +185,7 @@ impl<'a> Compiler<'a> {
                     let mut codes = self.codes.borrow_mut();
 
                     if let Some(index) = frame.get_variable(symbol) {
-                        codes.push(Instruction::Local as u8);
+                        codes.push(Instruction::Peek as u8);
                         codes.push(index as u8);
                         *frame.temporary_count_mut() += 1;
                     } else if symbol.as_str().len() >= 1 << 8 {
