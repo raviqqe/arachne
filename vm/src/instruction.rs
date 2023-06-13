@@ -5,24 +5,35 @@ pub use decode::{decode_instructions, DecodeError, InstructionIr};
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, num_derive::FromPrimitive)]
 pub enum Instruction {
-    Nil,
-    Float64,
-    Integer32,
-    Symbol,
+    // Stack operation
+    Drop,
     Peek,
-    Get,
-    Set,
-    Length,
+
+    // Computation
     Add,
     Subtract,
     Multiply,
     Divide,
-    Call,
-    Close,
+    Get,
+    Set,
+    Length,
     Equal,
-    Drop,
-    Dump,
+
+    // Constant
+    Nil,
+    Float64,
+    Integer32,
+    Symbol,
+
+    // Closure
+    Close,
+
+    // Control
+    Call,
+    Return,
     Jump,
     Branch,
-    Return,
+
+    // Debug
+    Dump,
 }
