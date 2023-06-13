@@ -2,7 +2,7 @@ Feature: Arithmetic
   Scenario Outline: Use arithmetic operations
     Given a file named "main.arc" with:
     """
-		(let f <function>)
+    (let f <function>)
     <expression>
     """
     When I run `arachne` interactively
@@ -13,7 +13,7 @@ Feature: Arithmetic
     """
 
     Examples:
-			| function                   | expression  | result |
+      | function                   | expression  | result |
       | (fn () 42)                 | (f)         | 42     |
       | (fn (x) 42)                | (f 0)       | 42     |
       | (fn (x) x)                 | (f 42)      | 42     |
