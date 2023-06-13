@@ -6,7 +6,7 @@ expression: "compile([[\"let\".into(), \"x\".into(), 42.0.into()].into(),\n     
     Float64(
         42.0,
     ),
-    Local(
+    Peek(
         0,
     ),
 ]

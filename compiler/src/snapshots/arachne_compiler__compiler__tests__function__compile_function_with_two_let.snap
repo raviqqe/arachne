@@ -6,13 +6,13 @@ expression: "compile([[\"fn\".into(), [\"x\".into()].into(),\n                  
     Jump {
         pointer: 8,
     },
-    Local(
+    Peek(
         0,
     ),
-    Local(
+    Peek(
         0,
     ),
-    Local(
+    Peek(
         0,
     ),
     Return {

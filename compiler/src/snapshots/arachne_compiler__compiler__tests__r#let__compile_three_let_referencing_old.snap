@@ -9,7 +9,7 @@ expression: "compile([[\"let\".into(), \"x\".into(), 1.0.into()].into(),\n      
     Float64(
         2.0,
     ),
-    Local(
+    Peek(
         1,
     ),
 ]
