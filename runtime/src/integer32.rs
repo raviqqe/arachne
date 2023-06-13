@@ -1,6 +1,5 @@
 use super::Value;
 use crate::value::SYMBOL_MASK;
-use alloc::string::String;
 use core::fmt::{self, Debug, Display, Formatter};
 
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
@@ -11,8 +10,12 @@ impl Integer32 {
         self.0
     }
 
-    pub fn as_str(&self) -> &str {
-        unsafe { &*((self.0 & !SYMBOL_MASK) as *const u8 as *const String) }
+    pub fn to_i32(&self) -> i32 {
+        let mut buffer = [0u8; 4];
+
+        buffer.copy_from_slice(self.0.to_le_bytes()[..2]);
+
+        i32::from_le_bytes(buffer)
     }
 }
 
