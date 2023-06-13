@@ -59,9 +59,9 @@ If a value is invalid, the `set` function does nothing and returns the original 
 
 ```lisp
 (if
-  (condition-1 body-1)
-  (condition-2 body-2)
-  (else body))
+  condition-0 then-body-0
+  condition-1 then-body-1
+  else-body)
 ```
 
 ### Let binding

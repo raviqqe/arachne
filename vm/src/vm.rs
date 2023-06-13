@@ -24,6 +24,7 @@ macro_rules! binary_operation {
 pub struct Vm {
     program_counter: usize,
     stack: Stack,
+    // TODO Change this into frames and add frame pointers?
     return_addresses: Vec<u32>,
 }
 
@@ -158,7 +159,12 @@ impl Vm {
                             .clone(),
                     );
                 }
-                Instruction::Equal => todo!(),
+                Instruction::Equal => {
+                    let rhs = self.stack.pop_value();
+                    let lhs = self.stack.pop_value();
+
+                    self.stack.push_value(((lhs == rhs) as usize as f64).into());
+                }
                 Instruction::Jump => {
                     let address = self.read_u16(codes);
 
