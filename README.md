@@ -61,7 +61,7 @@ If a value is invalid, the `set` function does nothing and returns the original 
 (if
   (condition-1 body-1)
   (condition-2 body-2)
-  (else-body))
+  (else body))
 ```
 
 ### Let binding
