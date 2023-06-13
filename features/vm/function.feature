@@ -13,9 +13,11 @@ Feature: Arithmetic
     """
 
     Examples:
-      | function                   | expression  | result |
-      | (fn () 42)                 | (f)         | 42     |
-      | (fn (x) 42)                | (f 0)       | 42     |
-      | (fn (x) x)                 | (f 42)      | 42     |
-      | (fn (x y) (+ x y))         | (f 42 2045) | 2087   |
-      | (fn (x y z) (+ (* x y) z)) | (f 42 2 7)  | 91     |
+      | function                             | expression  | result |
+      | (fn () 42)                           | (f)         | 42     |
+      | (fn (x) 42)                          | (f 0)       | 42     |
+      | (fn (x) x)                           | (f 42)      | 42     |
+      | (fn (x y) (+ x y))                   | (f 42 2045) | 2087   |
+      | (fn (x y z) (+ (* x y) z))           | (f 42 2 7)  | 91     |
+      | (fn (x) (let y x) y)                 | (f 42)      | 42     |
+      | (fn (x) (let y x) (let z (+ x y)) z) | (f 42)      | 84     |
