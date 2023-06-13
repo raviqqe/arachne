@@ -1,5 +1,5 @@
 Feature: Control flow
-  Scenario Outline: Call a function
+  Scenario Outline: Use an if expression
     Given a file named "main.arc" with:
     """
     <expression>
