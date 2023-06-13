@@ -13,7 +13,7 @@ impl Integer32 {
         self.0
     }
 
-    pub fn to_i32(&self) -> i32 {
+    pub fn to_i32(self) -> i32 {
         const SIZE: usize = size_of::<u32>();
         let mut buffer = [0u8; SIZE];
 
