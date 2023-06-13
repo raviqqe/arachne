@@ -479,4 +479,21 @@ mod tests {
             );
         }
     }
+
+    mod let_rec {
+        use super::*;
+
+        #[tokio::test]
+        async fn compile_let() {
+            insta::assert_display_snapshot!(
+                compile([[
+                    "let-rec".into(),
+                    "f".into(),
+                    ["fn".into(), [].into(), ["f".into()].into()].into()
+                ]
+                .into()])
+                .await
+            );
+        }
+    }
 }
