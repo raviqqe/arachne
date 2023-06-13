@@ -27,7 +27,7 @@ impl Debug for Integer32 {
 
 impl Display for Integer32 {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
-        write!(formatter, "{}", self.as_str())
+        write!(formatter, "{}", self.to_i32())
     }
 }
 
@@ -41,7 +41,7 @@ impl TryFrom<&Value> for Integer32 {
     type Error = ();
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        if value.is_symbol() {
+        if value.is_integer32() {
             Ok(Self(value.to_raw()))
         } else {
             Err(())
