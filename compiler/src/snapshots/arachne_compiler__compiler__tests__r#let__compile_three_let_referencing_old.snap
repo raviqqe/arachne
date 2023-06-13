@@ -2,14 +2,7 @@
 source: compiler/src/compiler.rs
 expression: "compile([[\"let\".into(), \"x\".into(), 1.0.into()].into(),\n                [\"let\".into(), \"y\".into(), 2.0.into()].into(),\n                [\"let\".into(), \"z\".into(), \"x\".into()].into()]).await"
 ---
-[
-    Float64(
-        1.0,
-    ),
-    Float64(
-        2.0,
-    ),
-    Peek(
-        1,
-    ),
-]
+float64 1
+float64 2
+peek 1
+

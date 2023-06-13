@@ -2,22 +2,10 @@
 source: compiler/src/compiler.rs
 expression: "compile([[\"fn\".into(), [\"x\".into()].into(), 42.0.into()].into()]).await"
 ---
-[
-    Jump {
-        pointer: 11,
-    },
-    Float64(
-        42.0,
-    ),
-    Return {
-        frame_size: 1,
-    },
-    Close {
-        pointer: 3,
-        arity: 1,
-        environment_size: 0,
-        environment: [],
-    },
-    Dump,
-    Drop,
-]
+jump b
+float64 42
+return 1
+close 3 1 0 []
+dump
+drop
+

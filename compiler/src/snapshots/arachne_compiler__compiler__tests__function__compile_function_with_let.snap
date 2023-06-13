@@ -2,25 +2,11 @@
 source: compiler/src/compiler.rs
 expression: "compile([[\"fn\".into(), [\"x\".into()].into(),\n                            [\"let\".into(), \"y\".into(), \"x\".into()].into(),\n                            \"y\".into()].into()]).await"
 ---
-[
-    Jump {
-        pointer: 6,
-    },
-    Peek(
-        0,
-    ),
-    Peek(
-        0,
-    ),
-    Return {
-        frame_size: 2,
-    },
-    Close {
-        pointer: 3,
-        arity: 1,
-        environment_size: 0,
-        environment: [],
-    },
-    Dump,
-    Drop,
-]
+jump 6
+peek 0
+peek 0
+return 2
+close 3 1 0 []
+dump
+drop
+

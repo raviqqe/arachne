@@ -1,8 +1,11 @@
+mod ir;
+
 use crate::{
     decode::{decode_bytes, decode_u16, decode_u32, decode_u64, decode_u8},
     Instruction,
 };
 use core::fmt;
+use ir::InstructionIr;
 use num_traits::FromPrimitive;
 use std::{
     self,
@@ -11,44 +14,7 @@ use std::{
     str::{self, Utf8Error},
 };
 
-#[derive(Clone, Debug)]
-pub enum InstructionIr {
-    Nil,
-    Float64(f64),
-    Integer32(i32),
-    Symbol {
-        len: u8,
-        string: String,
-    },
-    Peek(u8),
-    Get,
-    Set,
-    Length,
-    Add,
-    Subtract,
-    Multiply,
-    Divide,
-    Call {
-        arity: u8,
-    },
-    Close {
-        pointer: u32,
-        arity: u8,
-        environment_size: u8,
-        environment: Vec<u8>,
-    },
-    Equal,
-    Drop,
-    Dump,
-    Jump {
-        pointer: i16,
-    },
-    Return {
-        frame_size: u8,
-    },
-}
-
-pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeError> {
+pub fn format_instructions(codes: &[u8]) -> Result<String, FormatError> {
     let mut index = 0;
     let mut instructions = Vec::new();
 
@@ -57,7 +23,7 @@ pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeErr
 
         instructions.push(
             match Instruction::from_u8(instruction)
-                .ok_or(DecodeError::InvalidInstruction(instruction))?
+                .ok_or(FormatError::InvalidInstruction(instruction))?
             {
                 Instruction::Nil => InstructionIr::Nil,
                 Instruction::Float64 => {
@@ -105,6 +71,9 @@ pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeErr
                 Instruction::Jump => InstructionIr::Jump {
                     pointer: decode_u16(codes, &mut index) as i16,
                 },
+                Instruction::Branch => InstructionIr::Branch {
+                    pointer: decode_u16(codes, &mut index) as i16,
+                },
                 Instruction::Return => InstructionIr::Return {
                     frame_size: decode_u8(codes, &mut index),
                 },
@@ -112,18 +81,22 @@ pub fn decode_instructions(codes: &[u8]) -> Result<Vec<InstructionIr>, DecodeErr
         );
     }
 
-    Ok(instructions)
+    Ok(instructions
+        .iter()
+        .map(ToString::to_string)
+        .collect::<Vec<_>>()
+        .join("\n"))
 }
 
 #[derive(Debug)]
-pub enum DecodeError {
+pub enum FormatError {
     InvalidInstruction(u8),
     Utf8(Utf8Error),
 }
 
-impl Error for DecodeError {}
+impl Error for FormatError {}
 
-impl Display for DecodeError {
+impl Display for FormatError {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         match self {
             Self::InvalidInstruction(instruction) => {
@@ -136,7 +109,7 @@ impl Display for DecodeError {
     }
 }
 
-impl From<Utf8Error> for DecodeError {
+impl From<Utf8Error> for FormatError {
     fn from(error: Utf8Error) -> Self {
         Self::Utf8(error)
     }

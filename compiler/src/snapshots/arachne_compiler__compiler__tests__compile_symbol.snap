@@ -1,12 +1,7 @@
 ---
 source: compiler/src/compiler.rs
-expression: decode_instructions(&codes.borrow()).unwrap()
+expression: "compile([\"foo\".into()]).await"
 ---
-[
-    Symbol {
-        len: 3,
-        string: "foo",
-    },
-    Dump,
-    Drop,
-]
+symbol 3 "foo"
+dump
+drop
