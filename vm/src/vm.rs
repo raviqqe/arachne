@@ -22,20 +22,22 @@ macro_rules! binary_operation {
 }
 
 pub struct Vm {
-    program_counter: usize,
+    program_counter: u32,
     stack: Stack,
+    return_addresses: Vec<u32>,
 }
 
 impl Vm {
-    pub fn new(stack_size: usize) -> Self {
+    pub fn new(stack_size: usize, return_address_capacity: usize) -> Self {
         Self {
             program_counter: 0,
             stack: Stack::new(stack_size),
+            return_addresses: Vec::with_capacity(return_address_capacity),
         }
     }
 
     pub fn run(&mut self, codes: &[u8]) {
-        while self.program_counter < codes.len() {
+        while (self.program_counter as usize) < codes.len() {
             match Instruction::from_u8(self.read_u8(codes)).expect("valid instruction") {
                 Instruction::Nil => self.stack.push_value(NIL),
                 Instruction::Float64 => {
@@ -108,9 +110,11 @@ impl Vm {
                 Instruction::Call => {
                     let arity = self.read_u8(codes) as usize;
 
+                    self.return_addresses.push(self.program_counter);
+
                     if let Some(closure) = self.stack.get(self.stack.len() - arity - 1).as_closure()
                     {
-                        self.program_counter = closure.id() as usize;
+                        self.program_counter = closure.id();
                         let closure_arity = closure.arity() as usize;
 
                         for _ in 0..arity.saturating_sub(closure_arity) {
@@ -159,7 +163,9 @@ impl Vm {
                 Instruction::Equal => todo!(),
                 Instruction::Array => todo!(),
                 Instruction::Jump => {
-                    self.program_counter += self.read_u16(codes) as usize;
+                    self.program_counter = self
+                        .program_counter
+                        .wrapping_add(self.read_u16(codes) as i16 as i32 as u32);
                     self.program_counter -= 3; // jump instruction size
                 }
                 Instruction::Return => {
@@ -169,8 +175,7 @@ impl Vm {
                         self.stack.pop_value();
                     }
 
-                    // TODO Pop a return address.
-                    self.program_counter = 42;
+                    self.program_counter = self.return_addresses.pop().expect("return address");
 
                     self.stack.push_value(value);
                 }
