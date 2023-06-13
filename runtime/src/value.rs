@@ -21,6 +21,7 @@ pub(crate) const INTEGER32_MASK: u64 = INTEGER32_SUB_MASK | EXPONENT_MASK;
 pub struct Value(u64);
 
 impl Value {
+    // TODO Optimize bit pattern match.
     pub fn r#type(&self) -> Type {
         if self.0 & EXPONENT_MASK == 0 {
             Type::Float64
@@ -28,6 +29,8 @@ impl Value {
             Type::Array
         } else if self.0 & CLOSURE_MASK == CLOSURE_MASK {
             Type::Closure
+        } else if self.0 & INTEGER32_MASK == INTEGER32_MASK {
+            Type::Integer32
         } else if self.0 & SYMBOL_MASK == SYMBOL_MASK {
             Type::Symbol
         } else {
@@ -61,6 +64,10 @@ impl Value {
     }
 
     pub fn to_float64(&self) -> Option<Float64> {
+        self.try_into().ok()
+    }
+
+    pub fn to_integer32(&self) -> Option<Integer32> {
         self.try_into().ok()
     }
 
@@ -120,9 +127,11 @@ impl Value {
 
 impl PartialEq for Value {
     fn eq(&self, other: &Self) -> bool {
-        if let (Some(one), Some(other)) = (self.to_float64(), other.to_float64()) {
+        if let (Some(one), Some(other)) = (self.as_array(), other.as_array()) {
             one == other
-        } else if let (Some(one), Some(other)) = (self.as_array(), other.as_array()) {
+        } else if let (Some(one), Some(other)) = (self.to_float64(), other.to_float64()) {
+            one == other
+        } else if let (Some(one), Some(other)) = (self.to_integer32(), other.to_integer32()) {
             one == other
         } else if let (Some(one), Some(other)) = (self.to_symbol(), other.to_symbol()) {
             one == other
@@ -302,6 +311,13 @@ mod tests {
         assert_eq!(Value::from(1.0), Value::from(1.0));
         assert_ne!(Value::from(0.0), Value::from(1.0));
         assert_eq!(Value::from(f64::NAN), Value::from(f64::NAN));
+    }
+
+    #[test]
+    fn compare_integer32() {
+        assert_eq!(Value::from(0i32), Value::from(0i32));
+        assert_eq!(Value::from(42i32), Value::from(42i32));
+        assert_ne!(Value::from(-42i32), Value::from(-42i32));
     }
 
     #[test]

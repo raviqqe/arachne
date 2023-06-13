@@ -1,5 +1,5 @@
 use super::Value;
-use crate::value::SYMBOL_MASK;
+use crate::value::INTEGER32_MASK;
 use core::{
     fmt::{self, Debug, Display, Formatter},
     mem::size_of,
@@ -43,7 +43,7 @@ impl From<i32> for Integer32 {
 
 impl From<u32> for Integer32 {
     fn from(number: u32) -> Self {
-        Self(number as u64 | SYMBOL_MASK)
+        Self(number as u64 | INTEGER32_MASK)
     }
 }
 
@@ -63,7 +63,7 @@ impl TryFrom<Value> for Integer32 {
     type Error = Value;
 
     fn try_from(value: Value) -> Result<Self, Self::Error> {
-        if value.is_symbol() {
+        if value.is_integer32() {
             Ok(Self(value.into_raw()))
         } else {
             Err(value)
