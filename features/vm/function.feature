@@ -1,5 +1,5 @@
-Feature: Arithmetic
-  Scenario Outline: Use arithmetic operations
+Feature: Function
+  Scenario Outline: Call a function
     Given a file named "main.arc" with:
     """
     (let f <function>)
