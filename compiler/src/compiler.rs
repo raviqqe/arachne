@@ -243,7 +243,7 @@ impl<'a> Compiler<'a> {
 
         let else_index = {
             if condition_index + 3 < array.len_usize() {
-                self.compile_if(&array, condition_index + 2, frame)?;
+                self.compile_if(array, condition_index + 2, frame)?;
             } else {
                 let mut frame = frame.fork();
                 self.compile_expression(array.get_usize(condition_index + 2), &mut frame)?;
