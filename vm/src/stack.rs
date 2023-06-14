@@ -27,8 +27,4 @@ impl Stack {
     pub fn insert(&mut self, index: usize, value: Value) {
         self.values.insert(index, value);
     }
-
-    pub fn len(&self) -> usize {
-        self.values.len()
-    }
 }

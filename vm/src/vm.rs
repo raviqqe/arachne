@@ -27,7 +27,7 @@ pub struct Vm {
 }
 
 impl Vm {
-    pub fn new(stack_size: usize, return_address_capacity: usize) -> Self {
+    pub fn new(stack_size: usize, _return_address_capacity: usize) -> Self {
         Self {
             program_counter: 0,
             stack: Stack::new(stack_size),
@@ -111,7 +111,6 @@ impl Vm {
                     if let Some(closure) = self.stack.peek(arity).as_closure() {
                         let id = closure.id();
                         let arity = closure.arity() as usize;
-                        drop(closure);
 
                         self.stack
                             .insert(arity - 1, (self.program_counter as u32).into());
