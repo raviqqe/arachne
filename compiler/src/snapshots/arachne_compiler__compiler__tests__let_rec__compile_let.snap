@@ -1,0 +1,9 @@
+---
+source: compiler/src/compiler.rs
+expression: "compile([[\"let-rec\".into(), \"f\".into(),\n                            [\"fn\".into(), [].into(),\n                                        [\"f\".into()].into()].into()].into()]).await"
+---
+jump 6
+peek 0
+call 0
+return 1
+close 3 0 0 []
