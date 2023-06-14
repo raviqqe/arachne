@@ -3,8 +3,6 @@ use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct Frame<'a> {
-    // TODO Support blocks.
-    #[allow(dead_code)]
     parent: Option<&'a Frame<'a>>,
     variables: HashMap<Symbol, usize>,
     temporary_count: usize,
@@ -27,8 +25,6 @@ impl<'a> Frame<'a> {
         }
     }
 
-    // TODO Support blocks.
-    #[allow(dead_code)]
     pub fn fork(&'a self) -> Self {
         Self {
             parent: Some(self),
