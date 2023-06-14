@@ -186,9 +186,6 @@ impl Vm {
                     let value = self.stack.pop();
                     let frame = self.frames.pop().expect("frame");
 
-                    // TODO Remove an operand.
-                    self.read_u8(codes);
-
                     while self.stack.len() > frame.frame_pointer() {
                         self.stack.pop();
                     }
