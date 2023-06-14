@@ -184,12 +184,16 @@ impl Vm {
                 }
                 Instruction::Return => {
                     let value = self.stack.pop();
+                    let frame = self.frames.pop().expect("frame");
 
-                    for _ in 0..self.read_u8(codes) {
+                    // TODO Remove an operand.
+                    self.read_u8(codes);
+
+                    while self.stack.len() > frame.frame_pointer() as usize {
                         self.stack.pop();
                     }
 
-                    self.program_counter = self.frames.pop().expect("return address") as usize;
+                    self.program_counter = frame.return_address() as usize;
 
                     self.stack.push(value);
                 }
