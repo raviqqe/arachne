@@ -27,7 +27,7 @@ pub struct Vm {
 }
 
 impl Vm {
-    pub fn new(stack_size: usize, _return_address_capacity: usize) -> Self {
+    pub fn new(stack_size: usize) -> Self {
         Self {
             program_counter: 0,
             stack: Stack::new(stack_size),
