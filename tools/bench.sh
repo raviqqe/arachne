@@ -5,4 +5,6 @@ set -e
 cargo build --release
 cargo install hyperfine
 
-bench/fibonacci/main.sh
+for directory in fibonacci sum; do
+  bench/$directory/main.sh
+done
