@@ -202,7 +202,6 @@ impl<'a> Compiler<'a> {
 
             codes.push(Instruction::Return as u8);
             *frame.temporary_count_mut() -= 1;
-            codes.push(frame.size() as u8);
             assert_eq!(*frame.temporary_count_mut(), 0);
         }
 

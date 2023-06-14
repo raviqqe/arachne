@@ -35,9 +35,7 @@ pub enum InstructionIr {
     Branch {
         pointer: i16,
     },
-    Return {
-        frame_size: u8,
-    },
+    Return,
     Dump,
 }
 
@@ -71,7 +69,7 @@ impl Display for InstructionIr {
             Self::Call { arity } => write!(formatter, "call {}", arity),
             Self::Jump { pointer } => write!(formatter, "jump {:x}", pointer),
             Self::Branch { pointer } => write!(formatter, "branch {:x}", pointer),
-            Self::Return { frame_size } => write!(formatter, "return {}", frame_size),
+            Self::Return => write!(formatter, "return"),
             Self::Dump => write!(formatter, "dump"),
         }
     }

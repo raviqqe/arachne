@@ -1,5 +1,6 @@
 use crate::{
     decode::{decode_bytes, decode_f64, decode_u16, decode_u32, decode_u8},
+    frame::Frame,
     stack::Stack,
     Instruction,
 };
@@ -24,7 +25,7 @@ macro_rules! binary_operation {
 pub struct Vm {
     program_counter: usize,
     stack: Stack,
-    return_addresses: Vec<u32>,
+    frames: Vec<Frame>,
 }
 
 impl Vm {
@@ -32,7 +33,7 @@ impl Vm {
         Self {
             program_counter: 0,
             stack: Stack::new(stack_size),
-            return_addresses: Default::default(),
+            frames: Default::default(),
         }
     }
 
@@ -114,7 +115,10 @@ impl Vm {
                         let id = closure.id();
                         let closure_arity = closure.arity() as usize;
 
-                        self.return_addresses.push(self.program_counter as u32);
+                        self.frames.push(Frame::new(
+                            self.program_counter as u32,
+                            (self.stack.len() - arity - 1) as u32,
+                        ));
                         self.program_counter = id as usize;
 
                         for _ in 0..arity.saturating_sub(closure_arity) {
@@ -180,13 +184,13 @@ impl Vm {
                 }
                 Instruction::Return => {
                     let value = self.stack.pop();
+                    let frame = self.frames.pop().expect("frame");
 
-                    for _ in 0..self.read_u8(codes) {
+                    while self.stack.len() > frame.frame_pointer() as usize {
                         self.stack.pop();
                     }
 
-                    self.program_counter =
-                        self.return_addresses.pop().expect("return address") as usize;
+                    self.program_counter = frame.return_address() as usize;
 
                     self.stack.push(value);
                 }

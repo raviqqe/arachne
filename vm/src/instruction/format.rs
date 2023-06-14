@@ -74,9 +74,7 @@ pub fn format_instructions(codes: &[u8]) -> Result<String, FormatError> {
                 Instruction::Branch => InstructionIr::Branch {
                     pointer: decode_u16(codes, &mut index) as i16,
                 },
-                Instruction::Return => InstructionIr::Return {
-                    frame_size: decode_u8(codes, &mut index),
-                },
+                Instruction::Return => InstructionIr::Return,
             },
         );
     }

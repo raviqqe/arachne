@@ -24,6 +24,10 @@ impl Stack {
         self.values.get(self.get_index(index)).unwrap()
     }
 
+    pub fn len(&self) -> usize {
+        self.values.len()
+    }
+
     fn get_index(&self, index: usize) -> usize {
         self.values.len() - 1 - index
     }
