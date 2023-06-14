@@ -40,3 +40,23 @@ Feature: Function
     """
     42
     """
+
+  Scenario: Define a fibonacci function
+    Given a file named "main.arc" with:
+    """
+    (let-rec
+      fibonacci
+      (fn (x)
+        (if
+          (= x 0) 0
+          (= x 1) 1
+          (+ (fibonacci (- x 1)) (fibonacci (- x 2))))))
+
+    (fibonacci 40)
+    """
+    When I run `arachne` interactively
+    And I pipe in the file "main.arc"
+    Then the stdout should contain exactly:
+    """
+    6765
+    """
