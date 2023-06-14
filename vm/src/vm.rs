@@ -24,6 +24,7 @@ macro_rules! binary_operation {
 pub struct Vm {
     program_counter: usize,
     stack: Stack,
+    return_addresses: Vec<u32>,
 }
 
 impl Vm {
@@ -31,6 +32,7 @@ impl Vm {
         Self {
             program_counter: 0,
             stack: Stack::new(stack_size),
+            return_addresses: Default::default(),
         }
     }
 
@@ -112,8 +114,7 @@ impl Vm {
                         let id = closure.id();
                         let closure_arity = closure.arity() as usize;
 
-                        self.stack
-                            .insert(arity, (self.program_counter as u32).into());
+                        self.return_addresses.push(self.program_counter as u32);
                         self.program_counter = id as usize;
 
                         for _ in 0..arity.saturating_sub(closure_arity) {
@@ -184,12 +185,8 @@ impl Vm {
                         self.stack.pop();
                     }
 
-                    self.program_counter = self
-                        .stack
-                        .pop()
-                        .to_integer32()
-                        .expect("integer32 return address")
-                        .to_i32() as usize;
+                    self.program_counter =
+                        self.return_addresses.pop().expect("return address") as usize;
 
                     self.stack.push(value);
                 }
