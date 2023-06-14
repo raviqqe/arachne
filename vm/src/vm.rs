@@ -24,8 +24,6 @@ macro_rules! binary_operation {
 pub struct Vm {
     program_counter: usize,
     stack: Stack,
-    // TODO Change this into frames and add frame pointers?
-    return_addresses: Vec<u32>,
 }
 
 impl Vm {
@@ -33,7 +31,6 @@ impl Vm {
         Self {
             program_counter: 0,
             stack: Stack::new(stack_size),
-            return_addresses: Vec::with_capacity(return_address_capacity),
         }
     }
 
@@ -111,12 +108,15 @@ impl Vm {
                 Instruction::Call => {
                     let arity = self.read_u8(codes) as usize;
 
-                    if let Some(closure) =
-                        self.stack.peek(self.stack.len() - arity - 1).as_closure()
-                    {
-                        self.return_addresses.push(self.program_counter as u32);
-                        self.program_counter = closure.id() as usize;
-                        let closure_arity = closure.arity() as usize;
+                    if let Some(closure) = self.stack.peek(arity).as_closure() {
+                        let id = closure.id();
+                        let arity = closure.arity() as usize;
+                        drop(closure);
+
+                        self.stack
+                            .insert(arity - 1, (self.program_counter as u32).into());
+                        self.program_counter = id as usize;
+                        let closure_arity = arity;
 
                         for _ in 0..arity.saturating_sub(closure_arity) {
                             self.stack.pop();
@@ -154,11 +154,7 @@ impl Vm {
                     // TODO Move local variables when possible.
                     let index = self.read_u8(codes);
 
-                    self.stack.push(
-                        self.stack
-                            .peek(self.stack.len() - 1 - index as usize)
-                            .clone(),
-                    );
+                    self.stack.push(self.stack.peek(index as usize).clone());
                 }
                 Instruction::Equal => {
                     let rhs = self.stack.pop();
@@ -190,8 +186,12 @@ impl Vm {
                         self.stack.pop();
                     }
 
-                    self.program_counter =
-                        self.return_addresses.pop().expect("return address") as usize;
+                    self.program_counter = self
+                        .stack
+                        .pop()
+                        .to_integer32()
+                        .expect("integer32 return address")
+                        .to_i32() as usize;
 
                     self.stack.push(value);
                 }

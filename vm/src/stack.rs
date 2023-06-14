@@ -2,7 +2,7 @@ use runtime::Value;
 
 #[derive(Debug)]
 pub struct Stack {
-    values: Vec<u64>,
+    values: Vec<Value>,
 }
 
 impl Stack {
@@ -12,16 +12,20 @@ impl Stack {
         }
     }
 
-    pub fn peek(&self, index: usize) -> &Value {
-        unsafe { &*(self.values.get(index).unwrap() as *const u64).cast::<Value>() }
-    }
-
     pub fn push(&mut self, value: Value) {
-        self.values.push(value.into_raw());
+        self.values.push(value);
     }
 
     pub fn pop(&mut self) -> Value {
-        unsafe { Value::from_raw(self.values.pop().expect("stack value")) }
+        self.values.pop().expect("stack value")
+    }
+
+    pub fn peek(&self, index: usize) -> &Value {
+        self.values.get(self.values.len() - 1 - index).unwrap()
+    }
+
+    pub fn insert(&mut self, index: usize, value: Value) {
+        self.values.insert(index, value);
     }
 
     pub fn len(&self) -> usize {
