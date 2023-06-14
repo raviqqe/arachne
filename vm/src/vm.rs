@@ -10,14 +10,14 @@ use std::str;
 macro_rules! binary_operation {
     ($self:expr, $operator:tt) => {
         let value = (|| {
-            let rhs = $self.stack.pop_value().to_float64()?;
-            let lhs = $self.stack.pop_value().to_float64()?;
+            let rhs = $self.stack.pop().to_float64()?;
+            let lhs = $self.stack.pop().to_float64()?;
 
             Some((lhs.to_f64() $operator rhs.to_f64()).into())
         })()
         .unwrap_or(NIL);
 
-        $self.stack.push_value(value);
+        $self.stack.push(value);
     };
 }
 
@@ -40,14 +40,14 @@ impl Vm {
     pub fn run(&mut self, codes: &[u8]) {
         while self.program_counter < codes.len() {
             match Instruction::from_u8(self.read_u8(codes)).expect("valid instruction") {
-                Instruction::Nil => self.stack.push_value(NIL),
+                Instruction::Nil => self.stack.push(NIL),
                 Instruction::Float64 => {
                     let value = self.read_f64(codes);
-                    self.stack.push_value(value.into());
+                    self.stack.push(value.into());
                 }
                 Instruction::Integer32 => {
                     let value = self.read_u32(codes);
-                    self.stack.push_value(value.into());
+                    self.stack.push(value.into());
                 }
                 Instruction::Symbol => {
                     let len = self.read_u8(codes);
@@ -55,36 +55,36 @@ impl Vm {
                         .unwrap()
                         .into();
 
-                    self.stack.push_value(value);
+                    self.stack.push(value);
                 }
                 Instruction::Get => {
                     let value = (|| {
-                        let index = self.stack.pop_value();
-                        let array = self.stack.pop_value().into_array()?;
+                        let index = self.stack.pop();
+                        let array = self.stack.pop().into_array()?;
 
                         Some(array.get(index))
                     })()
                     .unwrap_or(NIL);
 
-                    self.stack.push_value(value);
+                    self.stack.push(value);
                 }
                 Instruction::Set => {
                     let value = (|| {
-                        let value = self.stack.pop_value();
-                        let index = self.stack.pop_value();
-                        let array = self.stack.pop_value().into_array()?;
+                        let value = self.stack.pop();
+                        let index = self.stack.pop();
+                        let array = self.stack.pop().into_array()?;
 
                         Some(array.set(index, value).into())
                     })()
                     .unwrap_or(NIL);
 
-                    self.stack.push_value(value);
+                    self.stack.push(value);
                 }
                 Instruction::Length => {
-                    let value = (|| Some(self.stack.pop_value().into_array()?.len().into()))()
-                        .unwrap_or(NIL);
+                    let value =
+                        (|| Some(self.stack.pop().into_array()?.len().into()))().unwrap_or(NIL);
 
-                    self.stack.push_value(value);
+                    self.stack.push(value);
                 }
                 Instruction::Add => {
                     binary_operation!(self, +);
@@ -99,37 +99,38 @@ impl Vm {
                     binary_operation!(self, /);
                 }
                 Instruction::Drop => {
-                    self.stack.pop_value();
+                    self.stack.pop();
                 }
                 Instruction::Dump => {
-                    let value = self.stack.pop_value();
+                    let value = self.stack.pop();
 
                     println!("{}", value);
 
-                    self.stack.push_value(value);
+                    self.stack.push(value);
                 }
                 Instruction::Call => {
                     let arity = self.read_u8(codes) as usize;
 
-                    if let Some(closure) = self.stack.get(self.stack.len() - arity - 1).as_closure()
+                    if let Some(closure) =
+                        self.stack.peek(self.stack.len() - arity - 1).as_closure()
                     {
                         self.return_addresses.push(self.program_counter as u32);
                         self.program_counter = closure.id() as usize;
                         let closure_arity = closure.arity() as usize;
 
                         for _ in 0..arity.saturating_sub(closure_arity) {
-                            self.stack.pop_value();
+                            self.stack.pop();
                         }
 
                         for _ in 0..closure_arity.saturating_sub(arity) {
-                            self.stack.push_value(NIL);
+                            self.stack.push(NIL);
                         }
                     } else {
                         for _ in 0..arity + 1 {
-                            self.stack.pop_value();
+                            self.stack.pop();
                         }
 
-                        self.stack.push_value(NIL);
+                        self.stack.push(NIL);
                     }
                 }
                 Instruction::Close => {
@@ -143,27 +144,27 @@ impl Vm {
 
                         closure.write_environment(
                             index as usize,
-                            self.stack.get(variable_index as usize).clone(),
+                            self.stack.peek(variable_index as usize).clone(),
                         );
                     }
 
-                    self.stack.push_value(closure.into());
+                    self.stack.push(closure.into());
                 }
                 Instruction::Peek => {
                     // TODO Move local variables when possible.
                     let index = self.read_u8(codes);
 
-                    self.stack.push_value(
+                    self.stack.push(
                         self.stack
-                            .get(self.stack.len() - 1 - index as usize)
+                            .peek(self.stack.len() - 1 - index as usize)
                             .clone(),
                     );
                 }
                 Instruction::Equal => {
-                    let rhs = self.stack.pop_value();
-                    let lhs = self.stack.pop_value();
+                    let rhs = self.stack.pop();
+                    let lhs = self.stack.pop();
 
-                    self.stack.push_value(((lhs == rhs) as usize as f64).into());
+                    self.stack.push(((lhs == rhs) as usize as f64).into());
                 }
                 Instruction::Jump => {
                     let address = self.read_u16(codes);
@@ -174,7 +175,7 @@ impl Vm {
                 }
                 Instruction::Branch => {
                     let address = self.read_u16(codes);
-                    let value = self.stack.pop_value();
+                    let value = self.stack.pop();
 
                     if value != NIL {
                         self.program_counter = self
@@ -183,16 +184,16 @@ impl Vm {
                     }
                 }
                 Instruction::Return => {
-                    let value = self.stack.pop_value();
+                    let value = self.stack.pop();
 
                     for _ in 0..self.read_u8(codes) {
-                        self.stack.pop_value();
+                        self.stack.pop();
                     }
 
                     self.program_counter =
                         self.return_addresses.pop().expect("return address") as usize;
 
-                    self.stack.push_value(value);
+                    self.stack.push(value);
                 }
             }
         }
