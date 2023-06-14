@@ -1,9 +1,9 @@
 (let-rec
-  f
+  fibonacci
   (fn (x) 
     (if 
       (= x 0) 0
       (= x 1) 1
-      (+ (f (- x 1)) (f (- x 2))))))
+      (+ (fibonacci (- x 1)) (fibonacci (- x 2))))))
 
-(f 40)
+(fibonacci 40)
