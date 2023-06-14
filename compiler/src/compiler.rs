@@ -425,28 +425,25 @@ mod tests {
         #[tokio::test]
         async fn compile_two_branches_in_function() {
             insta::assert_display_snapshot!(
-                compile(
-                    [[
-                        "let".into(),
-                        "f".into(),
+                compile([[
+                    "let".into(),
+                    "f".into(),
+                    [
+                        "fn".into(),
+                        [].into(),
                         [
-                            "fn".into(),
-                            [].into(),
-                            [
-                                "if".into(),
-                                1.0.into(),
-                                2.0.into(),
-                                3.0.into(),
-                                4.0.into(),
-                                5.0.into()
-                            ]
-                            .into()
+                            "if".into(),
+                            1.0.into(),
+                            2.0.into(),
+                            3.0.into(),
+                            4.0.into(),
+                            5.0.into()
                         ]
                         .into()
                     ]
-                    .into()]
                     .into()
-                )
+                ]
+                .into()])
                 .await
             );
         }
