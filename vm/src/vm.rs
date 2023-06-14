@@ -117,7 +117,7 @@ impl Vm {
 
                         self.frames.push(Frame::new(
                             self.program_counter as u32,
-                            self.stack.len() as u32,
+                            (self.stack.len() - arity - 1) as u32,
                         ));
                         self.program_counter = id as usize;
 
