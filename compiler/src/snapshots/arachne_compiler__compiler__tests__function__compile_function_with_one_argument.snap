@@ -2,9 +2,9 @@
 source: compiler/src/compiler.rs
 expression: "compile([[\"fn\".into(), [\"x\".into()].into(), 42.0.into()].into()]).await"
 ---
-jump b
+jump a
 float64 42
-return 2
+return
 close 3 1 0 []
 dump
 drop
