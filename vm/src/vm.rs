@@ -110,12 +110,11 @@ impl Vm {
 
                     if let Some(closure) = self.stack.peek(arity).as_closure() {
                         let id = closure.id();
-                        let arity = closure.arity() as usize;
+                        let closure_arity = closure.arity() as usize;
 
                         self.stack
-                            .insert(arity - 1, (self.program_counter as u32).into());
+                            .insert(arity, (self.program_counter as u32).into());
                         self.program_counter = id as usize;
-                        let closure_arity = arity;
 
                         for _ in 0..arity.saturating_sub(closure_arity) {
                             self.stack.pop();

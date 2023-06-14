@@ -21,10 +21,14 @@ impl Stack {
     }
 
     pub fn peek(&self, index: usize) -> &Value {
-        self.values.get(self.values.len() - 1 - index).unwrap()
+        self.values.get(self.get_index(index)).unwrap()
     }
 
     pub fn insert(&mut self, index: usize, value: Value) {
-        self.values.insert(index, value);
+        self.values.insert(self.get_index(index), value);
+    }
+
+    fn get_index(&self, index: usize) -> usize {
+        self.values.len() - 1 - index
     }
 }
