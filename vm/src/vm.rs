@@ -116,8 +116,8 @@ impl Vm {
                         let closure_arity = closure.arity() as usize;
 
                         self.frames.push(Frame::new(
-                            self.program_counter,
-                            self.stack.len() - arity - 1,
+                            self.program_counter as u32,
+                            (self.stack.len() - arity - 1) as u32,
                         ));
                         self.program_counter = id as usize;
 
@@ -186,11 +186,11 @@ impl Vm {
                     let value = self.stack.pop();
                     let frame = self.frames.pop().expect("frame");
 
-                    while self.stack.len() > frame.frame_pointer() {
+                    while self.stack.len() > frame.frame_pointer() as usize {
                         self.stack.pop();
                     }
 
-                    self.program_counter = frame.return_address();
+                    self.program_counter = frame.return_address() as usize;
 
                     self.stack.push(value);
                 }
