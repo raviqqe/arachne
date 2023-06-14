@@ -26,9 +26,9 @@ Feature: Function
   Scenario: Define a recursive function
     Given a file named "main.arc" with:
     """
-    (let-rec 
-      f 
-      (fn (x) 
+    (let-rec
+      f
+      (fn (x)
         (if (= x 0)
           42
           (f (- x 1)))))
@@ -57,7 +57,7 @@ Feature: Function
     And I pipe in the file "main.arc"
     Then the stdout should contain exactly:
     """
-		500000500000
+    500000500000
     """
 
   Scenario: Define a fibonacci function
