@@ -17,6 +17,10 @@ impl Symbol {
         self.0
     }
 
+    pub(crate) unsafe fn from_raw(raw: u64) -> Self {
+        Self(raw)
+    }
+
     pub fn as_str(&self) -> &str {
         unsafe { &*((self.0 & !SYMBOL_MASK) as *const u8 as *const String) }
     }

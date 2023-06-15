@@ -106,9 +106,9 @@ impl Value {
                 Type::Closure => {
                     TypedValueRef::Closure(unsafe { &*(self as *const _ as *const _) })
                 }
-                Type::Float64 => TypedValueRef::Float64(self.try_into().unwrap()),
-                Type::Integer32 => TypedValueRef::Integer32(self.try_into().unwrap()),
-                Type::Symbol => TypedValueRef::Symbol(self.try_into().unwrap()),
+                Type::Float64 => TypedValueRef::Float64(Float64::from(f64::from_bits(self.0))),
+                Type::Integer32 => TypedValueRef::Integer32(unsafe { Integer32::from_raw(self.0) }),
+                Type::Symbol => TypedValueRef::Symbol(unsafe { Symbol::from_raw(self.0) }),
             })
         }
     }
