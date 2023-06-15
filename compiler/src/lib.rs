@@ -1,4 +1,3 @@
-mod block;
 mod compiler;
 mod error;
 mod frame;
