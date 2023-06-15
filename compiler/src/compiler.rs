@@ -220,7 +220,7 @@ impl<'a> Compiler<'a> {
         codes.push(arity); // arity
         codes.push(closed_frame.free_variables().len() as u8);
 
-        for &index in closed_frame.free_variables() {
+        for &index in &*closed_frame.free_variables() {
             codes.push(index as u8);
         }
 

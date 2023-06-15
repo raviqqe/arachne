@@ -1,12 +1,15 @@
 use runtime::Symbol;
-use std::collections::{HashMap, HashSet};
+use std::{
+    cell::{Ref, RefCell},
+    collections::{HashMap, HashSet},
+};
 
 #[derive(Debug)]
 pub struct Frame<'a> {
-    parent: Option<&'a mut Frame<'a>>,
+    parent: Option<&'a Frame<'a>>,
     variables: HashMap<Symbol, usize>,
     temporary_count: usize,
-    free_variables: Option<HashSet<usize>>, // Only for function.
+    free_variables: Option<RefCell<HashSet<usize>>>, // Only for function.
 }
 
 impl<'a> Frame<'a> {
@@ -23,7 +26,7 @@ impl<'a> Frame<'a> {
         }
     }
 
-    pub fn fork(&'a mut self) -> Self {
+    pub fn fork(&'a self) -> Self {
         Self {
             parent: Some(self),
             variables: Default::default(),
@@ -32,13 +35,13 @@ impl<'a> Frame<'a> {
         }
     }
 
-    pub fn get_variable(&mut self, name: Symbol) -> Option<usize> {
+    pub fn get_variable(&self, name: Symbol) -> Option<usize> {
         let offset = self.variables.len() + self.temporary_count;
 
         if let Some(index) = self.variables.get(&name) {
             Some(offset - index - 1)
         } else {
-            if let Some(parent) = &mut self.parent {
+            if let Some(parent) = &self.parent {
                 if let Some(index) = parent.get_variable(name) {
                     Some(index + offset)
                 } else {
@@ -62,8 +65,8 @@ impl<'a> Frame<'a> {
         &mut self.temporary_count
     }
 
-    pub fn free_variables(&self) -> &HashSet<usize> {
-        self.free_variables.as_ref().unwrap()
+    pub fn free_variables(&self) -> Ref<HashSet<usize>> {
+        self.free_variables.as_ref().unwrap().borrow()
     }
 }
 
