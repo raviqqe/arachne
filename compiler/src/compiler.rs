@@ -181,10 +181,12 @@ impl<'a> Compiler<'a> {
         let arguments = arguments.as_array().expect("arguments");
         let arity = u8::try_from(arguments.len_usize())?;
 
-        {
+        let function_frame = {
             let mut frame = Frame::with_capacity(arguments.len_usize() + 1);
 
-            frame.insert_variable(name.unwrap_or_else(|| "".into()));
+            if let Some(name) = name {
+                frame.insert_variable(name);
+            }
 
             for index in 0..arguments.len_usize() {
                 if let Some(argument) = arguments.get_usize(index).to_symbol() {
@@ -203,7 +205,9 @@ impl<'a> Compiler<'a> {
             codes.push(Instruction::Return as u8);
             *frame.temporary_count_mut() -= 1;
             assert_eq!(*frame.temporary_count_mut(), 0);
-        }
+
+            frame
+        };
 
         let mut codes = self.codes.borrow_mut();
         let current_index = codes.len();
