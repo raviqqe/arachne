@@ -59,7 +59,7 @@ impl Value {
     }
 
     pub fn is_closure(&self) -> bool {
-        self.r#type() == Type::Closure
+        self.is_nil() || self.r#type() == Type::Closure
     }
 
     pub fn is_symbol(&self) -> bool {
@@ -269,7 +269,7 @@ mod tests {
     fn nil_type_check() {
         assert!(NIL.is_nil());
         assert!(NIL.is_array());
-        assert!(!NIL.is_closure());
+        assert!(NIL.is_closure());
         assert!(NIL.is_float64());
         assert!(!NIL.is_symbol());
     }
