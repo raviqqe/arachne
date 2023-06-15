@@ -1,7 +1,7 @@
 use crate::{frame::Frame, CompileError};
 use async_stream::try_stream;
 use futures::{Stream, StreamExt};
-use runtime::{Array, Symbol, TypedValue, Value};
+use runtime::{Array, Symbol, TypedValueRef, Value};
 use std::{cell::RefCell, error::Error, mem::size_of};
 use vm::Instruction;
 
@@ -87,9 +87,9 @@ impl<'a> Compiler<'a> {
     }
 
     fn compile_expression(&mut self, value: Value, frame: &mut Frame) -> Result<(), CompileError> {
-        if let Some(value) = value.into_typed() {
+        if let Some(value) = value.as_typed() {
             match value {
-                TypedValue::Array(array) => {
+                TypedValueRef::Array(array) => {
                     if let Some(symbol) = array.get_usize(0).to_symbol() {
                         let symbol = symbol.as_str();
 
@@ -122,22 +122,22 @@ impl<'a> Compiler<'a> {
                         self.compile_call(array, frame)?
                     }
                 }
-                TypedValue::Closure(_) => return Err(CompileError::Closure),
-                TypedValue::Float64(number) => {
+                TypedValueRef::Closure(_) => return Err(CompileError::Closure),
+                TypedValueRef::Float64(number) => {
                     let mut codes = self.codes.borrow_mut();
 
                     codes.push(Instruction::Float64 as u8);
                     codes.extend(number.to_f64().to_le_bytes());
                     *frame.temporary_count_mut() += 1;
                 }
-                TypedValue::Integer32(number) => {
+                TypedValueRef::Integer32(number) => {
                     let mut codes = self.codes.borrow_mut();
 
                     codes.push(Instruction::Integer32 as u8);
                     codes.extend(number.to_i32().to_le_bytes());
                     *frame.temporary_count_mut() += 1;
                 }
-                TypedValue::Symbol(symbol) => {
+                TypedValueRef::Symbol(symbol) => {
                     let mut codes = self.codes.borrow_mut();
 
                     if let Some(index) = frame.get_variable(symbol) {
@@ -220,7 +220,7 @@ impl<'a> Compiler<'a> {
         Ok(())
     }
 
-    fn compile_arguments(&mut self, array: Array, frame: &mut Frame) -> Result<(), CompileError> {
+    fn compile_arguments(&mut self, array: &Array, frame: &mut Frame) -> Result<(), CompileError> {
         for index in 1..array.len_usize() {
             self.compile_expression(array.get_usize(index), frame)?;
         }
@@ -228,9 +228,9 @@ impl<'a> Compiler<'a> {
         Ok(())
     }
 
-    fn compile_call(&mut self, array: Array, frame: &mut Frame) -> Result<(), CompileError> {
+    fn compile_call(&mut self, array: &Array, frame: &mut Frame) -> Result<(), CompileError> {
         self.compile_expression(array.get_usize(0), frame)?;
-        self.compile_arguments(array.clone(), frame)?;
+        self.compile_arguments(array, frame)?;
 
         let mut codes = self.codes.borrow_mut();
         codes.push(Instruction::Call as u8);

@@ -118,11 +118,11 @@ impl Value {
             None
         } else {
             Some(match self.r#type() {
-                Type::Array => TypedValue::Array(self.try_into().unwrap()),
-                Type::Closure => TypedValue::Closure(self.try_into().unwrap()),
-                Type::Float64 => TypedValue::Float64(self.try_into().unwrap()),
-                Type::Integer32 => TypedValue::Integer32(self.try_into().unwrap()),
-                Type::Symbol => TypedValue::Symbol(self.try_into().unwrap()),
+                Type::Array => TypedValue::Array(unsafe { Array::from_raw(self.0) }),
+                Type::Closure => TypedValue::Closure(unsafe { Closure::from_raw(self.0) }),
+                Type::Float64 => TypedValue::Float64(Float64::from(f64::from_bits(self.0))),
+                Type::Integer32 => TypedValue::Integer32(unsafe { Integer32::from_raw(self.0) }),
+                Type::Symbol => TypedValue::Symbol(unsafe { Symbol::from_raw(self.0) }),
             })
         }
     }
