@@ -1,5 +1,8 @@
 use super::{Array, Float64};
-use crate::{integer32::Integer32, r#type::Type, symbol::Symbol, Closure, TypedValue};
+use crate::{
+    integer32::Integer32, r#type::Type, symbol::Symbol, typed_value::TypedValueRef, Closure,
+    TypedValue,
+};
 use alloc::{string::String, vec::Vec};
 use core::{
     fmt::{self, Display, Formatter},
@@ -92,6 +95,22 @@ impl Value {
 
     pub fn as_closure(&self) -> Option<&Closure> {
         self.try_into().ok()
+    }
+
+    pub fn as_typed(&self) -> Option<TypedValueRef> {
+        if self.is_nil() {
+            None
+        } else {
+            Some(match self.r#type() {
+                Type::Array => TypedValueRef::Array(unsafe { &*(self as *const _ as *const _) }),
+                Type::Closure => {
+                    TypedValueRef::Closure(unsafe { &*(self as *const _ as *const _) })
+                }
+                Type::Float64 => TypedValueRef::Float64(self.try_into().unwrap()),
+                Type::Integer32 => TypedValueRef::Integer32(self.try_into().unwrap()),
+                Type::Symbol => TypedValueRef::Symbol(self.try_into().unwrap()),
+            })
+        }
     }
 
     pub fn into_typed(self) -> Option<TypedValue> {
