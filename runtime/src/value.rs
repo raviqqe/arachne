@@ -28,9 +28,7 @@ pub struct Value(u64);
 
 impl Value {
     pub fn r#type(&self) -> Type {
-        let bits = self.0 & EXPONENT_MASK;
-
-        if bits == 0 {
+        if self.0 & EXPONENT_MASK == 0 {
             return Type::Float64;
         }
 
