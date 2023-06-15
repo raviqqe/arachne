@@ -218,7 +218,12 @@ impl<'a> Compiler<'a> {
         codes.push(Instruction::Close as u8);
         codes.extend((function_index as u32).to_le_bytes());
         codes.push(arity); // arity
-        codes.push(0u8); // TODO environment size
+        codes.push(function_frame.free_variables().len() as u8); // TODO environment size
+
+        for &index in function_frame.free_variables() {
+            codes.push(index as u8);
+        }
+
         *frame.temporary_count_mut() += 1;
 
         Ok(())
