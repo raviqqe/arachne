@@ -7,38 +7,42 @@ use core::{
 };
 
 pub const NIL: Value = Value(0);
-const EXPONENT_MASK: u64 = 0x7ff0_0000_0000_0000;
-const ARRAY_SUB_MASK: u64 = 0x0004_0000_0000_0000;
-const CLOSURE_SUB_MASK: u64 = 0x0001_0000_0000_0000;
-const SYMBOL_SUB_MASK: u64 = 0x0002_0000_0000_0000;
-const INTEGER32_SUB_MASK: u64 = 0x0000_8000_0000_0000;
-pub(crate) const ARRAY_MASK: u64 = ARRAY_SUB_MASK | EXPONENT_MASK;
-pub(crate) const CLOSURE_MASK: u64 = CLOSURE_SUB_MASK | EXPONENT_MASK;
-pub(crate) const SYMBOL_MASK: u64 = SYMBOL_SUB_MASK | EXPONENT_MASK;
-pub(crate) const INTEGER32_MASK: u64 = INTEGER32_SUB_MASK | EXPONENT_MASK;
+const EXPONENT_MASK: u64 = 0x7ff0 << 48;
+const TYPE_SUB_MASK: usize = 0b111;
+const INTEGER32_SUB_MASK: usize = 0b001;
+const SYMBOL_SUB_MASK: usize = 0b011;
+const CLOSURE_SUB_MASK: usize = 0b010;
+const ARRAY_SUB_MASK: usize = 0b100;
+const TYPE_MASK_OFFSET: usize = 48;
+
+const fn build_mask(sub_mask: usize) -> u64 {
+    ((sub_mask as u64) << TYPE_MASK_OFFSET) | EXPONENT_MASK
+}
+
+pub(crate) const ARRAY_MASK: u64 = build_mask(ARRAY_SUB_MASK);
+pub(crate) const CLOSURE_MASK: u64 = build_mask(CLOSURE_SUB_MASK);
+pub(crate) const SYMBOL_MASK: u64 = build_mask(SYMBOL_SUB_MASK);
+pub(crate) const INTEGER32_MASK: u64 = build_mask(INTEGER32_SUB_MASK);
 
 #[derive(Debug)]
 pub struct Value(u64);
 
 impl Value {
-    // TODO Optimize bit pattern match.
-    pub fn r#type(&self) -> Type {
-        if self.0 & EXPONENT_MASK == 0 {
-            Type::Float64
-        } else if self.0 & ARRAY_MASK == ARRAY_MASK {
-            Type::Array
-        } else if self.0 & CLOSURE_MASK == CLOSURE_MASK {
-            Type::Closure
-        } else if self.0 & INTEGER32_MASK == INTEGER32_MASK {
-            Type::Integer32
-        } else if self.0 & SYMBOL_MASK == SYMBOL_MASK {
-            Type::Symbol
-        } else {
-            Type::Float64
+    pub const fn r#type(&self) -> Type {
+        if self.0 & EXPONENT_MASK != EXPONENT_MASK {
+            return Type::Float64;
+        }
+
+        match ((self.0 >> TYPE_MASK_OFFSET) as usize) & TYPE_SUB_MASK {
+            INTEGER32_SUB_MASK => Type::Integer32,
+            SYMBOL_SUB_MASK => Type::Symbol,
+            CLOSURE_SUB_MASK => Type::Closure,
+            ARRAY_SUB_MASK => Type::Array,
+            _ => Type::Float64,
         }
     }
 
-    pub fn is_nil(&self) -> bool {
+    pub const fn is_nil(&self) -> bool {
         self.0 == 0
     }
 
@@ -55,7 +59,6 @@ impl Value {
     }
 
     pub fn is_closure(&self) -> bool {
-        // TODO Should closures be non-nil?
         self.is_nil() || self.r#type() == Type::Closure
     }
 
@@ -127,16 +130,12 @@ impl Value {
 
 impl PartialEq for Value {
     fn eq(&self, other: &Self) -> bool {
-        if let (Some(one), Some(other)) = (self.as_array(), other.as_array()) {
-            one == other
-        } else if let (Some(one), Some(other)) = (self.to_float64(), other.to_float64()) {
-            one == other
-        } else if let (Some(one), Some(other)) = (self.to_integer32(), other.to_integer32()) {
-            one == other
-        } else if let (Some(one), Some(other)) = (self.to_symbol(), other.to_symbol()) {
-            one == other
-        } else {
-            false
+        match self.r#type() {
+            Type::Float64 => self.to_float64() == other.to_float64(),
+            Type::Closure => false,
+            Type::Integer32 => self.to_integer32() == other.to_integer32(),
+            Type::Array => self.as_array() == other.as_array(),
+            Type::Symbol => self.to_symbol() == other.to_symbol(),
         }
     }
 }
@@ -157,8 +156,14 @@ impl Clone for Value {
 
 impl Drop for Value {
     fn drop(&mut self) {
-        if self.is_array() {
-            unsafe { Array::from_raw(self.0) };
+        match self.r#type() {
+            Type::Array => unsafe {
+                Array::from_raw(self.0);
+            },
+            Type::Closure => unsafe {
+                Closure::from_raw(self.0);
+            },
+            Type::Float64 | Type::Integer32 | Type::Symbol => {}
         }
     }
 }
