@@ -8,11 +8,17 @@ use core::{
 
 pub const NIL: Value = Value(0);
 const EXPONENT_MASK: u64 = 0x7ff0 << 48;
-const ARRAY_SUB_MASK: u64 = 0x0004_0000_0000_0000;
+const ARRAY_SUB_MASK: usize = 0x0004;
 const CLOSURE_SUB_MASK: u64 = 0x0001_0000_0000_0000;
 const SYMBOL_SUB_MASK: u64 = 0x0002_0000_0000_0000;
 const INTEGER32_SUB_MASK: u64 = 0x0000_8000_0000_0000;
-pub(crate) const ARRAY_MASK: u64 = ARRAY_SUB_MASK | EXPONENT_MASK;
+const TYPE_MASK_OFFSET: usize = 48;
+
+const fn build_mask(sub_mask: usize) -> u64 {
+    ((sub_mask as u64) << TYPE_MASK_OFFSET) | EXPONENT_MASK
+}
+
+pub(crate) const ARRAY_MASK: u64 = build_mask(ARRAY_SUB_MASK);
 pub(crate) const CLOSURE_MASK: u64 = CLOSURE_SUB_MASK | EXPONENT_MASK;
 pub(crate) const SYMBOL_MASK: u64 = SYMBOL_SUB_MASK | EXPONENT_MASK;
 pub(crate) const INTEGER32_MASK: u64 = INTEGER32_SUB_MASK | EXPONENT_MASK;
