@@ -149,12 +149,16 @@ impl Value {
 
 impl PartialEq for Value {
     fn eq(&self, other: &Self) -> bool {
-        match self.r#type() {
-            Type::Float64 => self.to_float64() == other.to_float64(),
-            Type::Closure => false,
-            Type::Integer32 => self.to_integer32() == other.to_integer32(),
-            Type::Array => self.as_array() == other.as_array(),
-            Type::Symbol => self.to_symbol() == other.to_symbol(),
+        if let Some(value) = self.as_typed() {
+            match value {
+                TypedValueRef::Float64(one) => Some(one) == other.to_float64(),
+                TypedValueRef::Closure(_) => false,
+                TypedValueRef::Integer32(one) => Some(one) == other.to_integer32(),
+                TypedValueRef::Array(one) => Some(one) == other.as_array(),
+                TypedValueRef::Symbol(one) => Some(one) == other.to_symbol(),
+            }
+        } else {
+            other.is_nil()
         }
     }
 }

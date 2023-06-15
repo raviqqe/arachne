@@ -94,9 +94,9 @@ impl<'a> Compiler<'a> {
                         let symbol = symbol.as_str();
 
                         if symbol == "fn" {
-                            self.compile_function(None, &array, frame)?;
+                            self.compile_function(None, array, frame)?;
                         } else if symbol == "if" {
-                            self.compile_if(&array, 1, frame)?;
+                            self.compile_if(array, 1, frame)?;
                         } else if let Some(instruction) = match symbol {
                             "=" => Some(Instruction::Equal),
                             "get" => Some(Instruction::Get),
