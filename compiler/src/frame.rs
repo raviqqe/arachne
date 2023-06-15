@@ -9,7 +9,7 @@ pub struct Frame<'a> {
     parent: Option<&'a Frame<'a>>,
     variables: HashMap<Symbol, usize>,
     temporary_count: usize,
-    free_variables: Option<RefCell<HashSet<usize>>>, // Only for function.
+    free_variables: Option<RefCell<HashSet<usize>>>, // Only for function
 }
 
 impl<'a> Frame<'a> {
