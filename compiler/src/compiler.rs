@@ -181,7 +181,7 @@ impl<'a> Compiler<'a> {
         let arguments = arguments.as_array().expect("arguments");
         let arity = u8::try_from(arguments.len_usize())?;
 
-        let function_frame = {
+        let closed_frame = {
             let mut frame = Frame::with_capacity(arguments.len_usize() + 1);
 
             if let Some(name) = name {
@@ -218,7 +218,12 @@ impl<'a> Compiler<'a> {
         codes.push(Instruction::Close as u8);
         codes.extend((function_index as u32).to_le_bytes());
         codes.push(arity); // arity
-        codes.push(0u8); // TODO environment size
+        codes.push(closed_frame.free_variables().len() as u8);
+
+        for &index in closed_frame.free_variables() {
+            codes.push(index as u8);
+        }
+
         *frame.temporary_count_mut() += 1;
 
         Ok(())
