@@ -158,6 +158,8 @@ impl Drop for Value {
     fn drop(&mut self) {
         if self.is_array() {
             unsafe { Array::from_raw(self.0) };
+        } else if self.is_closure() {
+            unsafe { Closure::from_raw(self.0) };
         }
     }
 }
