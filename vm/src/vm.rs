@@ -198,7 +198,11 @@ impl Vm {
         }
     }
 
-    fn run_instruction(&self) {
+    fn run_instruction(&mut self, codes: &[u8]) -> bool {
+        if codes.len() == 0 {
+            return true;
+        }
+
         match Instruction::from_u8(self.read_u8(codes)).expect("valid instruction") {
             Instruction::Nil => self.stack.push(NIL),
             Instruction::Float64 => {
@@ -354,6 +358,8 @@ impl Vm {
                 self.stack.push(value);
             }
         }
+
+        false
     }
 
     fn read_f64(&mut self, codes: &[u8]) -> f64 {
