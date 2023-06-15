@@ -21,7 +21,6 @@ pub(crate) const INTEGER32_MASK: u64 = INTEGER32_SUB_MASK | EXPONENT_MASK;
 pub struct Value(u64);
 
 impl Value {
-    // TODO Optimize bit pattern match.
     pub fn r#type(&self) -> Type {
         if self.0 & EXPONENT_MASK == 0 {
             Type::Float64
