@@ -8,14 +8,20 @@ use core::{
 
 pub const NIL: Value = Value(0);
 const EXPONENT_MASK: u64 = 0x7ff0_0000_0000_0000;
-const ARRAY_SUB_MASK: u64 = 0x0004_0000_0000_0000;
-const CLOSURE_SUB_MASK: u64 = 0x0001_0000_0000_0000;
-const SYMBOL_SUB_MASK: u64 = 0x0002_0000_0000_0000;
-const INTEGER32_SUB_MASK: u64 = 0x0000_8000_0000_0000;
-pub(crate) const ARRAY_MASK: u64 = ARRAY_SUB_MASK | EXPONENT_MASK;
-pub(crate) const CLOSURE_MASK: u64 = CLOSURE_SUB_MASK | EXPONENT_MASK;
-pub(crate) const SYMBOL_MASK: u64 = SYMBOL_SUB_MASK | EXPONENT_MASK;
-pub(crate) const INTEGER32_MASK: u64 = INTEGER32_SUB_MASK | EXPONENT_MASK;
+const ARRAY_SUB_MASK: u64 = 0b000;
+const CLOSURE_SUB_MASK: u64 = 0b000;
+const SYMBOL_SUB_MASK: u64 = 0b000;
+const INTEGER32_SUB_MASK: u64 = 0b000;
+const TYPE_MASK_OFFSET: usize = 48;
+
+const fn build_mask(sub_mask: u64) -> u64 {
+    sub_mask << TYPE_MASK_OFFSET | EXPONENT_MASK
+}
+
+pub(crate) const ARRAY_MASK: u64 = build_mask(ARRAY_SUB_MASK);
+pub(crate) const CLOSURE_MASK: u64 = build_mask(CLOSURE_SUB_MASK);
+pub(crate) const SYMBOL_MASK: u64 = build_mask(SYMBOL_SUB_MASK);
+pub(crate) const INTEGER32_MASK: u64 = build_mask(INTEGER32_SUB_MASK);
 
 #[derive(Debug)]
 pub struct Value(u64);
@@ -23,9 +29,13 @@ pub struct Value(u64);
 impl Value {
     // TODO Optimize bit pattern match.
     pub fn r#type(&self) -> Type {
-        if self.0 & EXPONENT_MASK == 0 {
-            Type::Float64
-        } else if self.0 & ARRAY_MASK == ARRAY_MASK {
+        let bits = self.0 & EXPONENT_MASK;
+
+        if bits {
+            return Type::Float64;
+        }
+
+        if self.0 & ARRAY_MASK == ARRAY_MASK {
             Type::Array
         } else if self.0 & CLOSURE_MASK == CLOSURE_MASK {
             Type::Closure
