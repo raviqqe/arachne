@@ -55,8 +55,7 @@ impl Value {
     }
 
     pub fn is_closure(&self) -> bool {
-        // TODO Should closures be non-nil?
-        self.is_nil() || self.r#type() == Type::Closure
+        self.r#type() == Type::Closure
     }
 
     pub fn is_symbol(&self) -> bool {
