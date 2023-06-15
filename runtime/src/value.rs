@@ -7,7 +7,7 @@ use core::{
 };
 
 pub const NIL: Value = Value(0);
-const EXPONENT_MASK: u64 = 0x7ff0_0000_0000_0000;
+const EXPONENT_MASK: u64 = 0x7ff0 << 48;
 const ARRAY_SUB_MASK: u64 = 0x0004_0000_0000_0000;
 const CLOSURE_SUB_MASK: u64 = 0x0001_0000_0000_0000;
 const SYMBOL_SUB_MASK: u64 = 0x0002_0000_0000_0000;
