@@ -19,7 +19,6 @@ const fn build_mask(sub_mask: usize) -> u64 {
     ((sub_mask as u64) << TYPE_MASK_OFFSET) | EXPONENT_MASK
 }
 
-pub(crate) const TYPE_MASK: u64 = build_mask(TYPE_SUB_MASK);
 pub(crate) const ARRAY_MASK: u64 = build_mask(ARRAY_SUB_MASK);
 pub(crate) const CLOSURE_MASK: u64 = build_mask(CLOSURE_SUB_MASK);
 pub(crate) const SYMBOL_MASK: u64 = build_mask(SYMBOL_SUB_MASK);
