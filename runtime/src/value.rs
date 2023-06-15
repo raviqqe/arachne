@@ -8,10 +8,10 @@ use core::{
 
 pub const NIL: Value = Value(0);
 const EXPONENT_MASK: u64 = 0x7ff0 << 48;
-const ARRAY_SUB_MASK: usize = 0x0004;
-const CLOSURE_SUB_MASK: u64 = 0x0001;
-const SYMBOL_SUB_MASK: u64 = 0x0002;
-const INTEGER32_SUB_MASK: u64 = 0b11;
+const INTEGER32_SUB_MASK: u64 = 0b001;
+const SYMBOL_SUB_MASK: u64 = 0b011;
+const CLOSURE_SUB_MASK: u64 = 0b010;
+const ARRAY_SUB_MASK: usize = 0b110;
 const TYPE_MASK_OFFSET: usize = 48;
 
 const fn build_mask(sub_mask: usize) -> u64 {
@@ -30,14 +30,14 @@ impl Value {
     pub fn r#type(&self) -> Type {
         if self.0 & EXPONENT_MASK == 0 {
             Type::Float64
+        } else if self.0 & SYMBOL_MASK == SYMBOL_MASK {
+            Type::Symbol
         } else if self.0 & INTEGER32_MASK == INTEGER32_MASK {
             Type::Integer32
         } else if self.0 & ARRAY_MASK == ARRAY_MASK {
             Type::Array
         } else if self.0 & CLOSURE_MASK == CLOSURE_MASK {
             Type::Closure
-        } else if self.0 & SYMBOL_MASK == SYMBOL_MASK {
-            Type::Symbol
         } else {
             Type::Float64
         }
