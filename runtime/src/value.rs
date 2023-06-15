@@ -28,7 +28,7 @@ pub(crate) const INTEGER32_MASK: u64 = build_mask(INTEGER32_SUB_MASK);
 pub struct Value(u64);
 
 impl Value {
-    pub fn r#type(&self) -> Type {
+    pub const fn r#type(&self) -> Type {
         if self.0 & EXPONENT_MASK != EXPONENT_MASK {
             return Type::Float64;
         }
@@ -42,7 +42,7 @@ impl Value {
         }
     }
 
-    pub fn is_nil(&self) -> bool {
+    pub const fn is_nil(&self) -> bool {
         self.0 == 0
     }
 
@@ -156,10 +156,14 @@ impl Clone for Value {
 
 impl Drop for Value {
     fn drop(&mut self) {
-        if self.is_array() {
-            unsafe { Array::from_raw(self.0) };
-        } else if self.is_closure() {
-            unsafe { Closure::from_raw(self.0) };
+        match self.r#type() {
+            Type::Array => unsafe {
+                Array::from_raw(self.0);
+            },
+            Type::Closure => unsafe {
+                Closure::from_raw(self.0);
+            },
+            Type::Float64 | Type::Integer32 | Type::Symbol => {}
         }
     }
 }
