@@ -67,7 +67,7 @@ impl Vm {
     }
 
     fn run_instruction(&mut self, codes: &[u8]) -> bool {
-        if codes.len() == 0 {
+        if self.program_counter >= codes.len() {
             return true;
         }
 
