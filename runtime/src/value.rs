@@ -1,5 +1,8 @@
 use super::{Array, Float64};
-use crate::{integer32::Integer32, r#type::Type, symbol::Symbol, Closure, TypedValue};
+use crate::{
+    integer32::Integer32, r#type::Type, symbol::Symbol, typed_value::TypedValueRef, Closure,
+    TypedValue,
+};
 use alloc::{string::String, vec::Vec};
 use core::{
     fmt::{self, Display, Formatter},
@@ -94,16 +97,32 @@ impl Value {
         self.try_into().ok()
     }
 
+    pub fn as_typed(&self) -> Option<TypedValueRef> {
+        if self.is_nil() {
+            None
+        } else {
+            Some(match self.r#type() {
+                Type::Array => TypedValueRef::Array(unsafe { &*(self as *const _ as *const _) }),
+                Type::Closure => {
+                    TypedValueRef::Closure(unsafe { &*(self as *const _ as *const _) })
+                }
+                Type::Float64 => TypedValueRef::Float64(Float64::from(f64::from_bits(self.0))),
+                Type::Integer32 => TypedValueRef::Integer32(unsafe { Integer32::from_raw(self.0) }),
+                Type::Symbol => TypedValueRef::Symbol(unsafe { Symbol::from_raw(self.0) }),
+            })
+        }
+    }
+
     pub fn into_typed(self) -> Option<TypedValue> {
         if self.is_nil() {
             None
         } else {
             Some(match self.r#type() {
-                Type::Array => TypedValue::Array(self.try_into().unwrap()),
-                Type::Closure => TypedValue::Closure(self.try_into().unwrap()),
-                Type::Float64 => TypedValue::Float64(self.try_into().unwrap()),
-                Type::Integer32 => TypedValue::Integer32(self.try_into().unwrap()),
-                Type::Symbol => TypedValue::Symbol(self.try_into().unwrap()),
+                Type::Array => TypedValue::Array(unsafe { Array::from_raw(self.0) }),
+                Type::Closure => TypedValue::Closure(unsafe { Closure::from_raw(self.0) }),
+                Type::Float64 => TypedValue::Float64(Float64::from(f64::from_bits(self.0))),
+                Type::Integer32 => TypedValue::Integer32(unsafe { Integer32::from_raw(self.0) }),
+                Type::Symbol => TypedValue::Symbol(unsafe { Symbol::from_raw(self.0) }),
             })
         }
     }
@@ -130,12 +149,16 @@ impl Value {
 
 impl PartialEq for Value {
     fn eq(&self, other: &Self) -> bool {
-        match self.r#type() {
-            Type::Float64 => self.to_float64() == other.to_float64(),
-            Type::Closure => false,
-            Type::Integer32 => self.to_integer32() == other.to_integer32(),
-            Type::Array => self.as_array() == other.as_array(),
-            Type::Symbol => self.to_symbol() == other.to_symbol(),
+        if let Some(value) = self.as_typed() {
+            match value {
+                TypedValueRef::Float64(one) => Some(one) == other.to_float64(),
+                TypedValueRef::Closure(_) => false,
+                TypedValueRef::Integer32(one) => Some(one) == other.to_integer32(),
+                TypedValueRef::Array(one) => Some(one) == other.as_array(),
+                TypedValueRef::Symbol(one) => Some(one) == other.to_symbol(),
+            }
+        } else {
+            other.is_nil()
         }
     }
 }
