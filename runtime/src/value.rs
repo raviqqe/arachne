@@ -8,6 +8,7 @@ use core::{
 
 pub const NIL: Value = Value(0);
 const EXPONENT_MASK: u64 = 0x7ff0 << 48;
+const TYPE_SUB_MASK: usize = 0b111;
 const INTEGER32_SUB_MASK: usize = 0b001;
 const SYMBOL_SUB_MASK: usize = 0b011;
 const CLOSURE_SUB_MASK: usize = 0b010;
@@ -18,6 +19,7 @@ const fn build_mask(sub_mask: usize) -> u64 {
     ((sub_mask as u64) << TYPE_MASK_OFFSET) | EXPONENT_MASK
 }
 
+pub(crate) const TYPE_MASK: u64 = build_mask(TYPE_SUB_MASK);
 pub(crate) const ARRAY_MASK: u64 = build_mask(ARRAY_SUB_MASK);
 pub(crate) const CLOSURE_MASK: u64 = build_mask(CLOSURE_SUB_MASK);
 pub(crate) const SYMBOL_MASK: u64 = build_mask(SYMBOL_SUB_MASK);
@@ -28,11 +30,11 @@ pub struct Value(u64);
 
 impl Value {
     pub fn r#type(&self) -> Type {
-        if self.0 & EXPONENT_MASK == 0 {
+        if self.0 & EXPONENT_MASK != EXPONENT_MASK {
             return Type::Float64;
         }
 
-        match ((self.0 & !EXPONENT_MASK) >> TYPE_MASK_OFFSET) as usize {
+        match ((self.0 >> TYPE_MASK_OFFSET) as usize) & TYPE_SUB_MASK {
             INTEGER32_SUB_MASK => Type::Integer32,
             SYMBOL_SUB_MASK => Type::Symbol,
             CLOSURE_SUB_MASK => Type::Closure,
