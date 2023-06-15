@@ -130,16 +130,12 @@ impl Value {
 
 impl PartialEq for Value {
     fn eq(&self, other: &Self) -> bool {
-        if let (Some(one), Some(other)) = (self.as_array(), other.as_array()) {
-            one == other
-        } else if let (Some(one), Some(other)) = (self.to_float64(), other.to_float64()) {
-            one == other
-        } else if let (Some(one), Some(other)) = (self.to_integer32(), other.to_integer32()) {
-            one == other
-        } else if let (Some(one), Some(other)) = (self.to_symbol(), other.to_symbol()) {
-            one == other
-        } else {
-            false
+        match self.r#type() {
+            Type::Float64 => self.to_float64() == other.to_float64(),
+            Type::Closure => false,
+            Type::Integer32 => self.to_integer32() == other.to_integer32(),
+            Type::Array => self.as_array() == other.as_array(),
+            Type::Symbol => self.to_symbol() == other.to_symbol(),
         }
     }
 }
