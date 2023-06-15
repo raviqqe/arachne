@@ -7,15 +7,15 @@ use core::{
 };
 
 pub const NIL: Value = Value(0);
-const EXPONENT_MASK: u64 = 0x7ff0_0000_0000_0000;
-const ARRAY_SUB_MASK: u64 = 0b000;
-const CLOSURE_SUB_MASK: u64 = 0b000;
-const SYMBOL_SUB_MASK: u64 = 0b000;
-const INTEGER32_SUB_MASK: u64 = 0b000;
+const EXPONENT_MASK: u64 = 0x7ff0 << 48;
+const INTEGER32_SUB_MASK: usize = 0b001;
+const SYMBOL_SUB_MASK: usize = 0b011;
+const CLOSURE_SUB_MASK: usize = 0b010;
+const ARRAY_SUB_MASK: usize = 0b100;
 const TYPE_MASK_OFFSET: usize = 48;
 
-const fn build_mask(sub_mask: u64) -> u64 {
-    sub_mask << TYPE_MASK_OFFSET | EXPONENT_MASK
+const fn build_mask(sub_mask: usize) -> u64 {
+    ((sub_mask as u64) << TYPE_MASK_OFFSET) | EXPONENT_MASK
 }
 
 pub(crate) const ARRAY_MASK: u64 = build_mask(ARRAY_SUB_MASK);
@@ -27,24 +27,19 @@ pub(crate) const INTEGER32_MASK: u64 = build_mask(INTEGER32_SUB_MASK);
 pub struct Value(u64);
 
 impl Value {
-    // TODO Optimize bit pattern match.
     pub fn r#type(&self) -> Type {
         let bits = self.0 & EXPONENT_MASK;
 
-        if bits {
+        if bits == 0 {
             return Type::Float64;
         }
 
-        if self.0 & ARRAY_MASK == ARRAY_MASK {
-            Type::Array
-        } else if self.0 & CLOSURE_MASK == CLOSURE_MASK {
-            Type::Closure
-        } else if self.0 & INTEGER32_MASK == INTEGER32_MASK {
-            Type::Integer32
-        } else if self.0 & SYMBOL_MASK == SYMBOL_MASK {
-            Type::Symbol
-        } else {
-            Type::Float64
+        match ((self.0 & !EXPONENT_MASK) >> TYPE_MASK_OFFSET) as usize {
+            INTEGER32_SUB_MASK => Type::Integer32,
+            SYMBOL_SUB_MASK => Type::Symbol,
+            CLOSURE_SUB_MASK => Type::Closure,
+            ARRAY_SUB_MASK => Type::Array,
+            _ => Type::Float64,
         }
     }
 
@@ -275,7 +270,7 @@ mod tests {
     fn nil_type_check() {
         assert!(NIL.is_nil());
         assert!(NIL.is_array());
-        assert!(NIL.is_closure());
+        assert!(!NIL.is_closure());
         assert!(NIL.is_float64());
         assert!(!NIL.is_symbol());
     }
