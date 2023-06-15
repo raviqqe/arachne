@@ -29,8 +29,10 @@ pub struct Value(u64);
 impl Value {
     pub fn r#type(&self) -> Type {
         if self.0 & EXPONENT_MASK == 0 {
-            Type::Float64
-        } else if self.0 & SYMBOL_MASK == SYMBOL_MASK {
+            return Type::Float64;
+        }
+
+        if self.0 & SYMBOL_MASK == SYMBOL_MASK {
             Type::Symbol
         } else if self.0 & INTEGER32_MASK == INTEGER32_MASK {
             Type::Integer32
