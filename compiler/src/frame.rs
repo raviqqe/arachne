@@ -26,7 +26,16 @@ impl<'a> Frame<'a> {
         }
     }
 
-    pub fn fork(&'a self) -> Self {
+    pub fn function(&'a self, capacity: usize) -> Self {
+        Self {
+            parent: Some(self),
+            variables: HashMap::with_capacity(capacity),
+            temporary_count: 0,
+            free_variables: Some(Default::default()),
+        }
+    }
+
+    pub fn block(&'a self) -> Self {
         Self {
             parent: Some(self),
             variables: Default::default(),
@@ -107,7 +116,7 @@ mod tests {
 
         frame.insert_variable("x".into());
 
-        let frame = frame.fork();
+        let frame = frame.block();
 
         assert_eq!(frame.get_variable("x".into()), Some(0));
     }
@@ -118,7 +127,7 @@ mod tests {
 
         frame.insert_variable("x".into());
 
-        let mut frame = frame.fork();
+        let mut frame = frame.block();
 
         frame.insert_variable("y".into());
 
@@ -133,7 +142,7 @@ mod tests {
         frame.insert_variable("x".into());
         frame.insert_variable("y".into());
 
-        let mut frame = frame.fork();
+        let mut frame = frame.block();
 
         frame.insert_variable("z".into());
 
@@ -149,7 +158,7 @@ mod tests {
         frame.insert_variable("x".into());
         frame.insert_variable("y".into());
 
-        let mut frame = frame.fork();
+        let mut frame = frame.block();
 
         frame.insert_variable("z".into());
         frame.insert_variable("v".into());
