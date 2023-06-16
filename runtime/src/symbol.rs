@@ -3,6 +3,7 @@ use crate::value::SYMBOL_MASK;
 use alloc::{borrow::ToOwned, boxed::Box, string::String};
 use core::{
     fmt::{self, Debug, Display, Formatter},
+    ops::Deref,
     pin::Pin,
 };
 use dashmap::DashMap;
@@ -46,7 +47,7 @@ impl From<String> for Symbol {
             .entry(Box::pin(symbol))
             .or_insert_with(Default::default);
 
-        Self(entry.key().as_ptr() as *const String as u64 | SYMBOL_MASK)
+        Self(entry.key().deref() as *const String as u64 | SYMBOL_MASK)
     }
 }
 
