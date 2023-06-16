@@ -150,10 +150,10 @@ impl<'a> Compiler<'a> {
         Ok(())
     }
 
-    fn compile_variable(&mut self, name: Symbol, frame: &mut Frame) {
+    fn compile_variable(&mut self, symbol: Symbol, frame: &mut Frame) {
         let mut codes = self.codes.borrow_mut();
 
-        match frame.get_variable(name) {
+        match frame.get_variable(symbol) {
             Variable::Bound(index) => {
                 codes.push(Instruction::Peek as u8);
                 codes.push(index as u8);
@@ -220,8 +220,8 @@ impl<'a> Compiler<'a> {
         codes[jump_index - size_of::<u16>()..jump_index]
             .copy_from_slice(&((current_index - jump_index) as u16).to_le_bytes());
 
-        for &name in &*closed_frame.free_variables() {
-            self.compile_variable(name, frame);
+        for &symbol in &*closed_frame.free_variables() {
+            self.compile_variable(symbol, frame);
         }
 
         codes.push(Instruction::Close as u8);
