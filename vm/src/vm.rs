@@ -153,6 +153,7 @@ impl Vm {
 
                     self.stack.push(closure.into());
                 }
+                Instruction::Environment => todo!(),
                 Instruction::Peek => {
                     // TODO Move local variables when possible.
                     let index = self.read_u8(codes);

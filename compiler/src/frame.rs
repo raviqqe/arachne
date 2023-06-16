@@ -1,15 +1,22 @@
 use runtime::Symbol;
 use std::{
     cell::{Ref, RefCell, RefMut},
-    collections::{HashMap, HashSet},
+    collections::HashMap,
 };
+
+#[derive(Clone, Copy, Debug)]
+pub enum Variable {
+    Bound(usize),
+    Free(usize),
+}
 
 #[derive(Debug)]
 pub struct Frame<'a> {
     parent: Option<&'a Frame<'a>>,
     variables: HashMap<Symbol, usize>,
     temporary_count: usize,
-    free_variables: Option<RefCell<HashSet<Symbol>>>, // Only for function
+    // Only for function
+    free_variables: Option<RefCell<Vec<Symbol>>>,
 }
 
 impl<'a> Frame<'a> {
@@ -35,17 +42,22 @@ impl<'a> Frame<'a> {
         }
     }
 
-    pub fn get_variable(&self, name: Symbol) -> Option<usize> {
+    pub fn get_variable(&self, name: Symbol) -> Variable {
         let offset = self.variables.len() + self.temporary_count;
 
         if let Some(index) = self.variables.get(&name) {
-            Some(offset - index - 1)
+            Variable::Bound(offset - index - 1)
         } else if let Some(parent) = &self.parent {
-            parent.get_variable(name).map(|index| index + offset)
+            match parent.get_variable(name) {
+                Variable::Bound(index) => Variable::Bound(index + offset),
+                variable @ Variable::Free(_) => variable,
+            }
         } else {
-            self.free_variables_mut().insert(name);
+            let index = self.free_variables().len();
 
-            None
+            self.free_variables_mut().push(name);
+
+            Variable::Free(index)
         }
     }
 
@@ -61,11 +73,11 @@ impl<'a> Frame<'a> {
         &mut self.temporary_count
     }
 
-    pub fn free_variables(&self) -> Ref<HashSet<Symbol>> {
+    pub fn free_variables(&self) -> Ref<Vec<Symbol>> {
         self.free_variables.as_ref().unwrap().borrow()
     }
 
-    fn free_variables_mut(&self) -> RefMut<HashSet<Symbol>> {
+    fn free_variables_mut(&self) -> RefMut<Vec<Symbol>> {
         if let Some(variables) = self.free_variables.as_ref() {
             variables.borrow_mut()
         } else {

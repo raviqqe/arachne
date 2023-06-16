@@ -1,4 +1,7 @@
-use crate::{frame::Frame, CompileError};
+use crate::{
+    frame::{Frame, Variable},
+    CompileError,
+};
 use async_stream::try_stream;
 use futures::{Stream, StreamExt};
 use runtime::{Array, Symbol, TypedValueRef, Value};
@@ -137,22 +140,7 @@ impl<'a> Compiler<'a> {
                     codes.extend(number.to_i32().to_le_bytes());
                     *frame.temporary_count_mut() += 1;
                 }
-                TypedValueRef::Symbol(symbol) => {
-                    let mut codes = self.codes.borrow_mut();
-
-                    if let Some(index) = frame.get_variable(symbol) {
-                        codes.push(Instruction::Peek as u8);
-                        codes.push(index as u8);
-                        *frame.temporary_count_mut() += 1;
-                    } else if symbol.as_str().len() >= 1 << 8 {
-                        return Err(CompileError::SymbolLength(symbol.as_str().into()));
-                    } else {
-                        codes.push(Instruction::Symbol as u8);
-                        codes.push(symbol.as_str().len() as u8);
-                        codes.extend(symbol.as_str().as_bytes());
-                        *frame.temporary_count_mut() += 1;
-                    }
-                }
+                TypedValueRef::Symbol(symbol) => self.compile_variable(symbol, frame),
             }
         } else {
             self.codes.borrow_mut().push(Instruction::Nil as u8);
@@ -160,6 +148,23 @@ impl<'a> Compiler<'a> {
         }
 
         Ok(())
+    }
+
+    fn compile_variable(&mut self, name: Symbol, frame: &mut Frame) {
+        let mut codes = self.codes.borrow_mut();
+
+        match frame.get_variable(name) {
+            Variable::Bound(index) => {
+                codes.push(Instruction::Peek as u8);
+                codes.push(index as u8);
+            }
+            Variable::Free(index) => {
+                codes.push(Instruction::Environment as u8);
+                codes.push(index as u8);
+            }
+        }
+
+        *frame.temporary_count_mut() += 1;
     }
 
     fn compile_function(
@@ -215,14 +220,14 @@ impl<'a> Compiler<'a> {
         codes[jump_index - size_of::<u16>()..jump_index]
             .copy_from_slice(&((current_index - jump_index) as u16).to_le_bytes());
 
+        for &name in &*closed_frame.free_variables() {
+            self.compile_variable(name, frame);
+        }
+
         codes.push(Instruction::Close as u8);
         codes.extend((function_index as u32).to_le_bytes());
         codes.push(arity); // arity
         codes.push(closed_frame.free_variables().len() as u8);
-
-        for &name in &*closed_frame.free_variables() {
-            codes.push(frame.get_variable(name).expect("existing variable") as u8);
-        }
 
         *frame.temporary_count_mut() += 1;
 

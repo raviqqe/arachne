@@ -65,6 +65,9 @@ pub fn format_instructions(codes: &[u8]) -> Result<String, FormatError> {
                             .to_vec(),
                     }
                 }
+                Instruction::Environment => {
+                    InstructionIr::Environment(decode_u8(codes, &mut index))
+                }
                 Instruction::Equal => InstructionIr::Equal,
                 Instruction::Drop => InstructionIr::Drop,
                 Instruction::Dump => InstructionIr::Dump,

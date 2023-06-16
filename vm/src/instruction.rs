@@ -27,6 +27,7 @@ pub enum Instruction {
 
     // Closure
     Close,
+    Environment,
 
     // Control
     Call,

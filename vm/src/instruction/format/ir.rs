@@ -18,6 +18,7 @@ pub enum InstructionIr {
         environment_size: u8,
         environment: Vec<u8>,
     },
+    Environment(u8),
     Equal,
     Add,
     Subtract,
@@ -58,6 +59,7 @@ impl Display for InstructionIr {
                 "close {:x} {} {} {:?}",
                 pointer, arity, environment_size, environment
             ),
+            Self::Environment(index) => write!(formatter, "environment {}", index),
             Self::Equal => write!(formatter, "equal"),
             Self::Add => write!(formatter, "add"),
             Self::Subtract => write!(formatter, "subtract"),
