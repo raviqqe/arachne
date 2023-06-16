@@ -70,11 +70,9 @@ dependencies = [
 name = "arachne"
 version = "0.1.0"
 dependencies = [
- "arachne-mlir-interpreter",
- "arachne-naive-interpreter",
+ "arachne-interpreter",
  "arachne-parse",
  "arachne-vm",
- "arachne-vm-interpreter",
  "async-recursion",
  "async-stream",
  "clap",
@@ -99,21 +97,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "arachne-mlir-interpreter"
+name = "arachne-interpreter"
 version = "0.1.0"
 dependencies = [
+ "arachne-compiler",
  "arachne-runtime",
- "async-stream",
- "futures",
- "melior",
- "pretty_assertions",
-]
-
-[[package]]
-name = "arachne-naive-interpreter"
-version = "0.1.0"
-dependencies = [
- "arachne-runtime",
+ "arachne-vm",
  "async-stream",
  "futures",
  "once_cell",
@@ -149,19 +138,6 @@ dependencies = [
  "arachne-runtime",
  "num-derive",
  "num-traits",
- "pretty_assertions",
-]
-
-[[package]]
-name = "arachne-vm-interpreter"
-version = "0.1.0"
-dependencies = [
- "arachne-compiler",
- "arachne-runtime",
- "arachne-vm",
- "async-stream",
- "futures",
- "once_cell",
  "pretty_assertions",
 ]
 
