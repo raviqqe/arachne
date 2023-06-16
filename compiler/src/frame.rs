@@ -55,6 +55,7 @@ impl<'a> Frame<'a> {
         } else {
             let index = self.free_variables().len();
 
+            // TODO De-duplicate free variables.
             self.free_variables_mut().push(name);
 
             Variable::Free(index)
