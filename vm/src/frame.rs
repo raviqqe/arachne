@@ -1,13 +1,13 @@
 pub struct Frame {
     return_address: u32,
-    frame_pointer: u32,
+    pointer: u32,
 }
 
 impl Frame {
     pub fn new(return_address: u32, frame_pointer: u32) -> Self {
         Self {
             return_address,
-            frame_pointer,
+            pointer: frame_pointer,
         }
     }
 
@@ -15,7 +15,7 @@ impl Frame {
         self.return_address
     }
 
-    pub fn frame_pointer(&self) -> u32 {
-        self.frame_pointer
+    pub fn pointer(&self) -> u32 {
+        self.pointer
     }
 }

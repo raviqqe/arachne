@@ -116,6 +116,10 @@ impl Vm {
                 Instruction::TailCall => {
                     let arity = self.read_u8(codes) as usize;
 
+                    let frame = self.frames.last().expect("frame");
+                    self.stack
+                        .truncate(frame.pointer() as usize, self.stack.len() - arity - 1);
+
                     self.call(arity)
                 }
                 Instruction::Close => {
@@ -133,7 +137,7 @@ impl Vm {
                     self.stack.push(closure.into());
                 }
                 Instruction::Environment => {
-                    let pointer = self.frames.last().expect("frame").frame_pointer();
+                    let pointer = self.frames.last().expect("frame").pointer();
                     let index = self.read_u8(codes) as usize;
 
                     self.stack.push(
@@ -178,7 +182,7 @@ impl Vm {
                     let value = self.stack.pop();
                     let frame = self.frames.pop().expect("frame");
 
-                    while self.stack.len() > frame.frame_pointer() as usize {
+                    while self.stack.len() > frame.pointer() as usize {
                         self.stack.pop();
                     }
 
