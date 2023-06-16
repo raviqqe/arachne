@@ -1,4 +1,7 @@
-use crate::{frame::Frame, CompileError};
+use crate::{
+    frame::{Frame, Variable},
+    CompileError,
+};
 use async_stream::try_stream;
 use futures::{Stream, StreamExt};
 use runtime::{Array, Symbol, TypedValueRef, Value};
@@ -137,22 +140,7 @@ impl<'a> Compiler<'a> {
                     codes.extend(number.to_i32().to_le_bytes());
                     *frame.temporary_count_mut() += 1;
                 }
-                TypedValueRef::Symbol(symbol) => {
-                    let mut codes = self.codes.borrow_mut();
-
-                    if let Some(index) = frame.get_variable(symbol) {
-                        codes.push(Instruction::Peek as u8);
-                        codes.push(index as u8);
-                        *frame.temporary_count_mut() += 1;
-                    } else if symbol.as_str().len() >= 1 << 8 {
-                        return Err(CompileError::SymbolLength(symbol.as_str().into()));
-                    } else {
-                        codes.push(Instruction::Symbol as u8);
-                        codes.push(symbol.as_str().len() as u8);
-                        codes.extend(symbol.as_str().as_bytes());
-                        *frame.temporary_count_mut() += 1;
-                    }
-                }
+                TypedValueRef::Symbol(symbol) => self.compile_variable(symbol, frame),
             }
         } else {
             self.codes.borrow_mut().push(Instruction::Nil as u8);
@@ -160,6 +148,24 @@ impl<'a> Compiler<'a> {
         }
 
         Ok(())
+    }
+
+    fn compile_variable(&mut self, symbol: Symbol, frame: &mut Frame) {
+        let mut codes = self.codes.borrow_mut();
+
+        match frame.get_variable(symbol) {
+            Variable::Bound(index) => {
+                codes.push(Instruction::Peek as u8);
+                codes.push(index as u8);
+            }
+            Variable::Free(index) => {
+                // TODO Throw an error at top level.
+                codes.push(Instruction::Environment as u8);
+                codes.push(index as u8);
+            }
+        }
+
+        *frame.temporary_count_mut() += 1;
     }
 
     fn compile_function(
@@ -181,10 +187,12 @@ impl<'a> Compiler<'a> {
         let arguments = arguments.as_array().expect("arguments");
         let arity = u8::try_from(arguments.len_usize())?;
 
-        {
+        let closed_frame = {
             let mut frame = Frame::with_capacity(arguments.len_usize() + 1);
 
-            frame.insert_variable(name.unwrap_or_else(|| "".into()));
+            if let Some(name) = name {
+                frame.insert_variable(name);
+            }
 
             for index in 0..arguments.len_usize() {
                 if let Some(argument) = arguments.get_usize(index).to_symbol() {
@@ -203,18 +211,28 @@ impl<'a> Compiler<'a> {
             codes.push(Instruction::Return as u8);
             *frame.temporary_count_mut() -= 1;
             assert_eq!(*frame.temporary_count_mut(), 0);
-        }
+
+            frame
+        };
 
         let mut codes = self.codes.borrow_mut();
         let current_index = codes.len();
 
         codes[jump_index - size_of::<u16>()..jump_index]
             .copy_from_slice(&((current_index - jump_index) as u16).to_le_bytes());
+        drop(codes);
 
+        for &symbol in &*closed_frame.free_variables() {
+            self.compile_variable(symbol, frame);
+        }
+
+        let mut codes = self.codes.borrow_mut();
         codes.push(Instruction::Close as u8);
         codes.extend((function_index as u32).to_le_bytes());
         codes.push(arity); // arity
-        codes.push(0u8); // TODO environment size
+        codes.push(closed_frame.free_variables().len() as u8);
+
+        *frame.temporary_count_mut() -= closed_frame.free_variables().len();
         *frame.temporary_count_mut() += 1;
 
         Ok(())
@@ -256,7 +274,7 @@ impl<'a> Compiler<'a> {
         *frame.temporary_count_mut() -= 1;
 
         let else_index = {
-            let mut frame = frame.fork();
+            let mut frame = frame.block();
 
             if condition_index + 3 < array.len_usize() {
                 self.compile_if(array, condition_index + 2, &mut frame)?;
@@ -277,7 +295,7 @@ impl<'a> Compiler<'a> {
                 .copy_from_slice(&((current_index - branch_index) as i16).to_le_bytes());
             drop(codes);
 
-            let mut frame = frame.fork();
+            let mut frame = frame.block();
             self.compile_expression(array.get_usize(condition_index + 1), &mut frame)?;
         }
 
@@ -377,6 +395,87 @@ mod tests {
                 .into()])
                 .await
             );
+        }
+
+        mod closure {
+            use super::*;
+
+            #[tokio::test]
+            async fn compile_closure() {
+                insta::assert_display_snapshot!(
+                    compile([
+                        ["let".into(), "x".into(), 42.0.into()].into(),
+                        ["fn".into(), [].into(), "x".into()].into()
+                    ])
+                    .await
+                );
+            }
+
+            #[tokio::test]
+            async fn capture_two_variables() {
+                insta::assert_display_snapshot!(
+                    compile([
+                        ["let".into(), "x".into(), 1.0.into()].into(),
+                        ["let".into(), "y".into(), 2.0.into()].into(),
+                        [
+                            "fn".into(),
+                            [].into(),
+                            ["+".into(), "x".into(), "y".into()].into()
+                        ]
+                        .into()
+                    ])
+                    .await
+                );
+            }
+
+            #[tokio::test]
+            async fn capture_same_variable_twice() {
+                insta::assert_display_snapshot!(
+                    compile([
+                        ["let".into(), "x".into(), 1.0.into()].into(),
+                        [
+                            "fn".into(),
+                            [].into(),
+                            ["+".into(), "x".into(), "x".into()].into()
+                        ]
+                        .into()
+                    ])
+                    .await
+                );
+            }
+
+            #[tokio::test]
+            async fn compile_nested() {
+                insta::assert_display_snapshot!(
+                    compile([
+                        ["let".into(), "x".into(), 42.0.into()].into(),
+                        [
+                            "fn".into(),
+                            [].into(),
+                            ["fn".into(), [].into(), "x".into()].into()
+                        ]
+                        .into()
+                    ])
+                    .await
+                );
+            }
+
+            #[tokio::test]
+            async fn compile_call() {
+                insta::assert_display_snapshot!(
+                    compile([
+                        ["let".into(), "x".into(), 42.0.into()].into(),
+                        [
+                            "let".into(),
+                            "f".into(),
+                            ["fn".into(), [].into(), "x".into()].into()
+                        ]
+                        .into(),
+                        ["f".into()].into(),
+                    ])
+                    .await
+                );
+            }
         }
     }
 

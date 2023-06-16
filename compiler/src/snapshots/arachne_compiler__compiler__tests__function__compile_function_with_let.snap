@@ -6,6 +6,6 @@ jump 5
 peek 0
 peek 0
 return
-close 3 1 0 []
+close 3 1 0
 dump
 drop

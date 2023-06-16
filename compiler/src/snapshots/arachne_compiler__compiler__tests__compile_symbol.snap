@@ -2,6 +2,6 @@
 source: compiler/src/compiler.rs
 expression: "compile([\"foo\".into()]).await"
 ---
-symbol 3 "foo"
+environment 0
 dump
 drop

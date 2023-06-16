@@ -1,0 +1,15 @@
+---
+source: compiler/src/compiler.rs
+expression: "compile([[\"let\".into(), \"x\".into(), 1.0.into()].into(),\n                [\"fn\".into(), [].into(),\n                            [\"+\".into(), \"x\".into(), \"x\".into()].into()].into()]).await"
+---
+float64 1
+jump 6
+environment 0
+environment 1
+add
+return
+peek 0
+peek 1
+close c 0 2
+dump
+drop

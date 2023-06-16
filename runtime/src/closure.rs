@@ -44,6 +44,12 @@ impl Closure {
         self.header().arity
     }
 
+    pub fn get_environment(&self, index: usize) -> &Value {
+        assert!(index < self.header().environment_size as usize);
+
+        unsafe { &*self.environment_mut(index) }
+    }
+
     pub fn write_environment(&mut self, index: usize, value: Value) {
         assert!(index < self.header().environment_size as usize);
 
