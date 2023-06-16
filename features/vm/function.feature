@@ -94,3 +94,18 @@ Feature: Function
     """
     42
     """
+
+  Scenario: Create a nested closure
+    Given a file named "main.arc" with:
+    """
+    (let x 42)
+    (let f (fn () (fn () x)))
+
+    ((f))
+    """
+    When I run `arachne` interactively
+    And I pipe in the file "main.arc"
+    Then the stdout should contain exactly:
+    """
+    42
+    """
