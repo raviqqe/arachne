@@ -52,19 +52,11 @@ pub fn format_instructions(codes: &[u8]) -> Result<String, FormatError> {
                 Instruction::Call => InstructionIr::Call {
                     arity: decode_u8(codes, &mut index),
                 },
-                Instruction::Close => {
-                    let pointer = decode_u32(codes, &mut index);
-                    let arity = decode_u8(codes, &mut index);
-                    let environment_size = decode_u8(codes, &mut index);
-
-                    InstructionIr::Close {
-                        pointer,
-                        arity,
-                        environment_size,
-                        environment: decode_bytes(codes, environment_size as usize, &mut index)
-                            .to_vec(),
-                    }
-                }
+                Instruction::Close => InstructionIr::Close {
+                    pointer: decode_u32(codes, &mut index),
+                    arity: decode_u8(codes, &mut index),
+                    environment_size: decode_u8(codes, &mut index),
+                },
                 Instruction::Environment => {
                     InstructionIr::Environment(decode_u8(codes, &mut index))
                 }

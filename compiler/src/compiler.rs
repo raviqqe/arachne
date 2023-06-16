@@ -219,11 +219,13 @@ impl<'a> Compiler<'a> {
 
         codes[jump_index - size_of::<u16>()..jump_index]
             .copy_from_slice(&((current_index - jump_index) as u16).to_le_bytes());
+        drop(codes);
 
         for &symbol in &*closed_frame.free_variables() {
             self.compile_variable(symbol, frame);
         }
 
+        let mut codes = self.codes.borrow_mut();
         codes.push(Instruction::Close as u8);
         codes.extend((function_index as u32).to_le_bytes());
         codes.push(arity); // arity
