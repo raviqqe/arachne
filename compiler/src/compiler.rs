@@ -412,6 +412,39 @@ mod tests {
             }
 
             #[tokio::test]
+            async fn capture_two_variables() {
+                insta::assert_display_snapshot!(
+                    compile([
+                        ["let".into(), "x".into(), 1.0.into()].into(),
+                        ["let".into(), "y".into(), 2.0.into()].into(),
+                        [
+                            "fn".into(),
+                            [].into(),
+                            ["+".into(), "x".into(), "y".into()].into()
+                        ]
+                        .into()
+                    ])
+                    .await
+                );
+            }
+
+            #[tokio::test]
+            async fn capture_same_variable_twice() {
+                insta::assert_display_snapshot!(
+                    compile([
+                        ["let".into(), "x".into(), 1.0.into()].into(),
+                        [
+                            "fn".into(),
+                            [].into(),
+                            ["+".into(), "x".into(), "x".into()].into()
+                        ]
+                        .into()
+                    ])
+                    .await
+                );
+            }
+
+            #[tokio::test]
             async fn compile_call() {
                 insta::assert_display_snapshot!(
                     compile([
