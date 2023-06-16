@@ -1,14 +1,9 @@
+use crate::variable::Variable;
 use runtime::Symbol;
 use std::{
     cell::{Ref, RefCell, RefMut},
     collections::HashMap,
 };
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Variable {
-    Bound(usize),
-    Free(usize),
-}
 
 #[derive(Debug)]
 pub struct Block<'a> {

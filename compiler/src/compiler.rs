@@ -1,7 +1,4 @@
-use crate::{
-    block::{Block, Variable},
-    CompileError,
-};
+use crate::{block::Block, variable::Variable, CompileError};
 use async_stream::try_stream;
 use futures::{Stream, StreamExt};
 use runtime::{Array, Symbol, TypedValueRef, Value};
