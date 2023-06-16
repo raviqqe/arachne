@@ -29,6 +29,9 @@ pub enum InstructionIr {
     Call {
         arity: u8,
     },
+    TailCall {
+        arity: u8,
+    },
     Jump {
         pointer: i16,
     },
@@ -67,6 +70,7 @@ impl Display for InstructionIr {
             Self::Set => write!(formatter, "set"),
             Self::Length => write!(formatter, "length"),
             Self::Call { arity } => write!(formatter, "call {}", arity),
+            Self::TailCall { arity } => write!(formatter, "tail_call {}", arity),
             Self::Jump { pointer } => write!(formatter, "jump {:x}", pointer),
             Self::Branch { pointer } => write!(formatter, "branch {:x}", pointer),
             Self::Return => write!(formatter, "return"),

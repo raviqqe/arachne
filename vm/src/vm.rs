@@ -136,6 +136,7 @@ impl Vm {
                         self.stack.push(NIL);
                     }
                 }
+                Instruction::TailCall => todo!(),
                 Instruction::Close => {
                     let id = self.read_u32(codes);
                     let arity = self.read_u8(codes);
