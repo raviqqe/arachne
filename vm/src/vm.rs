@@ -111,32 +111,13 @@ impl Vm {
                 Instruction::Call => {
                     let arity = self.read_u8(codes) as usize;
 
-                    if let Some(closure) = self.stack.peek(arity).as_closure() {
-                        let id = closure.id();
-                        let closure_arity = closure.arity() as usize;
-
-                        self.frames.push(Frame::new(
-                            self.program_counter as u32,
-                            (self.stack.len() - arity - 1) as u32,
-                        ));
-                        self.program_counter = id as usize;
-
-                        for _ in 0..arity.saturating_sub(closure_arity) {
-                            self.stack.pop();
-                        }
-
-                        for _ in 0..closure_arity.saturating_sub(arity) {
-                            self.stack.push(NIL);
-                        }
-                    } else {
-                        for _ in 0..arity + 1 {
-                            self.stack.pop();
-                        }
-
-                        self.stack.push(NIL);
-                    }
+                    self.call(arity)
                 }
-                Instruction::TailCall => todo!(),
+                Instruction::TailCall => {
+                    let arity = self.read_u8(codes) as usize;
+
+                    self.call(arity)
+                }
                 Instruction::Close => {
                     let id = self.read_u32(codes);
                     let arity = self.read_u8(codes);
@@ -206,6 +187,33 @@ impl Vm {
                     self.stack.push(value);
                 }
             }
+        }
+    }
+
+    fn call(&mut self, arity: usize) {
+        if let Some(closure) = self.stack.peek(arity).as_closure() {
+            let id = closure.id();
+            let closure_arity = closure.arity() as usize;
+
+            self.frames.push(Frame::new(
+                self.program_counter as u32,
+                (self.stack.len() - arity - 1) as u32,
+            ));
+            self.program_counter = id as usize;
+
+            for _ in 0..arity.saturating_sub(closure_arity) {
+                self.stack.pop();
+            }
+
+            for _ in 0..closure_arity.saturating_sub(arity) {
+                self.stack.push(NIL);
+            }
+        } else {
+            for _ in 0..arity + 1 {
+                self.stack.pop();
+            }
+
+            self.stack.push(NIL);
         }
     }
 
