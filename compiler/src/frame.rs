@@ -41,14 +41,10 @@ impl<'a> Frame<'a> {
         if let Some(index) = self.variables.get(&name) {
             Some(offset - index - 1)
         } else if let Some(parent) = &self.parent {
-            if let Some(index) = parent.get_variable(name) {
-                self.free_variables_mut().insert(name);
-
-                Some(index + offset)
-            } else {
-                None
-            }
+            parent.get_variable(name).map(|index| index + offset)
         } else {
+            self.free_variables_mut().insert(name);
+
             None
         }
     }
