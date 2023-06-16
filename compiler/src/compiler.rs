@@ -63,7 +63,7 @@ impl<'a> Compiler<'a> {
                 self.compile_expression_statement(value, frame, dump)?
             }
         } else {
-            self.compile_expression_statement(&value, frame, dump)?
+            self.compile_expression_statement(value, frame, dump)?
         }
 
         Ok(())
