@@ -111,6 +111,11 @@ impl Vm {
                 Instruction::Call => {
                     let arity = self.read_u8(codes) as usize;
 
+                    self.frames.push(Frame::new(
+                        self.program_counter as u32,
+                        (self.stack.len() - arity - 1) as u32,
+                    ));
+
                     self.call(arity)
                 }
                 Instruction::TailCall => {
@@ -199,10 +204,6 @@ impl Vm {
             let id = closure.id();
             let closure_arity = closure.arity() as usize;
 
-            self.frames.push(Frame::new(
-                self.program_counter as u32,
-                (self.stack.len() - arity - 1) as u32,
-            ));
             self.program_counter = id as usize;
 
             for _ in 0..arity.saturating_sub(closure_arity) {
