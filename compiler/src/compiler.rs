@@ -1,5 +1,5 @@
 use crate::{
-    frame::{Block, Variable},
+    block::{Block, Variable},
     CompileError,
 };
 use async_stream::try_stream;
@@ -273,7 +273,7 @@ impl<'a> Compiler<'a> {
         *frame.temporary_count_mut() -= 1;
 
         let else_index = {
-            let mut frame = frame.block();
+            let mut frame = frame.fork();
 
             if condition_index + 3 < array.len_usize() {
                 self.compile_if(array, condition_index + 2, &mut frame)?;
@@ -294,7 +294,7 @@ impl<'a> Compiler<'a> {
                 .copy_from_slice(&((current_index - branch_index) as i16).to_le_bytes());
             drop(codes);
 
-            let mut frame = frame.block();
+            let mut frame = frame.fork();
             self.compile_expression(array.get_usize(condition_index + 1), &mut frame)?;
         }
 
