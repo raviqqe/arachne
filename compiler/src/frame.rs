@@ -1,6 +1,6 @@
 use runtime::Symbol;
 use std::{
-    cell::{Ref, RefCell},
+    cell::{Ref, RefCell, RefMut},
     collections::{HashMap, HashSet},
 };
 
@@ -9,7 +9,7 @@ pub struct Frame<'a> {
     parent: Option<&'a Frame<'a>>,
     variables: HashMap<Symbol, usize>,
     temporary_count: usize,
-    free_variables: Option<RefCell<HashSet<usize>>>, // Only for function
+    free_variables: Option<RefCell<HashSet<Symbol>>>, // Only for function
 }
 
 impl<'a> Frame<'a> {
@@ -50,7 +50,13 @@ impl<'a> Frame<'a> {
         if let Some(index) = self.variables.get(&name) {
             Some(offset - index - 1)
         } else if let Some(parent) = &self.parent {
-            parent.get_variable(name).map(|index| index + offset)
+            if let Some(index) = parent.get_variable(name) {
+                self.free_variables_mut().insert(name);
+
+                Some(index + offset)
+            } else {
+                None
+            }
         } else {
             None
         }
@@ -68,8 +74,16 @@ impl<'a> Frame<'a> {
         &mut self.temporary_count
     }
 
-    pub fn free_variables(&self) -> Ref<HashSet<usize>> {
+    pub fn free_variables(&self) -> Ref<HashSet<Symbol>> {
         self.free_variables.as_ref().unwrap().borrow()
+    }
+
+    fn free_variables_mut(&self) -> RefMut<HashSet<Symbol>> {
+        if let Some(variables) = self.free_variables.as_ref() {
+            variables.borrow_mut()
+        } else {
+            self.parent.unwrap().free_variables_mut()
+        }
     }
 }
 
