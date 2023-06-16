@@ -1,4 +1,4 @@
-use crate::{block::Block, variable::Variable, CompileError};
+use crate::{block::Block, function::Function, variable::Variable, CompileError};
 use async_stream::try_stream;
 use futures::{Stream, StreamExt};
 use runtime::{Array, Symbol, TypedValueRef, Value};
@@ -19,7 +19,8 @@ impl<'a> Compiler<'a> {
         values: &'a mut (impl Stream<Item = Result<Value, E>> + Unpin),
     ) -> impl Stream<Item = Result<(), CompileError>> + 'a {
         try_stream! {
-            let mut frame = Block::new();
+            let function = Function::new();
+            let mut frame = Block::new(&function);
 
             while let Some(value) = values.next().await {
                 self.compile_statement(&value.map_err(|error| CompileError::Other(error.into()))?, &mut frame, true)?;
@@ -183,32 +184,33 @@ impl<'a> Compiler<'a> {
         let arguments = arguments.as_array().expect("arguments");
         let arity = u8::try_from(arguments.len_usize())?;
 
-        let closed_frame = {
-            let mut frame = Block::with_capacity(arguments.len_usize() + 1);
+        let function = {
+            let function = Function::new();
+            let mut block = Block::with_capacity(&function, arguments.len_usize() + 1);
 
             if let Some(name) = name {
-                frame.insert_variable(name);
+                block.insert_variable(name);
             }
 
             for index in 0..arguments.len_usize() {
                 if let Some(argument) = arguments.get_usize(index).to_symbol() {
-                    frame.insert_variable(argument);
+                    block.insert_variable(argument);
                 }
             }
 
             for index in 2..array.len_usize() - 1 {
-                self.compile_statement(array.get_usize(index), &mut frame, false)?;
+                self.compile_statement(array.get_usize(index), &mut block, false)?;
             }
 
-            self.compile_expression(array.get_usize(array.len_usize() - 1), &mut frame)?;
+            self.compile_expression(array.get_usize(array.len_usize() - 1), &mut block)?;
 
             let mut codes = self.codes.borrow_mut();
 
             codes.push(Instruction::Return as u8);
-            *frame.temporary_count_mut() -= 1;
-            assert_eq!(*frame.temporary_count_mut(), 0);
+            *block.temporary_count_mut() -= 1;
+            assert_eq!(*block.temporary_count_mut(), 0);
 
-            frame
+            function
         };
 
         let mut codes = self.codes.borrow_mut();
@@ -218,7 +220,7 @@ impl<'a> Compiler<'a> {
             .copy_from_slice(&((current_index - jump_index) as u16).to_le_bytes());
         drop(codes);
 
-        for &symbol in &*closed_frame.free_variables() {
+        for &symbol in &*function.free_variables() {
             self.compile_variable(symbol, frame);
         }
 
@@ -226,9 +228,9 @@ impl<'a> Compiler<'a> {
         codes.push(Instruction::Close as u8);
         codes.extend((function_index as u32).to_le_bytes());
         codes.push(arity); // arity
-        codes.push(closed_frame.free_variables().len() as u8);
+        codes.push(function.free_variables().len() as u8);
 
-        *frame.temporary_count_mut() -= closed_frame.free_variables().len();
+        *frame.temporary_count_mut() -= function.free_variables().len();
         *frame.temporary_count_mut() += 1;
 
         Ok(())

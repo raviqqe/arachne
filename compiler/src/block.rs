@@ -1,39 +1,35 @@
-use crate::variable::Variable;
+use crate::{function::Function, variable::Variable};
 use runtime::Symbol;
-use std::{
-    cell::{Ref, RefCell, RefMut},
-    collections::HashMap,
-};
+use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct Block<'a> {
+    function: &'a Function,
     parent: Option<&'a Block<'a>>,
     variables: HashMap<Symbol, usize>,
     temporary_count: usize,
-    // Only for function
-    free_variables: Option<RefCell<Vec<Symbol>>>,
 }
 
 impl<'a> Block<'a> {
-    pub fn new() -> Self {
-        Self::with_capacity(0)
+    pub fn new(function: &'a Function) -> Self {
+        Self::with_capacity(function, 0)
     }
 
-    pub fn with_capacity(capacity: usize) -> Self {
+    pub fn with_capacity(function: &'a Function, capacity: usize) -> Self {
         Self {
+            function,
             parent: None,
             variables: HashMap::with_capacity(capacity),
             temporary_count: 0,
-            free_variables: Some(Default::default()),
         }
     }
 
     pub fn fork(&'a self) -> Self {
         Self {
+            function: self.function,
             parent: Some(self),
             variables: Default::default(),
             temporary_count: 0,
-            free_variables: None,
         }
     }
 
@@ -48,10 +44,10 @@ impl<'a> Block<'a> {
                 variable @ Variable::Free(_) => variable,
             }
         } else {
-            let index = self.free_variables().len();
+            let index = self.function.free_variables().len();
 
             // TODO De-duplicate free variables.
-            self.free_variables_mut().push(name);
+            self.function.free_variables_mut().push(name);
 
             Variable::Free(index)
         }
@@ -68,18 +64,6 @@ impl<'a> Block<'a> {
     pub fn temporary_count_mut(&mut self) -> &mut usize {
         &mut self.temporary_count
     }
-
-    pub fn free_variables(&self) -> Ref<Vec<Symbol>> {
-        self.free_variables.as_ref().unwrap().borrow()
-    }
-
-    fn free_variables_mut(&self) -> RefMut<Vec<Symbol>> {
-        if let Some(variables) = self.free_variables.as_ref() {
-            variables.borrow_mut()
-        } else {
-            self.parent.unwrap().free_variables_mut()
-        }
-    }
 }
 
 #[cfg(test)]
@@ -88,102 +72,110 @@ mod tests {
 
     #[test]
     fn get_bound_variable() {
-        let mut frame = Block::new();
+        let function = Function::new();
+        let mut block = Block::new(&function);
 
-        frame.insert_variable("x".into());
+        block.insert_variable("x".into());
 
-        assert_eq!(frame.get_variable("x".into()), Variable::Bound(0));
+        assert_eq!(block.get_variable("x".into()), Variable::Bound(0));
     }
 
     #[test]
     fn get_free_variable() {
-        let frame = Block::new();
+        let function = Function::new();
+        let block = Block::new(&function);
 
-        assert_eq!(frame.get_variable("x".into()), Variable::Free(0));
-        assert_eq!(frame.get_variable("y".into()), Variable::Free(1));
-        assert_eq!(frame.get_variable("z".into()), Variable::Free(2));
+        assert_eq!(block.get_variable("x".into()), Variable::Free(0));
+        assert_eq!(block.get_variable("y".into()), Variable::Free(1));
+        assert_eq!(block.get_variable("z".into()), Variable::Free(2));
     }
 
     #[test]
     fn get_two_variables() {
-        let mut frame = Block::new();
+        let function = Function::new();
+        let mut block = Block::new(&function);
 
-        frame.insert_variable("x".into());
-        frame.insert_variable("y".into());
+        block.insert_variable("x".into());
+        block.insert_variable("y".into());
 
-        assert_eq!(frame.get_variable("x".into()), Variable::Bound(1));
-        assert_eq!(frame.get_variable("y".into()), Variable::Bound(0));
+        assert_eq!(block.get_variable("x".into()), Variable::Bound(1));
+        assert_eq!(block.get_variable("y".into()), Variable::Bound(0));
     }
 
     #[test]
     fn get_three_variables() {
-        let mut frame = Block::new();
+        let function = Function::new();
+        let mut block = Block::new(&function);
 
-        frame.insert_variable("x".into());
-        frame.insert_variable("y".into());
-        frame.insert_variable("z".into());
+        block.insert_variable("x".into());
+        block.insert_variable("y".into());
+        block.insert_variable("z".into());
 
-        assert_eq!(frame.get_variable("x".into()), Variable::Bound(2));
-        assert_eq!(frame.get_variable("y".into()), Variable::Bound(1));
-        assert_eq!(frame.get_variable("z".into()), Variable::Bound(0));
+        assert_eq!(block.get_variable("x".into()), Variable::Bound(2));
+        assert_eq!(block.get_variable("y".into()), Variable::Bound(1));
+        assert_eq!(block.get_variable("z".into()), Variable::Bound(0));
     }
 
     #[test]
     fn get_variable_in_parent() {
-        let mut frame = Block::new();
+        let function = Function::new();
+        let mut block = Block::new(&function);
 
-        frame.insert_variable("x".into());
+        block.insert_variable("x".into());
 
-        let frame = frame.fork();
+        let block = block.fork();
 
-        assert_eq!(frame.get_variable("x".into()), Variable::Bound(0));
+        assert_eq!(block.get_variable("x".into()), Variable::Bound(0));
     }
 
     #[test]
     fn get_two_variables_with_parent() {
-        let mut frame = Block::new();
+        let function = Function::new();
+        let mut block = Block::new(&function);
 
-        frame.insert_variable("x".into());
+        block.insert_variable("x".into());
 
-        let mut frame = frame.fork();
+        let mut block = block.fork();
 
-        frame.insert_variable("y".into());
+        block.insert_variable("y".into());
 
-        assert_eq!(frame.get_variable("x".into()), Variable::Bound(1));
-        assert_eq!(frame.get_variable("y".into()), Variable::Bound(0));
+        assert_eq!(block.get_variable("x".into()), Variable::Bound(1));
+        assert_eq!(block.get_variable("y".into()), Variable::Bound(0));
     }
 
     #[test]
     fn get_three_variables_with_parent() {
-        let mut frame = Block::new();
+        let function = Function::new();
+        let mut block = Block::new(&function);
 
-        frame.insert_variable("x".into());
-        frame.insert_variable("y".into());
+        block.insert_variable("x".into());
+        block.insert_variable("y".into());
 
-        let mut frame = frame.fork();
+        let mut block = block.fork();
 
-        frame.insert_variable("z".into());
+        block.insert_variable("z".into());
 
-        assert_eq!(frame.get_variable("x".into()), Variable::Bound(2));
-        assert_eq!(frame.get_variable("y".into()), Variable::Bound(1));
-        assert_eq!(frame.get_variable("z".into()), Variable::Bound(0));
+        assert_eq!(block.get_variable("x".into()), Variable::Bound(2));
+        assert_eq!(block.get_variable("y".into()), Variable::Bound(1));
+        assert_eq!(block.get_variable("z".into()), Variable::Bound(0));
     }
 
     #[test]
     fn get_four_variables_with_parent() {
-        let mut frame = Block::new();
+        let function = Function::new();
+        let mut block = Block::new(&function);
 
-        frame.insert_variable("x".into());
-        frame.insert_variable("y".into());
+        block.insert_variable("x".into());
+        block.insert_variable("y".into());
 
-        let mut frame = frame.fork();
+        let mut block = block.fork();
 
-        frame.insert_variable("z".into());
-        frame.insert_variable("v".into());
+        block.insert_variable("z".into());
+        block.insert_variable("v".into());
 
-        assert_eq!(frame.get_variable("x".into()), Variable::Bound(3));
-        assert_eq!(frame.get_variable("y".into()), Variable::Bound(2));
-        assert_eq!(frame.get_variable("z".into()), Variable::Bound(1));
-        assert_eq!(frame.get_variable("v".into()), Variable::Bound(0));
+        assert_eq!(block.get_variable("x".into()), Variable::Bound(3));
+        assert_eq!(block.get_variable("y".into()), Variable::Bound(2));
+        assert_eq!(block.get_variable("z".into()), Variable::Bound(1));
+        assert_eq!(block.get_variable("v".into()), Variable::Bound(0));
     }
 }
