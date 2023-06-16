@@ -325,24 +325,35 @@ mod tests {
 
     type Error = io::Error;
 
-    async fn compile<const N: usize>(values: [Value; N]) -> String {
+    async fn compile_instructions<const N: usize>(
+        values: [Value; N],
+    ) -> Result<Vec<u8>, CompileError> {
         let codes = vec![].into();
-        let mut compiler = Compiler::new(&codes);
-        let values = iter(values).map(Ok);
 
-        pin_mut!(values);
+        {
+            let mut compiler = Compiler::new(&codes);
+            let values = iter(values).map(Ok);
 
-        let results = compiler.compile::<Error>(&mut values);
+            pin_mut!(values);
 
-        pin_mut!(results);
+            let results = compiler.compile::<Error>(&mut values);
 
-        while let Some(result) = results.next().await {
-            result.unwrap();
+            pin_mut!(results);
+
+            while let Some(result) = results.next().await {
+                result?;
+            }
         }
 
-        let instructions = format_instructions(&codes.borrow()).unwrap();
+        Ok(codes.into_inner())
+    }
 
-        instructions
+    async fn compile<const N: usize>(values: [Value; N]) -> String {
+        format_instructions(&compile_instructions(values).await.unwrap()).unwrap()
+    }
+
+    async fn compile_error<const N: usize>(values: [Value; N]) -> CompileError {
+        compile_instructions(values).await.unwrap_err()
     }
 
     #[tokio::test]
@@ -609,6 +620,16 @@ mod tests {
                 .await
             );
         }
+
+        #[tokio::test]
+        async fn compile_invalid() {
+            insta::assert_display_snapshot!(
+                compile_error([["let".into(), "x".into()].into()]).await
+            );
+            insta::assert_display_snapshot!(
+                compile_error([["let".into(), "x".into(), "y".into(), "z".into()].into()]).await
+            );
+        }
     }
 
     mod let_rec {
@@ -624,6 +645,17 @@ mod tests {
                 ]
                 .into()])
                 .await
+            );
+        }
+
+        #[tokio::test]
+        async fn compile_invalid() {
+            insta::assert_display_snapshot!(
+                compile_error([["let-rec".into(), "x".into()].into()]).await
+            );
+            insta::assert_display_snapshot!(
+                compile_error([["let-rec".into(), "x".into(), "y".into(), "z".into()].into()])
+                    .await
             );
         }
     }
