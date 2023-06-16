@@ -43,10 +43,16 @@ impl<'a> Block<'a> {
                 Variable::Bound(index) => Variable::Bound(index + offset),
                 variable @ Variable::Free(_) => variable,
             }
+        } else if let Some(index) = self
+            .function
+            .free_variables()
+            .iter()
+            .position(|other| other == &name)
+        {
+            Variable::Free(index)
         } else {
             let index = self.function.free_variables().len();
 
-            // TODO De-duplicate free variables.
             self.function.free_variables_mut().push(name);
 
             Variable::Free(index)
