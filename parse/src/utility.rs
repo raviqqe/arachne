@@ -1,7 +1,5 @@
 #[cfg(test)]
-use futures::stream::iter;
-#[cfg(test)]
-use futures::{Stream, StreamExt};
+use futures::{stream::iter, Stream, StreamExt};
 #[cfg(test)]
 use std::io;
 
