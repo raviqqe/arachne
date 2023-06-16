@@ -31,6 +31,7 @@ pub enum Instruction {
 
     // Control
     Call,
+    TailCall,
     Return,
     Jump,
     Branch,
