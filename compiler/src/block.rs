@@ -87,13 +87,24 @@ mod tests {
     }
 
     #[test]
-    fn get_free_variable() {
+    fn get_free_variables() {
         let function = Function::new();
         let block = Block::new(&function);
 
         assert_eq!(block.get_variable("x".into()), Variable::Free(0));
         assert_eq!(block.get_variable("y".into()), Variable::Free(1));
         assert_eq!(block.get_variable("z".into()), Variable::Free(2));
+    }
+
+    #[test]
+    fn get_same_free_variables() {
+        let function = Function::new();
+        let block = Block::new(&function);
+
+        assert_eq!(block.get_variable("x".into()), Variable::Free(0));
+        assert_eq!(block.get_variable("y".into()), Variable::Free(1));
+        assert_eq!(block.get_variable("x".into()), Variable::Free(0));
+        assert_eq!(block.get_variable("y".into()), Variable::Free(1));
     }
 
     #[test]
