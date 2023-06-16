@@ -9,6 +9,7 @@ use std::{
 pub enum CompileError {
     Closure,
     Other(Box<dyn Error>),
+    Syntax(String),
     SymbolLength(String),
 }
 
@@ -22,6 +23,9 @@ impl Display for CompileError {
             }
             Self::Other(error) => {
                 write!(formatter, "{}", error)
+            }
+            Self::Syntax(literal) => {
+                write!(formatter, "invalid syntax: {}", literal)
             }
             Self::SymbolLength(symbol) => {
                 write!(formatter, "symbol too long: {}", symbol)

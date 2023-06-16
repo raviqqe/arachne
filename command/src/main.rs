@@ -1,6 +1,6 @@
 use futures::{pin_mut, StreamExt};
 use parse::parse;
-use std::error::Error;
+use std::{error::Error, process::exit};
 use tokio::io::{stdin, AsyncBufReadExt, BufReader};
 use tokio_stream::wrappers::LinesStream;
 use vm_interpreter::Interpreter;
@@ -32,7 +32,14 @@ interpret_fn!(interpret_naive, naive_interpreter::interpret);
 interpret_fn!(interpret_mlir, mlir_interpreter::interpret);
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+async fn main() {
+    if let Err(error) = run().await {
+        eprintln!("{}", error);
+        exit(1);
+    }
+}
+
+async fn run() -> Result<(), Box<dyn Error>> {
     let matches = clap::Command::new(clap::crate_name!())
         .version(clap::crate_version!())
         .arg(

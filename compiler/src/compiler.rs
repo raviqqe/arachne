@@ -39,20 +39,28 @@ impl<'a> Compiler<'a> {
             if let Some(symbol) = array.get_usize(0).to_symbol() {
                 match symbol.as_str() {
                     "let" => {
-                        if let Some(symbol) = array.get_usize(1).to_symbol() {
+                        if array.len_usize() != 3 {
+                            return Err(CompileError::Syntax(array.to_string()));
+                        } else if let Some(symbol) = array.get_usize(1).to_symbol() {
                             self.compile_expression(array.get_usize(2), block)?;
                             block.insert_variable(symbol);
                             *block.temporary_count_mut() -= 1;
+                        } else {
+                            return Err(CompileError::Syntax(array.to_string()));
                         }
                     }
                     "let-rec" => {
-                        if let (Some(symbol), Some(array)) = (
+                        if array.len_usize() != 3 {
+                            return Err(CompileError::Syntax(array.to_string()));
+                        } else if let (Some(symbol), Some(array)) = (
                             array.get_usize(1).to_symbol(),
                             array.get_usize(2).as_array(),
                         ) {
                             self.compile_function(Some(symbol), array, block)?;
                             block.insert_variable(symbol);
                             *block.temporary_count_mut() -= 1;
+                        } else {
+                            return Err(CompileError::Syntax(array.to_string()));
                         }
                     }
                     _ => self.compile_expression_statement(value, block, dump)?,
@@ -181,7 +189,7 @@ impl<'a> Compiler<'a> {
         drop(codes);
 
         let arguments = array.get_usize(1);
-        let arguments = arguments.as_array().expect("arguments");
+        let Some(arguments) = arguments.as_array() else { return Err(CompileError::Syntax(array.to_string())) };
         let arity = u8::try_from(arguments.len_usize())?;
 
         let function = {
@@ -317,24 +325,35 @@ mod tests {
 
     type Error = io::Error;
 
-    async fn compile<const N: usize>(values: [Value; N]) -> String {
+    async fn compile_instructions<const N: usize>(
+        values: [Value; N],
+    ) -> Result<Vec<u8>, CompileError> {
         let codes = vec![].into();
-        let mut compiler = Compiler::new(&codes);
-        let values = iter(values).map(Ok);
 
-        pin_mut!(values);
+        {
+            let mut compiler = Compiler::new(&codes);
+            let values = iter(values).map(Ok);
 
-        let results = compiler.compile::<Error>(&mut values);
+            pin_mut!(values);
 
-        pin_mut!(results);
+            let results = compiler.compile::<Error>(&mut values);
 
-        while let Some(result) = results.next().await {
-            result.unwrap();
+            pin_mut!(results);
+
+            while let Some(result) = results.next().await {
+                result?;
+            }
         }
 
-        let instructions = format_instructions(&codes.borrow()).unwrap();
+        Ok(codes.into_inner())
+    }
 
-        instructions
+    async fn compile<const N: usize>(values: [Value; N]) -> String {
+        format_instructions(&compile_instructions(values).await.unwrap()).unwrap()
+    }
+
+    async fn compile_error<const N: usize>(values: [Value; N]) -> CompileError {
+        compile_instructions(values).await.unwrap_err()
     }
 
     #[tokio::test]
@@ -601,6 +620,16 @@ mod tests {
                 .await
             );
         }
+
+        #[tokio::test]
+        async fn compile_invalid() {
+            insta::assert_display_snapshot!(
+                compile_error([["let".into(), "x".into()].into()]).await
+            );
+            insta::assert_display_snapshot!(
+                compile_error([["let".into(), "x".into(), "y".into(), "z".into()].into()]).await
+            );
+        }
     }
 
     mod let_rec {
@@ -616,6 +645,17 @@ mod tests {
                 ]
                 .into()])
                 .await
+            );
+        }
+
+        #[tokio::test]
+        async fn compile_invalid() {
+            insta::assert_display_snapshot!(
+                compile_error([["let-rec".into(), "x".into()].into()]).await
+            );
+            insta::assert_display_snapshot!(
+                compile_error([["let-rec".into(), "x".into(), "y".into(), "z".into()].into()])
+                    .await
             );
         }
     }

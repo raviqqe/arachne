@@ -1,0 +1,5 @@
+---
+source: compiler/src/compiler.rs
+expression: "compile_error([[\"let\".into(), \"x\".into()].into()]).await"
+---
+invalid syntax: (let x)
