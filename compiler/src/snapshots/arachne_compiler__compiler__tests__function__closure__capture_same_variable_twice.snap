@@ -5,11 +5,10 @@ expression: "compile([[\"let\".into(), \"x\".into(), 1.0.into()].into(),\n      
 float64 1
 jump 6
 environment 0
-environment 1
+environment 0
 add
 return
 peek 0
-peek 1
-close c 0 2
+close c 0 1
 dump
 drop

@@ -37,26 +37,26 @@ impl<'a> Block<'a> {
         let offset = self.variables.len() + self.temporary_count;
 
         if let Some(index) = self.variables.get(&name) {
-            Variable::Bound(offset - index - 1)
+            return Variable::Bound(offset - index - 1);
         } else if let Some(parent) = &self.parent {
-            match parent.get_variable(name) {
+            return match parent.get_variable(name) {
                 Variable::Bound(index) => Variable::Bound(index + offset),
                 variable @ Variable::Free(_) => variable,
-            }
+            };
         } else if let Some(index) = self
             .function
             .free_variables()
             .iter()
             .position(|other| other == &name)
         {
-            Variable::Free(index)
-        } else {
-            let index = self.function.free_variables().len();
-
-            self.function.free_variables_mut().push(name);
-
-            Variable::Free(index)
+            return Variable::Free(index);
         }
+
+        let index = self.function.free_variables().len();
+
+        self.function.free_variables_mut().push(name);
+
+        Variable::Free(index)
     }
 
     pub fn insert_variable(&mut self, name: Symbol) {
