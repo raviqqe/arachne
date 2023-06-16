@@ -159,6 +159,7 @@ impl<'a> Compiler<'a> {
                 codes.push(index as u8);
             }
             Variable::Free(index) => {
+                // TODO Throw an error at top level.
                 codes.push(Instruction::Environment as u8);
                 codes.push(index as u8);
             }
