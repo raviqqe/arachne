@@ -10,4 +10,4 @@ def sum(x):
     return z
 
 
-print(sum(1000000))
+print(sum(100000000))
