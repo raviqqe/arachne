@@ -43,7 +43,7 @@ impl<'a> Compiler<'a> {
                         if array.len_usize() != 3 {
                             return Err(CompileError::Syntax(array.to_string()));
                         } else if let Some(symbol) = array.get_usize(1).to_symbol() {
-                            self.compile_expression(array.get_usize(2), block)?;
+                            self.compile_expression(array.get_usize(2), block, false)?;
                             block.insert_variable(symbol);
                             *block.temporary_count_mut() -= 1;
                         } else {
@@ -82,7 +82,7 @@ impl<'a> Compiler<'a> {
         block: &mut Block,
         dump: bool,
     ) -> Result<(), CompileError> {
-        self.compile_expression(value, block)?;
+        self.compile_expression(value, block, false)?;
         let mut codes = self.codes.borrow_mut();
 
         if dump {
@@ -95,7 +95,12 @@ impl<'a> Compiler<'a> {
         Ok(())
     }
 
-    fn compile_expression(&mut self, value: &Value, block: &mut Block) -> Result<(), CompileError> {
+    fn compile_expression(
+        &mut self,
+        value: &Value,
+        block: &mut Block,
+        tail: bool,
+    ) -> Result<(), CompileError> {
         if let Some(value) = value.as_typed() {
             match value {
                 TypedValueRef::Array(array) => {
@@ -105,7 +110,7 @@ impl<'a> Compiler<'a> {
                         if symbol == "fn" {
                             self.compile_function(None, array, block)?;
                         } else if symbol == "if" {
-                            self.compile_if(array, 1, block)?;
+                            self.compile_if(array, 1, block, tail)?;
                         } else if let Some(instruction) = match symbol {
                             "=" => Some(Instruction::Equal),
                             "get" => Some(Instruction::Get),
@@ -125,10 +130,10 @@ impl<'a> Compiler<'a> {
                                 _ => 1,
                             };
                         } else {
-                            self.compile_call(array, block)?;
+                            self.compile_call(array, block, tail)?;
                         }
                     } else {
-                        self.compile_call(array, block)?
+                        self.compile_call(array, block, tail)?
                     }
                 }
                 TypedValueRef::Closure(_) => return Err(CompileError::Closure),
@@ -211,7 +216,7 @@ impl<'a> Compiler<'a> {
                 self.compile_statement(array.get_usize(index), &mut block, false)?;
             }
 
-            self.compile_expression(array.get_usize(array.len_usize() - 1), &mut block)?;
+            self.compile_expression(array.get_usize(array.len_usize() - 1), &mut block, true)?;
 
             let mut codes = self.codes.borrow_mut();
 
@@ -247,18 +252,27 @@ impl<'a> Compiler<'a> {
 
     fn compile_arguments(&mut self, array: &Array, block: &mut Block) -> Result<(), CompileError> {
         for index in 1..array.len_usize() {
-            self.compile_expression(array.get_usize(index), block)?;
+            self.compile_expression(array.get_usize(index), block, false)?;
         }
 
         Ok(())
     }
 
-    fn compile_call(&mut self, array: &Array, block: &mut Block) -> Result<(), CompileError> {
-        self.compile_expression(array.get_usize(0), block)?;
+    fn compile_call(
+        &mut self,
+        array: &Array,
+        block: &mut Block,
+        tail: bool,
+    ) -> Result<(), CompileError> {
+        self.compile_expression(array.get_usize(0), block, false)?;
         self.compile_arguments(array, block)?;
 
         let mut codes = self.codes.borrow_mut();
-        codes.push(Instruction::Call as u8);
+        codes.push(if tail {
+            Instruction::TailCall
+        } else {
+            Instruction::Call
+        } as u8);
         codes.push((array.len_usize() - 1) as u8);
         *block.temporary_count_mut() -= array.len_usize() - 1;
 
@@ -270,8 +284,9 @@ impl<'a> Compiler<'a> {
         array: &Array,
         condition_index: usize,
         block: &mut Block,
+        tail: bool,
     ) -> Result<(), CompileError> {
-        self.compile_expression(array.get_usize(condition_index), block)?;
+        self.compile_expression(array.get_usize(condition_index), block, false)?;
 
         let mut codes = self.codes.borrow_mut();
         codes.push(Instruction::Branch as u8);
@@ -284,9 +299,9 @@ impl<'a> Compiler<'a> {
             let mut block = block.fork();
 
             if condition_index + 3 < array.len_usize() {
-                self.compile_if(array, condition_index + 2, &mut block)?;
+                self.compile_if(array, condition_index + 2, &mut block, tail)?;
             } else {
-                self.compile_expression(array.get_usize(condition_index + 2), &mut block)?;
+                self.compile_expression(array.get_usize(condition_index + 2), &mut block, tail)?;
             }
 
             let mut codes = self.codes.borrow_mut();
@@ -303,7 +318,7 @@ impl<'a> Compiler<'a> {
             drop(codes);
 
             let mut block = block.fork();
-            self.compile_expression(array.get_usize(condition_index + 1), &mut block)?;
+            self.compile_expression(array.get_usize(condition_index + 1), &mut block, tail)?;
         }
 
         let mut codes = self.codes.borrow_mut();
