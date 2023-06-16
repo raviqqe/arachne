@@ -20,10 +20,10 @@ impl<'a> Compiler<'a> {
     ) -> impl Stream<Item = Result<(), CompileError>> + 'a {
         try_stream! {
             let function = Function::new();
-            let mut frame = Block::new(&function);
+            let mut block = Block::new(&function);
 
             while let Some(value) = values.next().await {
-                self.compile_statement(&value.map_err(|error| CompileError::Other(error.into()))?, &mut frame, true)?;
+                self.compile_statement(&value.map_err(|error| CompileError::Other(error.into()))?, &mut block, true)?;
                 yield ();
             }
         }
@@ -32,7 +32,7 @@ impl<'a> Compiler<'a> {
     fn compile_statement(
         &mut self,
         value: &Value,
-        frame: &mut Block,
+        block: &mut Block,
         dump: bool,
     ) -> Result<(), CompileError> {
         if let Some(array) = value.as_array() {
@@ -40,9 +40,9 @@ impl<'a> Compiler<'a> {
                 match symbol.as_str() {
                     "let" => {
                         if let Some(symbol) = array.get_usize(1).to_symbol() {
-                            self.compile_expression(array.get_usize(2), frame)?;
-                            frame.insert_variable(symbol);
-                            *frame.temporary_count_mut() -= 1;
+                            self.compile_expression(array.get_usize(2), block)?;
+                            block.insert_variable(symbol);
+                            *block.temporary_count_mut() -= 1;
                         }
                     }
                     "let-rec" => {
@@ -50,18 +50,18 @@ impl<'a> Compiler<'a> {
                             array.get_usize(1).to_symbol(),
                             array.get_usize(2).as_array(),
                         ) {
-                            self.compile_function(Some(symbol), array, frame)?;
-                            frame.insert_variable(symbol);
-                            *frame.temporary_count_mut() -= 1;
+                            self.compile_function(Some(symbol), array, block)?;
+                            block.insert_variable(symbol);
+                            *block.temporary_count_mut() -= 1;
                         }
                     }
-                    _ => self.compile_expression_statement(value, frame, dump)?,
+                    _ => self.compile_expression_statement(value, block, dump)?,
                 }
             } else {
-                self.compile_expression_statement(value, frame, dump)?
+                self.compile_expression_statement(value, block, dump)?
             }
         } else {
-            self.compile_expression_statement(value, frame, dump)?
+            self.compile_expression_statement(value, block, dump)?
         }
 
         Ok(())
@@ -70,10 +70,10 @@ impl<'a> Compiler<'a> {
     fn compile_expression_statement(
         &mut self,
         value: &Value,
-        frame: &mut Block,
+        block: &mut Block,
         dump: bool,
     ) -> Result<(), CompileError> {
-        self.compile_expression(value, frame)?;
+        self.compile_expression(value, block)?;
         let mut codes = self.codes.borrow_mut();
 
         if dump {
@@ -81,12 +81,12 @@ impl<'a> Compiler<'a> {
         }
 
         codes.push(Instruction::Drop as u8);
-        *frame.temporary_count_mut() -= 1;
+        *block.temporary_count_mut() -= 1;
 
         Ok(())
     }
 
-    fn compile_expression(&mut self, value: &Value, frame: &mut Block) -> Result<(), CompileError> {
+    fn compile_expression(&mut self, value: &Value, block: &mut Block) -> Result<(), CompileError> {
         if let Some(value) = value.as_typed() {
             match value {
                 TypedValueRef::Array(array) => {
@@ -94,9 +94,9 @@ impl<'a> Compiler<'a> {
                         let symbol = symbol.as_str();
 
                         if symbol == "fn" {
-                            self.compile_function(None, array, frame)?;
+                            self.compile_function(None, array, block)?;
                         } else if symbol == "if" {
-                            self.compile_if(array, 1, frame)?;
+                            self.compile_if(array, 1, block)?;
                         } else if let Some(instruction) = match symbol {
                             "=" => Some(Instruction::Equal),
                             "get" => Some(Instruction::Get),
@@ -108,18 +108,18 @@ impl<'a> Compiler<'a> {
                             "/" => Some(Instruction::Divide),
                             _ => None,
                         } {
-                            self.compile_arguments(array, frame)?;
+                            self.compile_arguments(array, block)?;
                             self.codes.borrow_mut().push(instruction as u8);
-                            *frame.temporary_count_mut() -= match instruction {
+                            *block.temporary_count_mut() -= match instruction {
                                 Instruction::Length => 0,
                                 Instruction::Set => 2,
                                 _ => 1,
                             };
                         } else {
-                            self.compile_call(array, frame)?;
+                            self.compile_call(array, block)?;
                         }
                     } else {
-                        self.compile_call(array, frame)?
+                        self.compile_call(array, block)?
                     }
                 }
                 TypedValueRef::Closure(_) => return Err(CompileError::Closure),
@@ -128,29 +128,29 @@ impl<'a> Compiler<'a> {
 
                     codes.push(Instruction::Float64 as u8);
                     codes.extend(number.to_f64().to_le_bytes());
-                    *frame.temporary_count_mut() += 1;
+                    *block.temporary_count_mut() += 1;
                 }
                 TypedValueRef::Integer32(number) => {
                     let mut codes = self.codes.borrow_mut();
 
                     codes.push(Instruction::Integer32 as u8);
                     codes.extend(number.to_i32().to_le_bytes());
-                    *frame.temporary_count_mut() += 1;
+                    *block.temporary_count_mut() += 1;
                 }
-                TypedValueRef::Symbol(symbol) => self.compile_variable(symbol, frame),
+                TypedValueRef::Symbol(symbol) => self.compile_variable(symbol, block),
             }
         } else {
             self.codes.borrow_mut().push(Instruction::Nil as u8);
-            *frame.temporary_count_mut() += 1;
+            *block.temporary_count_mut() += 1;
         }
 
         Ok(())
     }
 
-    fn compile_variable(&mut self, symbol: Symbol, frame: &mut Block) {
+    fn compile_variable(&mut self, symbol: Symbol, block: &mut Block) {
         let mut codes = self.codes.borrow_mut();
 
-        match frame.get_variable(symbol) {
+        match block.get_variable(symbol) {
             Variable::Bound(index) => {
                 codes.push(Instruction::Peek as u8);
                 codes.push(index as u8);
@@ -162,14 +162,14 @@ impl<'a> Compiler<'a> {
             }
         }
 
-        *frame.temporary_count_mut() += 1;
+        *block.temporary_count_mut() += 1;
     }
 
     fn compile_function(
         &mut self,
         name: Option<Symbol>,
         array: &Array,
-        frame: &mut Block,
+        block: &mut Block,
     ) -> Result<(), CompileError> {
         let mut codes = self.codes.borrow_mut();
 
@@ -221,7 +221,7 @@ impl<'a> Compiler<'a> {
         drop(codes);
 
         for &symbol in &*function.free_variables() {
-            self.compile_variable(symbol, frame);
+            self.compile_variable(symbol, block);
         }
 
         let mut codes = self.codes.borrow_mut();
@@ -230,28 +230,28 @@ impl<'a> Compiler<'a> {
         codes.push(arity); // arity
         codes.push(function.free_variables().len() as u8);
 
-        *frame.temporary_count_mut() -= function.free_variables().len();
-        *frame.temporary_count_mut() += 1;
+        *block.temporary_count_mut() -= function.free_variables().len();
+        *block.temporary_count_mut() += 1;
 
         Ok(())
     }
 
-    fn compile_arguments(&mut self, array: &Array, frame: &mut Block) -> Result<(), CompileError> {
+    fn compile_arguments(&mut self, array: &Array, block: &mut Block) -> Result<(), CompileError> {
         for index in 1..array.len_usize() {
-            self.compile_expression(array.get_usize(index), frame)?;
+            self.compile_expression(array.get_usize(index), block)?;
         }
 
         Ok(())
     }
 
-    fn compile_call(&mut self, array: &Array, frame: &mut Block) -> Result<(), CompileError> {
-        self.compile_expression(array.get_usize(0), frame)?;
-        self.compile_arguments(array, frame)?;
+    fn compile_call(&mut self, array: &Array, block: &mut Block) -> Result<(), CompileError> {
+        self.compile_expression(array.get_usize(0), block)?;
+        self.compile_arguments(array, block)?;
 
         let mut codes = self.codes.borrow_mut();
         codes.push(Instruction::Call as u8);
         codes.push((array.len_usize() - 1) as u8);
-        *frame.temporary_count_mut() -= array.len_usize() - 1;
+        *block.temporary_count_mut() -= array.len_usize() - 1;
 
         Ok(())
     }
@@ -260,24 +260,24 @@ impl<'a> Compiler<'a> {
         &mut self,
         array: &Array,
         condition_index: usize,
-        frame: &mut Block,
+        block: &mut Block,
     ) -> Result<(), CompileError> {
-        self.compile_expression(array.get_usize(condition_index), frame)?;
+        self.compile_expression(array.get_usize(condition_index), block)?;
 
         let mut codes = self.codes.borrow_mut();
         codes.push(Instruction::Branch as u8);
         codes.extend(0u16.to_le_bytes());
         let branch_index = codes.len();
         drop(codes);
-        *frame.temporary_count_mut() -= 1;
+        *block.temporary_count_mut() -= 1;
 
         let else_index = {
-            let mut frame = frame.fork();
+            let mut block = block.fork();
 
             if condition_index + 3 < array.len_usize() {
-                self.compile_if(array, condition_index + 2, &mut frame)?;
+                self.compile_if(array, condition_index + 2, &mut block)?;
             } else {
-                self.compile_expression(array.get_usize(condition_index + 2), &mut frame)?;
+                self.compile_expression(array.get_usize(condition_index + 2), &mut block)?;
             }
 
             let mut codes = self.codes.borrow_mut();
@@ -293,8 +293,8 @@ impl<'a> Compiler<'a> {
                 .copy_from_slice(&((current_index - branch_index) as i16).to_le_bytes());
             drop(codes);
 
-            let mut frame = frame.fork();
-            self.compile_expression(array.get_usize(condition_index + 1), &mut frame)?;
+            let mut block = block.fork();
+            self.compile_expression(array.get_usize(condition_index + 1), &mut block)?;
         }
 
         let mut codes = self.codes.borrow_mut();
@@ -302,7 +302,7 @@ impl<'a> Compiler<'a> {
         codes[else_index - size_of::<u16>()..else_index]
             .copy_from_slice(&((current_index - else_index) as i16).to_le_bytes());
 
-        *frame.temporary_count_mut() += 1;
+        *block.temporary_count_mut() += 1;
 
         Ok(())
     }
