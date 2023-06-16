@@ -219,7 +219,6 @@ impl<'a> Compiler<'a> {
         codes.extend((function_index as u32).to_le_bytes());
         codes.push(arity); // arity
         codes.push(closed_frame.free_variables().len() as u8);
-        dbg!(&closed_frame.free_variables());
 
         for &name in &*closed_frame.free_variables() {
             codes.push(frame.get_variable(name).expect("existing variable") as u8);
