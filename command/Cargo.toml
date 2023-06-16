@@ -4,9 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-mlir-interpreter = { package = "arachne-mlir-interpreter", path = "../interpreter/mlir" }
-naive-interpreter = { package = "arachne-naive-interpreter", path = "../interpreter/naive" }
-vm-interpreter = { package = "arachne-vm-interpreter", path = "../interpreter/vm" }
+interpreter = { package = "arachne-interpreter", path = "../interpreter" }
 parse = { package = "arachne-parse", path = "../parse" }
 vm = { package = "arachne-vm", path = "../vm" }
 async-recursion = "1.0.4"
