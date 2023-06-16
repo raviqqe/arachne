@@ -39,20 +39,28 @@ impl<'a> Compiler<'a> {
             if let Some(symbol) = array.get_usize(0).to_symbol() {
                 match symbol.as_str() {
                     "let" => {
-                        if let Some(symbol) = array.get_usize(1).to_symbol() {
+                        if array.len_usize() != 3 {
+                            return Err(CompileError::Syntax(array.to_string()));
+                        } else if let Some(symbol) = array.get_usize(1).to_symbol() {
                             self.compile_expression(array.get_usize(2), block)?;
                             block.insert_variable(symbol);
                             *block.temporary_count_mut() -= 1;
+                        } else {
+                            return Err(CompileError::Syntax(array.to_string()));
                         }
                     }
                     "let-rec" => {
-                        if let (Some(symbol), Some(array)) = (
+                        if array.len_usize() != 3 {
+                            return Err(CompileError::Syntax(array.to_string()));
+                        } else if let (Some(symbol), Some(array)) = (
                             array.get_usize(1).to_symbol(),
                             array.get_usize(2).as_array(),
                         ) {
                             self.compile_function(Some(symbol), array, block)?;
                             block.insert_variable(symbol);
                             *block.temporary_count_mut() -= 1;
+                        } else {
+                            return Err(CompileError::Syntax(array.to_string()));
                         }
                     }
                     _ => self.compile_expression_statement(value, block, dump)?,
