@@ -20,7 +20,7 @@ fn evaluate(value: Value) -> Value {
     (|| {
         if let Some(mut array) = value.as_array().cloned() {
             for index in 0..array.len_usize() {
-                let value = array.get_usize(index);
+                let value = array.get_usize(index).clone();
                 array = array.set_usize(index, evaluate(value));
             }
 
@@ -31,7 +31,7 @@ fn evaluate(value: Value) -> Value {
                         let mut new = Array::new(len - 1);
 
                         for index in 1..len {
-                            new = new.set_usize(index - 1, array.get_usize(index));
+                            new = new.set_usize(index - 1, array.get_usize(index).clone());
                         }
 
                         Some(new.into())
@@ -39,7 +39,13 @@ fn evaluate(value: Value) -> Value {
                     "eq" => {
                         Some(((array.get_usize(1) == array.get_usize(2)) as usize as f64).into())
                     }
-                    "get" => Some(array.get_usize(1).as_array()?.get(array.get_usize(2))),
+                    "get" => Some(
+                        array
+                            .get_usize(1)
+                            .as_array()?
+                            .get(array.get_usize(2).clone())
+                            .clone(),
+                    ),
                     "set" => {
                         if array.len_usize() >= 4 {
                             Some(
@@ -47,7 +53,7 @@ fn evaluate(value: Value) -> Value {
                                     .get_usize(1)
                                     .as_array()?
                                     .clone()
-                                    .set(array.get_usize(2), array.get_usize(3))
+                                    .set(array.get_usize(2).clone(), array.get_usize(3).clone())
                                     .into(),
                             )
                         } else {

@@ -62,7 +62,7 @@ impl Vm {
                         let index = self.stack.pop();
                         let array = self.stack.pop().into_array()?;
 
-                        Some(array.get(index))
+                        Some(array.get(index).clone())
                     })()
                     .unwrap_or(NIL);
 

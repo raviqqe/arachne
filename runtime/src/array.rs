@@ -13,6 +13,7 @@ use core::{
 };
 
 const UNIQUE_COUNT: usize = 0;
+static STATIC_NIL: Value = NIL;
 
 #[derive(Debug)]
 pub struct Array(u64);
@@ -58,11 +59,11 @@ impl Array {
     }
 
     pub fn get(&self, index: Value) -> &Value {
-        let Ok(index) = Float64::try_from(index) else { return &NIL; };
+        let Ok(index) = Float64::try_from(index) else { return &STATIC_NIL; };
         let index = index.to_f64();
 
         if index < 0.0 {
-            &NIL
+            &STATIC_NIL
         } else {
             self.get_usize(index as usize)
         }
@@ -70,11 +71,11 @@ impl Array {
 
     pub fn get_usize(&self, index: usize) -> &Value {
         if self.is_nil() {
-            &NIL
+            &STATIC_NIL
         } else if index < self.header().len {
             self.get_usize_unchecked(index)
         } else {
-            &NIL
+            &STATIC_NIL
         }
     }
 
@@ -157,7 +158,7 @@ impl Array {
         unsafe { &mut *other.header_mut() }.len = len;
 
         for index in 0..self.header().len {
-            other.set_usize_unchecked(index, self.get_usize_unchecked(index));
+            other.set_usize_unchecked(index, self.get_usize_unchecked(index).clone());
         }
 
         other
@@ -321,11 +322,11 @@ mod tests {
 
     #[test]
     fn get() {
-        assert_eq!(Array::new(0).get((-1.0).into()), NIL);
-        assert_eq!(Array::new(0).get((-0.0).into()), NIL);
-        assert_eq!(Array::new(0).get(0.0.into()), NIL);
-        assert_eq!(Array::new(0).get(1.0.into()), NIL);
-        assert_eq!(Array::new(1).get(0.0.into()), NIL);
+        assert_eq!(Array::new(0).get((-1.0).into()), &NIL);
+        assert_eq!(Array::new(0).get((-0.0).into()), &NIL);
+        assert_eq!(Array::new(0).get(0.0.into()), &NIL);
+        assert_eq!(Array::new(0).get(1.0.into()), &NIL);
+        assert_eq!(Array::new(1).get(0.0.into()), &NIL);
     }
 
     #[test]
@@ -360,25 +361,25 @@ mod tests {
         fn set_element() {
             let array = Array::new(0).set(0.0.into(), 42.0.into());
 
-            assert_eq!(array.get(0.0.into()), 42.0.into());
-            assert_eq!(array.get(1.0.into()), NIL);
+            assert_eq!(array.get(0.0.into()), &42.0.into());
+            assert_eq!(array.get(1.0.into()), &NIL);
         }
 
         #[test]
         fn set_element_extending_array() {
             let array = Array::new(0).set(0.0.into(), 42.0.into());
 
-            assert_eq!(array.get(0.0.into()), 42.0.into());
-            assert_eq!(array.get(1.0.into()), NIL);
+            assert_eq!(array.get(0.0.into()), &42.0.into());
+            assert_eq!(array.get(1.0.into()), &NIL);
         }
 
         #[test]
         fn set_element_extending_array_with_nil() {
             let array = Array::new(0).set(1.0.into(), 42.0.into());
 
-            assert_eq!(array.get(0.0.into()), NIL);
-            assert_eq!(array.get(1.0.into()), 42.0.into());
-            assert_eq!(array.get(2.0.into()), NIL);
+            assert_eq!(array.get(0.0.into()), &NIL);
+            assert_eq!(array.get(1.0.into()), &42.0.into());
+            assert_eq!(array.get(2.0.into()), &NIL);
         }
 
         #[test]
@@ -386,8 +387,8 @@ mod tests {
             let one = Array::new(0);
             let other = one.clone().set(0.0.into(), 42.0.into());
 
-            assert_eq!(one.get(0.0.into()), NIL);
-            assert_eq!(other.get(0.0.into()), 42.0.into());
+            assert_eq!(one.get(0.0.into()), &NIL);
+            assert_eq!(other.get(0.0.into()), &42.0.into());
         }
 
         #[test]
@@ -396,12 +397,12 @@ mod tests {
             let other = one.clone().set_usize(0, 42.0.into());
 
             assert_eq!(one.len_usize(), 2);
-            assert_eq!(one.get_usize(0), NIL);
-            assert_eq!(one.get_usize(1), 13.0.into());
+            assert_eq!(one.get_usize(0), &NIL);
+            assert_eq!(one.get_usize(1), &13.0.into());
 
             assert_eq!(other.len_usize(), 2);
-            assert_eq!(other.get_usize(0), 42.0.into());
-            assert_eq!(other.get_usize(1), 13.0.into());
+            assert_eq!(other.get_usize(0), &42.0.into());
+            assert_eq!(other.get_usize(1), &13.0.into());
         }
     }
 }
