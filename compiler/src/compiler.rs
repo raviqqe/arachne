@@ -445,6 +445,22 @@ mod tests {
             }
 
             #[tokio::test]
+            async fn compile_nested() {
+                insta::assert_display_snapshot!(
+                    compile([
+                        ["let".into(), "x".into(), 42.0.into()].into(),
+                        [
+                            "fn".into(),
+                            [].into(),
+                            ["fn".into(), [].into(), "x".into()].into()
+                        ]
+                        .into()
+                    ])
+                    .await
+                );
+            }
+
+            #[tokio::test]
             async fn compile_call() {
                 insta::assert_display_snapshot!(
                     compile([
