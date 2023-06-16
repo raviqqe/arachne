@@ -11,15 +11,15 @@ pub enum Variable {
 }
 
 #[derive(Debug)]
-pub struct Frame<'a> {
-    parent: Option<&'a Frame<'a>>,
+pub struct Block<'a> {
+    parent: Option<&'a Block<'a>>,
     variables: HashMap<Symbol, usize>,
     temporary_count: usize,
     // Only for function
     free_variables: Option<RefCell<Vec<Symbol>>>,
 }
 
-impl<'a> Frame<'a> {
+impl<'a> Block<'a> {
     pub fn new() -> Self {
         Self::with_capacity(0)
     }
@@ -33,7 +33,7 @@ impl<'a> Frame<'a> {
         }
     }
 
-    pub fn block(&'a self) -> Self {
+    pub fn fork(&'a self) -> Self {
         Self {
             parent: Some(self),
             variables: Default::default(),
@@ -93,7 +93,7 @@ mod tests {
 
     #[test]
     fn get_bound_variable() {
-        let mut frame = Frame::new();
+        let mut frame = Block::new();
 
         frame.insert_variable("x".into());
 
@@ -102,7 +102,7 @@ mod tests {
 
     #[test]
     fn get_free_variable() {
-        let frame = Frame::new();
+        let frame = Block::new();
 
         assert_eq!(frame.get_variable("x".into()), Variable::Free(0));
         assert_eq!(frame.get_variable("y".into()), Variable::Free(1));
@@ -111,7 +111,7 @@ mod tests {
 
     #[test]
     fn get_two_variables() {
-        let mut frame = Frame::new();
+        let mut frame = Block::new();
 
         frame.insert_variable("x".into());
         frame.insert_variable("y".into());
@@ -122,7 +122,7 @@ mod tests {
 
     #[test]
     fn get_three_variables() {
-        let mut frame = Frame::new();
+        let mut frame = Block::new();
 
         frame.insert_variable("x".into());
         frame.insert_variable("y".into());
@@ -135,22 +135,22 @@ mod tests {
 
     #[test]
     fn get_variable_in_parent() {
-        let mut frame = Frame::new();
+        let mut frame = Block::new();
 
         frame.insert_variable("x".into());
 
-        let frame = frame.block();
+        let frame = frame.fork();
 
         assert_eq!(frame.get_variable("x".into()), Variable::Bound(0));
     }
 
     #[test]
     fn get_two_variables_with_parent() {
-        let mut frame = Frame::new();
+        let mut frame = Block::new();
 
         frame.insert_variable("x".into());
 
-        let mut frame = frame.block();
+        let mut frame = frame.fork();
 
         frame.insert_variable("y".into());
 
@@ -160,12 +160,12 @@ mod tests {
 
     #[test]
     fn get_three_variables_with_parent() {
-        let mut frame = Frame::new();
+        let mut frame = Block::new();
 
         frame.insert_variable("x".into());
         frame.insert_variable("y".into());
 
-        let mut frame = frame.block();
+        let mut frame = frame.fork();
 
         frame.insert_variable("z".into());
 
@@ -176,12 +176,12 @@ mod tests {
 
     #[test]
     fn get_four_variables_with_parent() {
-        let mut frame = Frame::new();
+        let mut frame = Block::new();
 
         frame.insert_variable("x".into());
         frame.insert_variable("y".into());
 
-        let mut frame = frame.block();
+        let mut frame = frame.fork();
 
         frame.insert_variable("z".into());
         frame.insert_variable("v".into());

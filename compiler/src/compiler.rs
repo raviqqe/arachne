@@ -1,5 +1,5 @@
 use crate::{
-    frame::{Frame, Variable},
+    frame::{Block, Variable},
     CompileError,
 };
 use async_stream::try_stream;
@@ -22,7 +22,7 @@ impl<'a> Compiler<'a> {
         values: &'a mut (impl Stream<Item = Result<Value, E>> + Unpin),
     ) -> impl Stream<Item = Result<(), CompileError>> + 'a {
         try_stream! {
-            let mut frame = Frame::new();
+            let mut frame = Block::new();
 
             while let Some(value) = values.next().await {
                 self.compile_statement(&value.map_err(|error| CompileError::Other(error.into()))?, &mut frame, true)?;
@@ -34,7 +34,7 @@ impl<'a> Compiler<'a> {
     fn compile_statement(
         &mut self,
         value: &Value,
-        frame: &mut Frame,
+        frame: &mut Block,
         dump: bool,
     ) -> Result<(), CompileError> {
         if let Some(array) = value.as_array() {
@@ -72,7 +72,7 @@ impl<'a> Compiler<'a> {
     fn compile_expression_statement(
         &mut self,
         value: &Value,
-        frame: &mut Frame,
+        frame: &mut Block,
         dump: bool,
     ) -> Result<(), CompileError> {
         self.compile_expression(value, frame)?;
@@ -88,7 +88,7 @@ impl<'a> Compiler<'a> {
         Ok(())
     }
 
-    fn compile_expression(&mut self, value: &Value, frame: &mut Frame) -> Result<(), CompileError> {
+    fn compile_expression(&mut self, value: &Value, frame: &mut Block) -> Result<(), CompileError> {
         if let Some(value) = value.as_typed() {
             match value {
                 TypedValueRef::Array(array) => {
@@ -149,7 +149,7 @@ impl<'a> Compiler<'a> {
         Ok(())
     }
 
-    fn compile_variable(&mut self, symbol: Symbol, frame: &mut Frame) {
+    fn compile_variable(&mut self, symbol: Symbol, frame: &mut Block) {
         let mut codes = self.codes.borrow_mut();
 
         match frame.get_variable(symbol) {
@@ -171,7 +171,7 @@ impl<'a> Compiler<'a> {
         &mut self,
         name: Option<Symbol>,
         array: &Array,
-        frame: &mut Frame,
+        frame: &mut Block,
     ) -> Result<(), CompileError> {
         let mut codes = self.codes.borrow_mut();
 
@@ -187,7 +187,7 @@ impl<'a> Compiler<'a> {
         let arity = u8::try_from(arguments.len_usize())?;
 
         let closed_frame = {
-            let mut frame = Frame::with_capacity(arguments.len_usize() + 1);
+            let mut frame = Block::with_capacity(arguments.len_usize() + 1);
 
             if let Some(name) = name {
                 frame.insert_variable(name);
@@ -237,7 +237,7 @@ impl<'a> Compiler<'a> {
         Ok(())
     }
 
-    fn compile_arguments(&mut self, array: &Array, frame: &mut Frame) -> Result<(), CompileError> {
+    fn compile_arguments(&mut self, array: &Array, frame: &mut Block) -> Result<(), CompileError> {
         for index in 1..array.len_usize() {
             self.compile_expression(array.get_usize(index), frame)?;
         }
@@ -245,7 +245,7 @@ impl<'a> Compiler<'a> {
         Ok(())
     }
 
-    fn compile_call(&mut self, array: &Array, frame: &mut Frame) -> Result<(), CompileError> {
+    fn compile_call(&mut self, array: &Array, frame: &mut Block) -> Result<(), CompileError> {
         self.compile_expression(array.get_usize(0), frame)?;
         self.compile_arguments(array, frame)?;
 
@@ -261,7 +261,7 @@ impl<'a> Compiler<'a> {
         &mut self,
         array: &Array,
         condition_index: usize,
-        frame: &mut Frame,
+        frame: &mut Block,
     ) -> Result<(), CompileError> {
         self.compile_expression(array.get_usize(condition_index), frame)?;
 
