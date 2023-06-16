@@ -142,13 +142,10 @@ impl Vm {
                     let environment_size = self.read_u8(codes);
                     let mut closure = Closure::new(id, arity, environment_size);
 
-                    for index in 0..environment_size {
-                        let variable_index = self.read_u8(codes);
+                    for index in (0..environment_size).rev() {
+                        let value = self.stack.pop();
 
-                        closure.write_environment(
-                            index as usize,
-                            self.stack.peek(variable_index as usize).clone(),
-                        );
+                        closure.write_environment(index as usize, value);
                     }
 
                     self.stack.push(closure.into());
