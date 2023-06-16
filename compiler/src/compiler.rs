@@ -25,7 +25,7 @@ impl<'a> Compiler<'a> {
             let mut frame = Frame::new();
 
             while let Some(value) = values.next().await {
-                self.compile_statement(value.map_err(|error| CompileError::Other(error.into()))?, &mut frame, true)?;
+                self.compile_statement(&value.map_err(|error| CompileError::Other(error.into()))?, &mut frame, true)?;
                 yield ();
             }
         }
@@ -33,38 +33,37 @@ impl<'a> Compiler<'a> {
 
     fn compile_statement(
         &mut self,
-        value: Value,
+        value: &Value,
         frame: &mut Frame,
         dump: bool,
     ) -> Result<(), CompileError> {
-        match Array::try_from(value) {
-            Ok(array) => {
-                if let Some(symbol) = array.get_usize(0).to_symbol() {
-                    match symbol.as_str() {
-                        "let" => {
-                            if let Some(symbol) = array.get_usize(1).to_symbol() {
-                                self.compile_expression(array.get_usize(2), frame)?;
-                                frame.insert_variable(symbol);
-                                *frame.temporary_count_mut() -= 1;
-                            }
+        if let Some(array) = value.as_array() {
+            if let Some(symbol) = array.get_usize(0).to_symbol() {
+                match symbol.as_str() {
+                    "let" => {
+                        if let Some(symbol) = array.get_usize(1).to_symbol() {
+                            self.compile_expression(array.get_usize(2), frame)?;
+                            frame.insert_variable(symbol);
+                            *frame.temporary_count_mut() -= 1;
                         }
-                        "let-rec" => {
-                            if let (Some(symbol), Some(array)) = (
-                                array.get_usize(1).to_symbol(),
-                                array.get_usize(2).as_array(),
-                            ) {
-                                self.compile_function(Some(symbol), array, frame)?;
-                                frame.insert_variable(symbol);
-                                *frame.temporary_count_mut() -= 1;
-                            }
-                        }
-                        _ => self.compile_expression_statement(array.into(), frame, dump)?,
                     }
-                } else {
-                    self.compile_expression_statement(array.into(), frame, dump)?
+                    "let-rec" => {
+                        if let (Some(symbol), Some(array)) = (
+                            array.get_usize(1).to_symbol(),
+                            array.get_usize(2).as_array(),
+                        ) {
+                            self.compile_function(Some(symbol), array, frame)?;
+                            frame.insert_variable(symbol);
+                            *frame.temporary_count_mut() -= 1;
+                        }
+                    }
+                    _ => self.compile_expression_statement(value, frame, dump)?,
                 }
+            } else {
+                self.compile_expression_statement(value, frame, dump)?
             }
-            Err(value) => self.compile_expression_statement(value, frame, dump)?,
+        } else {
+            self.compile_expression_statement(value, frame, dump)?
         }
 
         Ok(())
@@ -72,7 +71,7 @@ impl<'a> Compiler<'a> {
 
     fn compile_expression_statement(
         &mut self,
-        value: Value,
+        value: &Value,
         frame: &mut Frame,
         dump: bool,
     ) -> Result<(), CompileError> {
@@ -89,7 +88,7 @@ impl<'a> Compiler<'a> {
         Ok(())
     }
 
-    fn compile_expression(&mut self, value: Value, frame: &mut Frame) -> Result<(), CompileError> {
+    fn compile_expression(&mut self, value: &Value, frame: &mut Frame) -> Result<(), CompileError> {
         if let Some(value) = value.as_typed() {
             match value {
                 TypedValueRef::Array(array) => {
