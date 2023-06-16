@@ -394,6 +394,21 @@ mod tests {
                 .await
             );
         }
+
+        mod closure {
+            use super::*;
+
+            #[tokio::test]
+            async fn compile_function_with_let() {
+                insta::assert_display_snapshot!(
+                    compile([
+                        ["let".into(), "x".into(), 42.0.into()].into(),
+                        ["fn".into(), [].into(), "x".into()].into()
+                    ])
+                    .await
+                );
+            }
+        }
     }
 
     mod r#if {
