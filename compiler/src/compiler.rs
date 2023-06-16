@@ -231,6 +231,7 @@ impl<'a> Compiler<'a> {
         codes.push(arity); // arity
         codes.push(closed_frame.free_variables().len() as u8);
 
+        *frame.temporary_count_mut() -= closed_frame.free_variables().len();
         *frame.temporary_count_mut() += 1;
 
         Ok(())
