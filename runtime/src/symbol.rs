@@ -1,13 +1,15 @@
 use super::Value;
 use crate::value::SYMBOL_MASK;
 use alloc::{borrow::ToOwned, boxed::Box, string::String};
-use core::fmt::{self, Debug, Display, Formatter};
+use core::{
+    fmt::{self, Debug, Display, Formatter},
+    pin::Pin,
+};
 use dashmap::DashMap;
 use once_cell::sync::Lazy;
 
-// TODO Should we use Box::pin()?
 #[allow(clippy::box_collection)]
-static CACHE: Lazy<DashMap<Box<String>, ()>> = Lazy::new(Default::default);
+static CACHE: Lazy<DashMap<Pin<Box<String>>, ()>> = Lazy::new(Default::default);
 
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct Symbol(u64);
@@ -40,9 +42,11 @@ impl Display for Symbol {
 
 impl From<String> for Symbol {
     fn from(symbol: String) -> Self {
-        let entry = CACHE.entry(symbol.into()).or_insert_with(Default::default);
+        let entry = CACHE
+            .entry(Box::pin(symbol))
+            .or_insert_with(Default::default);
 
-        Self(entry.key().as_ref() as *const String as *const _ as u64 | SYMBOL_MASK)
+        Self(entry.key().as_ptr() as *const String as u64 | SYMBOL_MASK)
     }
 }
 
