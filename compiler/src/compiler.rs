@@ -182,7 +182,7 @@ impl<'a> Compiler<'a> {
         let arity = u8::try_from(arguments.len_usize())?;
 
         let closed_frame = {
-            let mut frame = frame.function(arguments.len_usize() + 1);
+            let mut frame = Frame::with_capacity(arguments.len_usize() + 1);
 
             if let Some(name) = name {
                 frame.insert_variable(name);

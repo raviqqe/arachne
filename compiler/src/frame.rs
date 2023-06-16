@@ -26,15 +26,6 @@ impl<'a> Frame<'a> {
         }
     }
 
-    pub fn function(&'a self, capacity: usize) -> Self {
-        Self {
-            parent: Some(self),
-            variables: HashMap::with_capacity(capacity),
-            temporary_count: 0,
-            free_variables: Some(Default::default()),
-        }
-    }
-
     pub fn block(&'a self) -> Self {
         Self {
             parent: Some(self),
