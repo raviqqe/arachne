@@ -399,11 +399,28 @@ mod tests {
             use super::*;
 
             #[tokio::test]
-            async fn compile_function_with_let() {
+            async fn compile_closure() {
                 insta::assert_display_snapshot!(
                     compile([
                         ["let".into(), "x".into(), 42.0.into()].into(),
                         ["fn".into(), [].into(), "x".into()].into()
+                    ])
+                    .await
+                );
+            }
+
+            #[tokio::test]
+            async fn compile_call() {
+                insta::assert_display_snapshot!(
+                    compile([
+                        ["let".into(), "x".into(), 42.0.into()].into(),
+                        [
+                            "let".into(),
+                            "f".into(),
+                            ["fn".into(), [].into(), "x".into()].into()
+                        ]
+                        .into(),
+                        ["f".into()].into(),
                     ])
                     .await
                 );
