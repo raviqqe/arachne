@@ -153,7 +153,19 @@ impl Vm {
 
                     self.stack.push(closure.into());
                 }
-                Instruction::Environment => todo!(),
+                Instruction::Environment => {
+                    let pointer = self.frames.last().expect("frame").frame_pointer();
+                    let index = self.read_u8(codes) as usize;
+
+                    self.stack.push(
+                        self.stack
+                            .peek(self.stack.len() - pointer as usize)
+                            .as_closure()
+                            .expect("closure")
+                            .get_environment(index)
+                            .clone(),
+                    );
+                }
                 Instruction::Peek => {
                     // TODO Move local variables when possible.
                     let index = self.read_u8(codes);
