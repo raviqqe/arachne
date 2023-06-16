@@ -92,12 +92,21 @@ mod tests {
     use super::*;
 
     #[test]
-    fn get_variable() {
+    fn get_bound_variable() {
         let mut frame = Frame::new();
 
         frame.insert_variable("x".into());
 
         assert_eq!(frame.get_variable("x".into()), Variable::Bound(0));
+    }
+
+    #[test]
+    fn get_free_variable() {
+        let frame = Frame::new();
+
+        assert_eq!(frame.get_variable("x".into()), Variable::Free(0));
+        assert_eq!(frame.get_variable("y".into()), Variable::Free(1));
+        assert_eq!(frame.get_variable("z".into()), Variable::Free(2));
     }
 
     #[test]
