@@ -37,20 +37,26 @@ impl<'a> Block<'a> {
         let offset = self.variables.len() + self.temporary_count;
 
         if let Some(index) = self.variables.get(&name) {
-            Variable::Bound(offset - index - 1)
+            return Variable::Bound(offset - index - 1);
         } else if let Some(parent) = &self.parent {
-            match parent.get_variable(name) {
+            return match parent.get_variable(name) {
                 Variable::Bound(index) => Variable::Bound(index + offset),
                 variable @ Variable::Free(_) => variable,
-            }
-        } else {
-            let index = self.function.free_variables().len();
-
-            // TODO De-duplicate free variables.
-            self.function.free_variables_mut().push(name);
-
-            Variable::Free(index)
+            };
+        } else if let Some(index) = self
+            .function
+            .free_variables()
+            .iter()
+            .position(|other| other == &name)
+        {
+            return Variable::Free(index);
         }
+
+        let index = self.function.free_variables().len();
+
+        self.function.free_variables_mut().push(name);
+
+        Variable::Free(index)
     }
 
     pub fn insert_variable(&mut self, name: Symbol) {
@@ -81,13 +87,24 @@ mod tests {
     }
 
     #[test]
-    fn get_free_variable() {
+    fn get_free_variables() {
         let function = Function::new();
         let block = Block::new(&function);
 
         assert_eq!(block.get_variable("x".into()), Variable::Free(0));
         assert_eq!(block.get_variable("y".into()), Variable::Free(1));
         assert_eq!(block.get_variable("z".into()), Variable::Free(2));
+    }
+
+    #[test]
+    fn get_same_free_variables() {
+        let function = Function::new();
+        let block = Block::new(&function);
+
+        assert_eq!(block.get_variable("x".into()), Variable::Free(0));
+        assert_eq!(block.get_variable("y".into()), Variable::Free(1));
+        assert_eq!(block.get_variable("x".into()), Variable::Free(0));
+        assert_eq!(block.get_variable("y".into()), Variable::Free(1));
     }
 
     #[test]
