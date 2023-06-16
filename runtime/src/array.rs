@@ -57,32 +57,29 @@ impl Array {
         ptr
     }
 
-    // TODO Do not clone
-    pub fn get(&self, index: Value) -> Value {
-        let Ok(index) = Float64::try_from(index) else { return NIL; };
+    pub fn get(&self, index: Value) -> &Value {
+        let Ok(index) = Float64::try_from(index) else { return &NIL; };
         let index = index.to_f64();
 
         if index < 0.0 {
-            NIL
+            &NIL
         } else {
             self.get_usize(index as usize)
         }
     }
 
-    // TODO Do not clone
-    pub fn get_usize(&self, index: usize) -> Value {
+    pub fn get_usize(&self, index: usize) -> &Value {
         if self.is_nil() {
-            NIL
+            &NIL
         } else if index < self.header().len {
             self.get_usize_unchecked(index)
         } else {
-            NIL
+            &NIL
         }
     }
 
-    // TODO Do not clone.
-    fn get_usize_unchecked(&self, index: usize) -> Value {
-        (unsafe { &*self.element_ptr(index) }).clone()
+    fn get_usize_unchecked(&self, index: usize) -> &Value {
+        unsafe { &*self.element_ptr(index) }
     }
 
     pub fn set(self, index: Value, value: Value) -> Self {
