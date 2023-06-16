@@ -7,5 +7,5 @@ use std::io;
 
 #[cfg(test)]
 pub fn lines_stream(string: &str) -> impl Stream<Item = Result<String, io::Error>> + '_ {
-    iter(string.lines()).map(|line| Ok::<_, io::Error>(line.trim().to_owned()))
+    iter(string.lines()).map(|line| Ok(line.trim().to_owned()))
 }
