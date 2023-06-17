@@ -82,29 +82,32 @@ impl Vm {
             dispatch!(self, codes);
             dispatch!(self, codes);
             dispatch!(self, codes);
-            dispatch!(self, codes);
-            dispatch!(self, codes);
         }
     }
 
+    #[inline(always)]
     fn get_instruction(&mut self, codes: &[u8]) -> fn(&mut Vm, &[u8]) {
         INSTRUCTIONS[Instruction::from_u8(self.read_u8(codes)).expect("valid instruction") as usize]
     }
 
+    #[inline(always)]
     fn nil(&mut self, _codes: &[u8]) {
         self.stack.push(NIL)
     }
 
+    #[inline(always)]
     fn float64(&mut self, codes: &[u8]) {
         let value = self.read_f64(codes);
         self.stack.push(value.into());
     }
 
+    #[inline(always)]
     fn integer32(&mut self, codes: &[u8]) {
         let value = self.read_u32(codes);
         self.stack.push(value.into());
     }
 
+    #[inline(always)]
     fn symbol(&mut self, codes: &[u8]) {
         let len = self.read_u8(codes);
         let value = str::from_utf8(self.read_bytes(codes, len as usize))
@@ -114,6 +117,7 @@ impl Vm {
         self.stack.push(value);
     }
 
+    #[inline(always)]
     fn get(&mut self, _codes: &[u8]) {
         let value = (|| {
             let index = self.stack.pop();
@@ -126,6 +130,7 @@ impl Vm {
         self.stack.push(value);
     }
 
+    #[inline(always)]
     fn set(&mut self, _codes: &[u8]) {
         let value = (|| {
             let value = self.stack.pop();
@@ -139,32 +144,39 @@ impl Vm {
         self.stack.push(value);
     }
 
+    #[inline(always)]
     fn length(&mut self, _codes: &[u8]) {
         let value = (|| Some(self.stack.pop().into_array()?.len().into()))().unwrap_or(NIL);
 
         self.stack.push(value);
     }
 
+    #[inline(always)]
     fn add(&mut self, _codes: &[u8]) {
         binary_operation!(self, +);
     }
 
+    #[inline(always)]
     fn subtract(&mut self, _codes: &[u8]) {
         binary_operation!(self, -);
     }
 
+    #[inline(always)]
     fn multiply(&mut self, _codes: &[u8]) {
         binary_operation!(self, *);
     }
 
+    #[inline(always)]
     fn divide(&mut self, _codes: &[u8]) {
         binary_operation!(self, /);
     }
 
+    #[inline(always)]
     fn drop(&mut self, _codes: &[u8]) {
         self.stack.pop();
     }
 
+    #[inline(always)]
     fn dump(&mut self, _codes: &[u8]) {
         let value = self.stack.pop();
 
@@ -173,6 +185,7 @@ impl Vm {
         self.stack.push(value);
     }
 
+    #[inline(always)]
     fn call(&mut self, codes: &[u8]) {
         let arity = self.read_u8(codes) as usize;
 
@@ -184,6 +197,7 @@ impl Vm {
         self.call_function(arity)
     }
 
+    #[inline(always)]
     fn tail_call(&mut self, codes: &[u8]) {
         let arity = self.read_u8(codes) as usize;
 
@@ -194,6 +208,7 @@ impl Vm {
         self.call_function(arity)
     }
 
+    #[inline(always)]
     fn close(&mut self, codes: &[u8]) {
         let id = self.read_u32(codes);
         let arity = self.read_u8(codes);
@@ -209,6 +224,7 @@ impl Vm {
         self.stack.push(closure.into());
     }
 
+    #[inline(always)]
     fn environment(&mut self, codes: &[u8]) {
         let pointer = self.frames.last().expect("frame").pointer();
         let index = self.read_u8(codes) as usize;
@@ -223,6 +239,7 @@ impl Vm {
         );
     }
 
+    #[inline(always)]
     fn peek(&mut self, codes: &[u8]) {
         // TODO Move local variables when possible.
         let index = self.read_u8(codes);
@@ -230,6 +247,7 @@ impl Vm {
         self.stack.push(self.stack.peek(index as usize).clone());
     }
 
+    #[inline(always)]
     fn equal(&mut self, _codes: &[u8]) {
         let rhs = self.stack.pop();
         let lhs = self.stack.pop();
@@ -237,6 +255,7 @@ impl Vm {
         self.stack.push(((lhs == rhs) as usize as f64).into());
     }
 
+    #[inline(always)]
     fn jump(&mut self, codes: &[u8]) {
         let address = self.read_u16(codes);
 
@@ -245,6 +264,7 @@ impl Vm {
             .wrapping_add(address as i16 as isize as usize);
     }
 
+    #[inline(always)]
     fn branch(&mut self, codes: &[u8]) {
         let address = self.read_u16(codes);
         let value = self.stack.pop();
@@ -256,6 +276,7 @@ impl Vm {
         }
     }
 
+    #[inline(always)]
     fn r#return(&mut self, _codes: &[u8]) {
         let value = self.stack.pop();
         let frame = self.frames.pop().expect("frame");
