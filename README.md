@@ -83,7 +83,7 @@ If a value is invalid, the `set` function does nothing and returns the original 
 ### Macro expression
 
 ```lisp
-(macro (x y) (+ 42 2045))
+(macro (x y) (let x y))
 ```
 
 ### Quote
