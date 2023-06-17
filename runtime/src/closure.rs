@@ -22,6 +22,7 @@ struct Header {
 }
 
 impl Closure {
+    #[inline]
     pub fn new(id: ClosureId, arity: u8, environment_size: u8) -> Self {
         let (layout, _) = Layout::new::<Header>()
             .extend(Layout::array::<Value>(environment_size as usize).unwrap())
@@ -40,16 +41,19 @@ impl Closure {
         this
     }
 
+    #[inline]
     pub fn arity(&self) -> u8 {
         self.header().arity
     }
 
+    #[inline]
     pub fn get_environment(&self, index: usize) -> &Value {
         assert!(index < self.header().environment_size as usize);
 
         unsafe { &*self.environment_mut(index) }
     }
 
+    #[inline]
     pub fn write_environment(&mut self, index: usize, value: Value) {
         assert!(index < self.header().environment_size as usize);
 
@@ -59,19 +63,23 @@ impl Closure {
     /// # Safety
     ///
     /// The pointer must be valid.
-    pub unsafe fn from_raw(ptr: u64) -> Self {
+    #[inline]
+    pub(crate) unsafe fn from_raw(ptr: u64) -> Self {
         Self(ptr)
     }
 
+    #[inline]
     pub fn id(&self) -> ClosureId {
         self.header().id
     }
 
+    #[inline]
     pub fn is_nil(&self) -> bool {
         self.0 == 0
     }
 
-    pub fn into_raw(self) -> u64 {
+    #[inline]
+    pub(crate) fn into_raw(self) -> u64 {
         let ptr = self.0;
 
         forget(self);
@@ -79,14 +87,17 @@ impl Closure {
         ptr
     }
 
+    #[inline]
     fn header(&self) -> &Header {
         unsafe { &*self.header_mut() }
     }
 
+    #[inline]
     fn header_mut(&self) -> *mut Header {
         self.as_ptr() as *mut _
     }
 
+    #[inline]
     fn environment_mut(&self, index: usize) -> *mut Value {
         unsafe {
             self.as_ptr()
@@ -97,12 +108,14 @@ impl Closure {
         }
     }
 
+    #[inline]
     fn as_ptr(&self) -> *mut u8 {
         (self.0 & !CLOSURE_MASK) as *mut _
     }
 }
 
 impl Clone for Closure {
+    #[inline]
     fn clone(&self) -> Self {
         if !self.is_nil() {
             unsafe { &mut *self.header_mut() }.count += 1;
@@ -113,6 +126,7 @@ impl Clone for Closure {
 }
 
 impl Drop for Closure {
+    #[inline]
     fn drop(&mut self) {
         if self.is_nil() {
         } else if self.header().count == 0 {
@@ -138,6 +152,7 @@ impl Display for Closure {
 impl TryFrom<Value> for Closure {
     type Error = Value;
 
+    #[inline]
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         if value.is_closure() {
             Ok(unsafe { Closure::from_raw(value.into_raw()) })
@@ -150,6 +165,7 @@ impl TryFrom<Value> for Closure {
 impl TryFrom<&Value> for &Closure {
     type Error = ();
 
+    #[inline]
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         if value.is_closure() {
             let ptr = value as *const _ as *const _;
