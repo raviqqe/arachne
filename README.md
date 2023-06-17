@@ -77,7 +77,7 @@ If a value is invalid, the `set` function does nothing and returns the original 
 ### Lambda expression
 
 ```lisp
-(fn (x y) (+ 42 2045))
+(fn (x y) (+ x y))
 ```
 
 ### Macro expression
