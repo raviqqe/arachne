@@ -400,7 +400,6 @@ mod tests {
         async fn compile_tail_call_with_argument() {
             insta::assert_display_snapshot!(
                 compile([
-                    ["let".into(), "x".into(), 42.0.into()].into(),
                     [
                         "let-rec".into(),
                         "f".into(),
@@ -412,7 +411,7 @@ mod tests {
                         .into()
                     ]
                     .into(),
-                    ["f".into()].into(),
+                    ["f".into(), 42.0.into()].into(),
                 ])
                 .await
             );
