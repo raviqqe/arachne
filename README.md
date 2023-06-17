@@ -15,16 +15,6 @@ The programming language for dark mages.
 
 ## Primitives
 
-### Array
-
-```lisp
-(array any) ; -> ()
-(array any 42) ; -> ()
-(array f64) ; -> ()
-```
-
-Arguments are an element type and capacity.
-
 ### Get
 
 ```lisp
