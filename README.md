@@ -27,8 +27,6 @@ The programming language for dark mages.
 (set xs 1 42) ; -> (1 42 3)
 ```
 
-If a value is invalid, the `set` function does nothing and returns the original array.
-
 ### Length
 
 ```lisp
@@ -38,26 +36,24 @@ If a value is invalid, the `set` function does nothing and returns the original 
 ### Equal
 
 ```lisp
-(eq 0 ()) ; -> 1
-(eq 0 0) ; -> 1
-(eq 0 1) ; -> 0
+(= 0 ()) ; -> 1
+(= 0 0) ; -> 1
+(= 0 1) ; -> 0
 ```
-
-## Prelude library
 
 ### If expression
 
 ```lisp
 (if
-  condition-0 then-body-0
   condition-1 then-body-1
+  condition-2 then-body-2
   else-body)
 ```
 
 ### Let binding
 
 ```lisp
-(let foo bar)
+(let foo 42)
 ```
 
 #### Self recursion
@@ -80,10 +76,10 @@ If a value is invalid, the `set` function does nothing and returns the original 
 (fn (x y) (+ x y))
 ```
 
-### Macro expression
+### Macro definition
 
 ```lisp
-(macro (x y) `(let ,x ,y))
+(macro (foo x y) `(let ,x ,y))
 ```
 
 ### Quote
