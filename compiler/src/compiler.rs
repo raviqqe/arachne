@@ -377,6 +377,48 @@ mod tests {
         insta::assert_display_snapshot!(compile(["foo".into()]).await);
     }
 
+    mod call {
+        use super::*;
+
+        #[tokio::test]
+        async fn compile_tail_call() {
+            insta::assert_display_snapshot!(
+                compile([
+                    [
+                        "let".into(),
+                        "f".into(),
+                        ["fn".into(), [].into(), ["f".into()].into()].into()
+                    ]
+                    .into(),
+                    ["f".into()].into(),
+                ])
+                .await
+            );
+        }
+
+        #[tokio::test]
+        async fn compile_tail_call_with_argument() {
+            insta::assert_display_snapshot!(
+                compile([
+                    ["let".into(), "x".into(), 42.0.into()].into(),
+                    [
+                        "let".into(),
+                        "f".into(),
+                        [
+                            "fn".into(),
+                            ["x".into()].into(),
+                            ["f".into(), "x".into()].into()
+                        ]
+                        .into()
+                    ]
+                    .into(),
+                    ["f".into()].into(),
+                ])
+                .await
+            );
+        }
+    }
+
     mod function {
         use super::*;
 
