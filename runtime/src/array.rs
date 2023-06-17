@@ -12,6 +12,8 @@ use core::{
     ptr::{drop_in_place, write},
 };
 
+// TODO Inline functions.
+
 const UNIQUE_COUNT: usize = 0;
 static STATIC_NIL: Value = NIL;
 
