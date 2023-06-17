@@ -385,7 +385,7 @@ mod tests {
             insta::assert_display_snapshot!(
                 compile([
                     [
-                        "let".into(),
+                        "let-rec".into(),
                         "f".into(),
                         ["fn".into(), [].into(), ["f".into()].into()].into()
                     ]
@@ -402,7 +402,7 @@ mod tests {
                 compile([
                     ["let".into(), "x".into(), 42.0.into()].into(),
                     [
-                        "let".into(),
+                        "let-rec".into(),
                         "f".into(),
                         [
                             "fn".into(),
