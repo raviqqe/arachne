@@ -6,4 +6,5 @@ debug = 0
 lto = true
 opt-level = 3
 overflow-checks = false
+panic = "abort"
 strip = true
