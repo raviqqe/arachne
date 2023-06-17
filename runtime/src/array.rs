@@ -12,6 +12,8 @@ use core::{
     ptr::{drop_in_place, write},
 };
 
+// TODO Inline functions.
+
 const UNIQUE_COUNT: usize = 0;
 static STATIC_NIL: Value = NIL;
 
@@ -38,7 +40,7 @@ impl Array {
     fn mask_ptr(ptr: *const u8) -> u64 {
         let ptr = ptr as u64;
 
-        assert!(ptr & ARRAY_MASK == 0);
+        debug_assert!(ptr & ARRAY_MASK == 0);
 
         ptr | ARRAY_MASK
     }
@@ -46,11 +48,11 @@ impl Array {
     /// # Safety
     ///
     /// The returned array is not cloned and dropped as usual.
-    pub unsafe fn from_raw(ptr: u64) -> Self {
+    pub(crate) unsafe fn from_raw(ptr: u64) -> Self {
         Self(ptr)
     }
 
-    pub fn into_raw(self) -> u64 {
+    pub(crate) fn into_raw(self) -> u64 {
         let ptr = self.0;
 
         forget(self);
@@ -253,7 +255,7 @@ impl TryFrom<Value> for Array {
 
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         if value.is_array() {
-            Ok(unsafe { Array::from_raw(value.into_raw()) })
+            Ok(unsafe { Self::from_raw(value.into_raw()) })
         } else {
             Err(value)
         }

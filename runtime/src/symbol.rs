@@ -9,6 +9,8 @@ use core::{
 use dashmap::DashMap;
 use once_cell::sync::Lazy;
 
+// TODO Inline functions.
+
 #[allow(clippy::box_collection)]
 static CACHE: Lazy<DashMap<Pin<Box<String>>, ()>> = Lazy::new(Default::default);
 

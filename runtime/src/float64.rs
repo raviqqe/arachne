@@ -7,12 +7,14 @@ use ordered_float::OrderedFloat;
 pub struct Float64(f64);
 
 impl Float64 {
+    #[inline]
     pub fn to_f64(self) -> f64 {
         self.0
     }
 }
 
 impl PartialEq for Float64 {
+    #[inline]
     fn eq(&self, other: &Self) -> bool {
         OrderedFloat::from(self.0) == OrderedFloat::from(other.0)
     }
@@ -27,6 +29,7 @@ impl Display for Float64 {
 }
 
 impl From<f64> for Float64 {
+    #[inline]
     fn from(number: f64) -> Self {
         Self(number)
     }
@@ -35,6 +38,7 @@ impl From<f64> for Float64 {
 impl TryFrom<&Value> for Float64 {
     type Error = ();
 
+    #[inline]
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         if value.is_float64() {
             Ok(f64::from_bits(value.to_raw()).into())
@@ -47,6 +51,7 @@ impl TryFrom<&Value> for Float64 {
 impl TryFrom<Value> for Float64 {
     type Error = Value;
 
+    #[inline]
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         if value.is_float64() {
             Ok(f64::from_bits(value.into_raw()).into())

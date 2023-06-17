@@ -5,6 +5,8 @@ use core::{
     mem::size_of,
 };
 
+// TODO Inline functions.
+
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct Integer32(u64);
 
