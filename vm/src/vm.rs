@@ -22,6 +22,16 @@ macro_rules! binary_operation {
     };
 }
 
+macro_rules! dispatch {
+    ($self:expr, $codes:expr) => {
+        if $self.program_counter >= $codes.len() {
+            break;
+        }
+
+        $self.get_instruction($codes)($self, $codes);
+    };
+}
+
 pub struct Vm {
     program_counter: usize,
     stack: Stack,
@@ -39,41 +49,16 @@ impl Vm {
 
     pub fn run(&mut self, codes: &[u8]) {
         loop {
-            if self.program_counter >= codes.len() {
-                break;
-            }
-
-            self.get_instruction(codes)(self, codes);
-
-            if self.program_counter >= codes.len() {
-                break;
-            }
-
-            self.get_instruction(codes)(self, codes);
-
-            if self.program_counter >= codes.len() {
-                break;
-            }
-
-            self.get_instruction(codes)(self, codes);
-
-            if self.program_counter >= codes.len() {
-                break;
-            }
-
-            self.get_instruction(codes)(self, codes);
-
-            if self.program_counter >= codes.len() {
-                break;
-            }
-
-            self.get_instruction(codes)(self, codes);
-
-            if self.program_counter >= codes.len() {
-                break;
-            }
-
-            self.get_instruction(codes)(self, codes);
+            dispatch!(self, codes);
+            dispatch!(self, codes);
+            dispatch!(self, codes);
+            dispatch!(self, codes);
+            dispatch!(self, codes);
+            dispatch!(self, codes);
+            dispatch!(self, codes);
+            dispatch!(self, codes);
+            dispatch!(self, codes);
+            dispatch!(self, codes);
         }
     }
 
