@@ -22,6 +22,16 @@ macro_rules! binary_operation {
     };
 }
 
+macro_rules! dispatch {
+    ($self:expr, $codes:expr) => {
+        if $self.program_counter >= $codes.len() {
+            return;
+        }
+
+        $self.get_instruction($codes)($self, $codes)
+    };
+}
+
 pub struct Vm {
     program_counter: usize,
     stack: Stack,
@@ -38,43 +48,7 @@ impl Vm {
     }
 
     pub fn run(&mut self, codes: &[u8]) {
-        loop {
-            if self.program_counter >= codes.len() {
-                break;
-            }
-
-            self.get_instruction(codes)(self, codes);
-
-            if self.program_counter >= codes.len() {
-                break;
-            }
-
-            self.get_instruction(codes)(self, codes);
-
-            if self.program_counter >= codes.len() {
-                break;
-            }
-
-            self.get_instruction(codes)(self, codes);
-
-            if self.program_counter >= codes.len() {
-                break;
-            }
-
-            self.get_instruction(codes)(self, codes);
-
-            if self.program_counter >= codes.len() {
-                break;
-            }
-
-            self.get_instruction(codes)(self, codes);
-
-            if self.program_counter >= codes.len() {
-                break;
-            }
-
-            self.get_instruction(codes)(self, codes);
-        }
+        dispatch!(self, codes);
     }
 
     fn get_instruction(&mut self, codes: &[u8]) -> fn(&mut Vm, &[u8]) {
@@ -104,18 +78,24 @@ impl Vm {
         }
     }
 
-    fn nil(&mut self, _codes: &[u8]) {
-        self.stack.push(NIL)
+    fn nil(&mut self, codes: &[u8]) {
+        self.stack.push(NIL);
+
+        dispatch!(self, codes);
     }
 
     fn float64(&mut self, codes: &[u8]) {
         let value = self.read_f64(codes);
         self.stack.push(value.into());
+
+        dispatch!(self, codes);
     }
 
     fn integer32(&mut self, codes: &[u8]) {
         let value = self.read_u32(codes);
         self.stack.push(value.into());
+
+        dispatch!(self, codes);
     }
 
     fn symbol(&mut self, codes: &[u8]) {
@@ -125,9 +105,11 @@ impl Vm {
             .into();
 
         self.stack.push(value);
+
+        dispatch!(self, codes);
     }
 
-    fn get(&mut self, _codes: &[u8]) {
+    fn get(&mut self, codes: &[u8]) {
         let value = (|| {
             let index = self.stack.pop();
             let array = self.stack.pop().into_array()?;
@@ -137,9 +119,11 @@ impl Vm {
         .unwrap_or(NIL);
 
         self.stack.push(value);
+
+        dispatch!(self, codes);
     }
 
-    fn set(&mut self, _codes: &[u8]) {
+    fn set(&mut self, codes: &[u8]) {
         let value = (|| {
             let value = self.stack.pop();
             let index = self.stack.pop();
@@ -150,40 +134,56 @@ impl Vm {
         .unwrap_or(NIL);
 
         self.stack.push(value);
+
+        dispatch!(self, codes);
     }
 
-    fn length(&mut self, _codes: &[u8]) {
+    fn length(&mut self, codes: &[u8]) {
         let value = (|| Some(self.stack.pop().into_array()?.len().into()))().unwrap_or(NIL);
 
         self.stack.push(value);
+
+        dispatch!(self, codes);
     }
 
-    fn add(&mut self, _codes: &[u8]) {
+    fn add(&mut self, codes: &[u8]) {
         binary_operation!(self, +);
+
+        dispatch!(self, codes);
     }
 
-    fn subtract(&mut self, _codes: &[u8]) {
+    fn subtract(&mut self, codes: &[u8]) {
         binary_operation!(self, -);
+
+        dispatch!(self, codes);
     }
 
-    fn multiply(&mut self, _codes: &[u8]) {
+    fn multiply(&mut self, codes: &[u8]) {
         binary_operation!(self, *);
+
+        dispatch!(self, codes);
     }
 
-    fn divide(&mut self, _codes: &[u8]) {
+    fn divide(&mut self, codes: &[u8]) {
         binary_operation!(self, /);
+
+        dispatch!(self, codes);
     }
 
-    fn drop(&mut self, _codes: &[u8]) {
+    fn drop(&mut self, codes: &[u8]) {
         self.stack.pop();
+
+        dispatch!(self, codes);
     }
 
-    fn dump(&mut self, _codes: &[u8]) {
+    fn dump(&mut self, codes: &[u8]) {
         let value = self.stack.pop();
 
         println!("{}", value);
 
         self.stack.push(value);
+
+        dispatch!(self, codes);
     }
 
     fn call(&mut self, codes: &[u8]) {
@@ -194,7 +194,9 @@ impl Vm {
             (self.stack.len() - arity - 1) as u32,
         ));
 
-        self.call_function(arity)
+        self.call_function(arity);
+
+        dispatch!(self, codes);
     }
 
     fn tail_call(&mut self, codes: &[u8]) {
@@ -204,7 +206,9 @@ impl Vm {
         self.stack
             .truncate(frame.pointer() as usize, self.stack.len() - arity - 1);
 
-        self.call_function(arity)
+        self.call_function(arity);
+
+        dispatch!(self, codes);
     }
 
     fn close(&mut self, codes: &[u8]) {
@@ -220,6 +224,8 @@ impl Vm {
         }
 
         self.stack.push(closure.into());
+
+        dispatch!(self, codes);
     }
 
     fn environment(&mut self, codes: &[u8]) {
@@ -234,6 +240,8 @@ impl Vm {
                 .get_environment(index)
                 .clone(),
         );
+
+        dispatch!(self, codes);
     }
 
     fn peek(&mut self, codes: &[u8]) {
@@ -241,13 +249,17 @@ impl Vm {
         let index = self.read_u8(codes);
 
         self.stack.push(self.stack.peek(index as usize).clone());
+
+        dispatch!(self, codes);
     }
 
-    fn equal(&mut self, _codes: &[u8]) {
+    fn equal(&mut self, codes: &[u8]) {
         let rhs = self.stack.pop();
         let lhs = self.stack.pop();
 
         self.stack.push(((lhs == rhs) as usize as f64).into());
+
+        dispatch!(self, codes);
     }
 
     fn jump(&mut self, codes: &[u8]) {
@@ -256,6 +268,8 @@ impl Vm {
         self.program_counter = self
             .program_counter
             .wrapping_add(address as i16 as isize as usize);
+
+        dispatch!(self, codes);
     }
 
     fn branch(&mut self, codes: &[u8]) {
@@ -267,9 +281,11 @@ impl Vm {
                 .program_counter
                 .wrapping_add(address as i16 as isize as usize);
         }
+
+        dispatch!(self, codes);
     }
 
-    fn r#return(&mut self, _codes: &[u8]) {
+    fn r#return(&mut self, codes: &[u8]) {
         let value = self.stack.pop();
         let frame = self.frames.pop().expect("frame");
 
@@ -280,6 +296,8 @@ impl Vm {
         self.program_counter = frame.return_address() as usize;
 
         self.stack.push(value);
+
+        dispatch!(self, codes);
     }
 
     fn call_function(&mut self, arity: usize) {
