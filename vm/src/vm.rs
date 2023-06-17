@@ -49,37 +49,9 @@ impl Vm {
                     let value = self.read_u32(codes);
                     self.stack.push(value.into());
                 }
-                Instruction::Symbol => {
-                    let len = self.read_u8(codes);
-                    let value = str::from_utf8(self.read_bytes(codes, len as usize))
-                        .unwrap()
-                        .into();
-
-                    self.stack.push(value);
-                }
-                Instruction::Get => {
-                    let value = (|| {
-                        let index = self.stack.pop();
-                        let array = self.stack.pop().into_array()?;
-
-                        Some(array.get(index).clone())
-                    })()
-                    .unwrap_or(NIL);
-
-                    self.stack.push(value);
-                }
-                Instruction::Set => {
-                    let value = (|| {
-                        let value = self.stack.pop();
-                        let index = self.stack.pop();
-                        let array = self.stack.pop().into_array()?;
-
-                        Some(array.set(index, value).into())
-                    })()
-                    .unwrap_or(NIL);
-
-                    self.stack.push(value);
-                }
+                Instruction::Symbol => Self::symbol,
+                Instruction::Get => Self::get,
+                Instruction::Set => Self::set,
                 Instruction::Length => Self::length,
                 Instruction::Add => Self::add,
                 Instruction::Subtract => Self::subtract,
@@ -98,6 +70,40 @@ impl Vm {
                 Instruction::Return => Self::r#return,
             })(codes)
         }
+    }
+
+    fn symbol(&mut self, codes: &[u8]) {
+        let len = self.read_u8(codes);
+        let value = str::from_utf8(self.read_bytes(codes, len as usize))
+            .unwrap()
+            .into();
+
+        self.stack.push(value);
+    }
+
+    fn get(&mut self, codes: &[u8]) {
+        let value = (|| {
+            let index = self.stack.pop();
+            let array = self.stack.pop().into_array()?;
+
+            Some(array.get(index).clone())
+        })()
+        .unwrap_or(NIL);
+
+        self.stack.push(value);
+    }
+
+    fn set(&mut self, codes: &[u8]) {
+        let value = (|| {
+            let value = self.stack.pop();
+            let index = self.stack.pop();
+            let array = self.stack.pop().into_array()?;
+
+            Some(array.set(index, value).into())
+        })()
+        .unwrap_or(NIL);
+
+        self.stack.push(value);
     }
 
     fn length(&mut self, codes: &[u8]) {
