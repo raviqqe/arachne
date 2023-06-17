@@ -48,11 +48,11 @@ impl Array {
     /// # Safety
     ///
     /// The returned array is not cloned and dropped as usual.
-    pub unsafe fn from_raw(ptr: u64) -> Self {
+    pub(crate) unsafe fn from_raw(ptr: u64) -> Self {
         Self(ptr)
     }
 
-    pub fn into_raw(self) -> u64 {
+    pub(crate) fn into_raw(self) -> u64 {
         let ptr = self.0;
 
         forget(self);
@@ -255,7 +255,7 @@ impl TryFrom<Value> for Array {
 
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         if value.is_array() {
-            Ok(unsafe { Array::from_raw(value.into_raw()) })
+            Ok(unsafe { Self::from_raw(value.into_raw()) })
         } else {
             Err(value)
         }
