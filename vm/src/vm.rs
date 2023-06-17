@@ -38,8 +38,42 @@ impl Vm {
     }
 
     pub fn run(&mut self, codes: &[u8]) {
-        while self.program_counter < codes.len() {
-            self.get_instruction(codes)(self, codes)
+        loop {
+            if self.program_counter >= codes.len() {
+                break;
+            }
+
+            self.get_instruction(codes)(self, codes);
+
+            if self.program_counter >= codes.len() {
+                break;
+            }
+
+            self.get_instruction(codes)(self, codes);
+
+            if self.program_counter >= codes.len() {
+                break;
+            }
+
+            self.get_instruction(codes)(self, codes);
+
+            if self.program_counter >= codes.len() {
+                break;
+            }
+
+            self.get_instruction(codes)(self, codes);
+
+            if self.program_counter >= codes.len() {
+                break;
+            }
+
+            self.get_instruction(codes)(self, codes);
+
+            if self.program_counter >= codes.len() {
+                break;
+            }
+
+            self.get_instruction(codes)(self, codes);
         }
     }
 
