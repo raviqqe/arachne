@@ -39,7 +39,7 @@ impl Vm {
 
     pub fn run(&mut self, codes: &[u8]) {
         while self.program_counter < codes.len() {
-            match Instruction::from_u8(self.read_u8(codes)).expect("valid instruction") {
+            (match Instruction::from_u8(self.read_u8(codes)).expect("valid instruction") {
                 Instruction::Nil => self.stack.push(NIL),
                 Instruction::Float64 => {
                     let value = self.read_f64(codes);
@@ -160,26 +160,30 @@ impl Vm {
 
                     self.stack.push(self.stack.peek(index as usize).clone());
                 }
-                Instruction::Equal => {
-                    let rhs = self.stack.pop();
-                    let lhs = self.stack.pop();
-
-                    self.stack.push(((lhs == rhs) as usize as f64).into());
-                }
-                Instruction::Jump => {
-                    let address = self.read_u16(codes);
-
-                    self.program_counter = self
-                        .program_counter
-                        .wrapping_add(address as i16 as isize as usize);
-                }
-                Instruction::Branch => Self::branch
+                Instruction::Equal => Self::equal,
+                Instruction::Jump => Self::jump,
+                Instruction::Branch => Self::branch,
                 Instruction::Return => Self::r#return,
-            })()
+            })(codes)
         }
     }
 
-    fn branch(&mut self, , codes: &[u8]) {
+    fn equal(&mut self, codes: &[u8]) {
+        let rhs = self.stack.pop();
+        let lhs = self.stack.pop();
+
+        self.stack.push(((lhs == rhs) as usize as f64).into());
+    }
+
+    fn jump(&mut self, codes: &[u8]) {
+        let address = self.read_u16(codes);
+
+        self.program_counter = self
+            .program_counter
+            .wrapping_add(address as i16 as isize as usize);
+    }
+
+    fn branch(&mut self, codes: &[u8]) {
         let address = self.read_u16(codes);
         let value = self.stack.pop();
 
