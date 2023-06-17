@@ -80,92 +80,115 @@ impl Vm {
 
                     self.stack.push(value);
                 }
-                Instruction::Length => {
-                    let value =
-                        (|| Some(self.stack.pop().into_array()?.len().into()))().unwrap_or(NIL);
-
-                    self.stack.push(value);
-                }
-                Instruction::Add => {
-                    binary_operation!(self, +);
-                }
-                Instruction::Subtract => {
-                    binary_operation!(self, -);
-                }
-                Instruction::Multiply => {
-                    binary_operation!(self, *);
-                }
-                Instruction::Divide => {
-                    binary_operation!(self, /);
-                }
-                Instruction::Drop => {
-                    self.stack.pop();
-                }
-                Instruction::Dump => {
-                    let value = self.stack.pop();
-
-                    println!("{}", value);
-
-                    self.stack.push(value);
-                }
-                Instruction::Call => {
-                    let arity = self.read_u8(codes) as usize;
-
-                    self.frames.push(Frame::new(
-                        self.program_counter as u32,
-                        (self.stack.len() - arity - 1) as u32,
-                    ));
-
-                    self.call_function(arity)
-                }
-                Instruction::TailCall => {
-                    let arity = self.read_u8(codes) as usize;
-
-                    let frame = self.frames.last().expect("frame");
-                    self.stack
-                        .truncate(frame.pointer() as usize, self.stack.len() - arity - 1);
-
-                    self.call_function(arity)
-                }
-                Instruction::Close => {
-                    let id = self.read_u32(codes);
-                    let arity = self.read_u8(codes);
-                    let environment_size = self.read_u8(codes);
-                    let mut closure = Closure::new(id, arity, environment_size);
-
-                    for index in (0..environment_size).rev() {
-                        let value = self.stack.pop();
-
-                        closure.write_environment(index as usize, value);
-                    }
-
-                    self.stack.push(closure.into());
-                }
-                Instruction::Environment => {
-                    let pointer = self.frames.last().expect("frame").pointer();
-                    let index = self.read_u8(codes) as usize;
-
-                    self.stack.push(
-                        self.stack
-                            .peek(self.stack.len() - pointer as usize)
-                            .as_closure()
-                            .expect("closure")
-                            .get_environment(index)
-                            .clone(),
-                    );
-                }
-                Instruction::Peek => {
-                    // TODO Move local variables when possible.
-                    let index = self.read_u8(codes);
-
-                    self.stack.push(self.stack.peek(index as usize).clone());
-                }
+                Instruction::Length => Self::length,
+                Instruction::Add => Self::add,
+                Instruction::Subtract => Self::subtract,
+                Instruction::Multiply => Self::multiply,
+                Instruction::Divide => Self::divide,
+                Instruction::Drop => Self::drop,
+                Instruction::Dump => Self::dump,
+                Instruction::Call => Self::call,
+                Instruction::TailCall => Self::tail_call,
+                Instruction::Close => Self::close,
+                Instruction::Environment => Self::environment,
+                Instruction::Peek => Self::peek,
                 Instruction::Equal => Self::equal,
                 Instruction::Jump => Self::jump,
                 Instruction::Branch => Self::branch,
                 Instruction::Return => Self::r#return,
             })(codes)
         }
+    }
+
+    fn length(&mut self, codes: &[u8]) {
+        let value = (|| Some(self.stack.pop().into_array()?.len().into()))().unwrap_or(NIL);
+
+        self.stack.push(value);
+    }
+
+    fn add(&mut self, codes: &[u8]) {
+        binary_operation!(self, +);
+    }
+
+    fn subtract(&mut self, codes: &[u8]) {
+        binary_operation!(self, -);
+    }
+
+    fn multiply(&mut self, codes: &[u8]) {
+        binary_operation!(self, *);
+    }
+
+    fn divide(&mut self, codes: &[u8]) {
+        binary_operation!(self, /);
+    }
+
+    fn drop(&mut self, codes: &[u8]) {
+        self.stack.pop();
+    }
+
+    fn dump(&mut self, codes: &[u8]) {
+        let value = self.stack.pop();
+
+        println!("{}", value);
+
+        self.stack.push(value);
+    }
+
+    fn call(&mut self, codes: &[u8]) {
+        let arity = self.read_u8(codes) as usize;
+
+        self.frames.push(Frame::new(
+            self.program_counter as u32,
+            (self.stack.len() - arity - 1) as u32,
+        ));
+
+        self.call_function(arity)
+    }
+
+    fn tail_call(&mut self, codes: &[u8]) {
+        let arity = self.read_u8(codes) as usize;
+
+        let frame = self.frames.last().expect("frame");
+        self.stack
+            .truncate(frame.pointer() as usize, self.stack.len() - arity - 1);
+
+        self.call_function(arity)
+    }
+
+    fn close(&mut self, codes: &[u8]) {
+        let id = self.read_u32(codes);
+        let arity = self.read_u8(codes);
+        let environment_size = self.read_u8(codes);
+        let mut closure = Closure::new(id, arity, environment_size);
+
+        for index in (0..environment_size).rev() {
+            let value = self.stack.pop();
+
+            closure.write_environment(index as usize, value);
+        }
+
+        self.stack.push(closure.into());
+    }
+
+    fn environment(&mut self, codes: &[u8]) {
+        let pointer = self.frames.last().expect("frame").pointer();
+        let index = self.read_u8(codes) as usize;
+
+        self.stack.push(
+            self.stack
+                .peek(self.stack.len() - pointer as usize)
+                .as_closure()
+                .expect("closure")
+                .get_environment(index)
+                .clone(),
+        );
+    }
+
+    fn peek(&mut self, codes: &[u8]) {
+        // TODO Move local variables when possible.
+        let index = self.read_u8(codes);
+
+        self.stack.push(self.stack.peek(index as usize).clone());
     }
 
     fn equal(&mut self, codes: &[u8]) {
