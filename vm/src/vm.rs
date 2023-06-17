@@ -40,15 +40,9 @@ impl Vm {
     pub fn run(&mut self, codes: &[u8]) {
         while self.program_counter < codes.len() {
             (match Instruction::from_u8(self.read_u8(codes)).expect("valid instruction") {
-                Instruction::Nil => self.stack.push(NIL),
-                Instruction::Float64 => {
-                    let value = self.read_f64(codes);
-                    self.stack.push(value.into());
-                }
-                Instruction::Integer32 => {
-                    let value = self.read_u32(codes);
-                    self.stack.push(value.into());
-                }
+                Instruction::Nil => Self::nil,
+                Instruction::Float64 => Self::float64,
+                Instruction::Integer32 => Self::integer32,
                 Instruction::Symbol => Self::symbol,
                 Instruction::Get => Self::get,
                 Instruction::Set => Self::set,
@@ -70,6 +64,20 @@ impl Vm {
                 Instruction::Return => Self::r#return,
             })(codes)
         }
+    }
+
+    fn nil(&mut self, codes: &[u8]) {
+        self.stack.push(NIL)
+    }
+
+    fn float64(&mut self, codes: &[u8]) {
+        let value = self.read_f64(codes);
+        self.stack.push(value.into());
+    }
+
+    fn integer32(&mut self, codes: &[u8]) {
+        let value = self.read_u32(codes);
+        self.stack.push(value.into());
     }
 
     fn symbol(&mut self, codes: &[u8]) {
