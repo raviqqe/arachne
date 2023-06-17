@@ -31,6 +31,7 @@ pub(crate) const INTEGER32_MASK: u64 = build_mask(INTEGER32_SUB_MASK);
 pub struct Value(u64);
 
 impl Value {
+    #[inline]
     pub const fn r#type(&self) -> Type {
         if self.0 & EXPONENT_MASK != EXPONENT_MASK {
             return Type::Float64;
@@ -45,58 +46,72 @@ impl Value {
         }
     }
 
+    #[inline]
     pub const fn is_nil(&self) -> bool {
         self.0 == 0
     }
 
+    #[inline]
     pub fn is_array(&self) -> bool {
         self.is_nil() || self.r#type() == Type::Array
     }
 
+    #[inline]
     pub fn is_float64(&self) -> bool {
         self.is_nil() || self.r#type() == Type::Float64
     }
 
+    #[inline]
     pub fn is_integer32(&self) -> bool {
         self.is_nil() || self.r#type() == Type::Integer32
     }
 
+    #[inline]
     pub fn is_closure(&self) -> bool {
         self.is_nil() || self.r#type() == Type::Closure
     }
 
+    #[inline]
     pub fn is_symbol(&self) -> bool {
         self.r#type() == Type::Symbol
     }
 
+    #[inline]
     pub fn to_float64(&self) -> Option<Float64> {
         self.try_into().ok()
     }
 
+    #[inline]
     pub fn to_integer32(&self) -> Option<Integer32> {
         self.try_into().ok()
     }
 
+    #[inline]
     pub fn to_symbol(&self) -> Option<Symbol> {
         self.try_into().ok()
     }
 
+    #[inline]
     pub fn into_array(self) -> Option<Array> {
         self.try_into().ok()
     }
 
+    #[inline]
     pub fn as_array(&self) -> Option<&Array> {
         self.try_into().ok()
     }
 
+    #[inline]
     pub fn into_closure(self) -> Option<Closure> {
         self.try_into().ok()
     }
 
+    #[inline]
     pub fn as_closure(&self) -> Option<&Closure> {
         self.try_into().ok()
     }
 
+    #[inline]
     pub fn as_typed(&self) -> Option<TypedValueRef> {
         if self.is_nil() {
             None
@@ -113,6 +128,7 @@ impl Value {
         }
     }
 
+    #[inline]
     pub fn into_typed(self) -> Option<TypedValue> {
         if self.is_nil() {
             None
@@ -127,7 +143,8 @@ impl Value {
         }
     }
 
-    pub fn into_raw(self) -> u64 {
+    #[inline]
+    pub(crate) fn into_raw(self) -> u64 {
         let raw = self.0;
 
         forget(self);
@@ -135,19 +152,14 @@ impl Value {
         raw
     }
 
-    pub fn to_raw(&self) -> u64 {
+    #[inline]
+    pub(crate) fn to_raw(&self) -> u64 {
         self.0
-    }
-
-    /// # Safety
-    ///
-    /// The raw content must be valid and moved into the new value.
-    pub unsafe fn from_raw(value: u64) -> Self {
-        Self(value)
     }
 }
 
 impl PartialEq for Value {
+    #[inline]
     fn eq(&self, other: &Self) -> bool {
         if let Some(value) = self.as_typed() {
             match value {
@@ -166,6 +178,7 @@ impl PartialEq for Value {
 impl Eq for Value {}
 
 impl Clone for Value {
+    #[inline]
     fn clone(&self) -> Self {
         if let Some(array) = self.as_array() {
             array.clone().into()
@@ -178,6 +191,7 @@ impl Clone for Value {
 }
 
 impl Drop for Value {
+    #[inline]
     fn drop(&mut self) {
         match self.r#type() {
             Type::Array => unsafe {
@@ -210,72 +224,84 @@ impl Display for Value {
 }
 
 impl From<Array> for Value {
+    #[inline]
     fn from(array: Array) -> Self {
         Self(array.into_raw())
     }
 }
 
 impl From<Closure> for Value {
+    #[inline]
     fn from(closure: Closure) -> Self {
         Self(closure.into_raw())
     }
 }
 
 impl From<Float64> for Value {
+    #[inline]
     fn from(number: Float64) -> Self {
         Self(number.to_f64().to_bits())
     }
 }
 
 impl From<Integer32> for Value {
+    #[inline]
     fn from(number: Integer32) -> Self {
         Self(number.to_raw())
     }
 }
 
 impl From<Symbol> for Value {
+    #[inline]
     fn from(symbol: Symbol) -> Self {
         Self(symbol.to_raw())
     }
 }
 
 impl From<f64> for Value {
+    #[inline]
     fn from(number: f64) -> Self {
         Float64::from(number).into()
     }
 }
 
 impl From<i32> for Value {
+    #[inline]
     fn from(number: i32) -> Self {
         Integer32::from(number).into()
     }
 }
 
 impl From<u32> for Value {
+    #[inline]
     fn from(number: u32) -> Self {
         Integer32::from(number).into()
     }
 }
 
 impl From<String> for Value {
+    #[inline]
     fn from(value: String) -> Self {
         Symbol::from(value).into()
     }
 }
 
 impl From<&str> for Value {
+    #[inline]
     fn from(value: &str) -> Self {
         Symbol::from(value).into()
     }
 }
 
 impl<const N: usize> From<[Value; N]> for Value {
+    #[inline]
     fn from(values: [Value; N]) -> Self {
         Array::from(values).into()
     }
 }
 
 impl From<Vec<Value>> for Value {
+    #[inline]
     fn from(values: Vec<Value>) -> Self {
         Array::from(values).into()
     }
