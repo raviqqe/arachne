@@ -39,30 +39,7 @@ impl Vm {
 
     pub fn run(&mut self, codes: &[u8]) {
         while self.program_counter < codes.len() {
-            (match Instruction::from_u8(self.read_u8(codes)).expect("valid instruction") {
-                Instruction::Nil => Self::nil,
-                Instruction::Float64 => Self::float64,
-                Instruction::Integer32 => Self::integer32,
-                Instruction::Symbol => Self::symbol,
-                Instruction::Get => Self::get,
-                Instruction::Set => Self::set,
-                Instruction::Length => Self::length,
-                Instruction::Add => Self::add,
-                Instruction::Subtract => Self::subtract,
-                Instruction::Multiply => Self::multiply,
-                Instruction::Divide => Self::divide,
-                Instruction::Drop => Self::drop,
-                Instruction::Dump => Self::dump,
-                Instruction::Call => Self::call,
-                Instruction::TailCall => Self::tail_call,
-                Instruction::Close => Self::close,
-                Instruction::Environment => Self::environment,
-                Instruction::Peek => Self::peek,
-                Instruction::Equal => Self::equal,
-                Instruction::Jump => Self::jump,
-                Instruction::Branch => Self::branch,
-                Instruction::Return => Self::r#return,
-            })(self, codes)
+            self.get_instruction(codes)(self, codes)
         }
     }
 
