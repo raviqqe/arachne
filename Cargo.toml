@@ -2,6 +2,8 @@
 members = ["command", "compiler", "interpreter", "parse", "runtime", "vm"]
 
 [profile.release]
+debug = 0
 lto = true
 opt-level = 3
 overflow-checks = false
+strip = true
