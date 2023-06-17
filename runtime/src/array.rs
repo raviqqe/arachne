@@ -40,7 +40,7 @@ impl Array {
     fn mask_ptr(ptr: *const u8) -> u64 {
         let ptr = ptr as u64;
 
-        assert!(ptr & ARRAY_MASK == 0);
+        debug_assert!(ptr & ARRAY_MASK == 0);
 
         ptr | ARRAY_MASK
     }
