@@ -199,6 +199,7 @@ impl Vm {
         }
     }
 
+    #[inline(always)]
     fn call(&mut self, arity: usize) {
         if let Some(closure) = self.stack.peek(arity).as_closure() {
             let id = closure.id();
