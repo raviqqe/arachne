@@ -1,21 +1,22 @@
 pub struct Frame {
+    pointer: u32,
     return_address: u32,
-    frame_pointer: u32,
 }
 
 impl Frame {
-    pub fn new(return_address: u32, frame_pointer: u32) -> Self {
+    // TODO Swap the argument order.
+    pub fn new(return_address: u32, pointer: u32) -> Self {
         Self {
+            pointer,
             return_address,
-            frame_pointer,
         }
+    }
+
+    pub fn pointer(&self) -> u32 {
+        self.pointer
     }
 
     pub fn return_address(&self) -> u32 {
         self.return_address
-    }
-
-    pub fn frame_pointer(&self) -> u32 {
-        self.frame_pointer
     }
 }

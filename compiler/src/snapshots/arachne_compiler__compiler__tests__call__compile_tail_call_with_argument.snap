@@ -1,0 +1,15 @@
+---
+source: compiler/src/compiler.rs
+expression: "compile([[\"let-rec\".into(), \"f\".into(),\n                            [\"fn\".into(), [\"x\".into()].into(),\n                                        [\"f\".into(), \"x\".into()].into()].into()].into(),\n                [\"f\".into(), 42.0.into()].into()]).await"
+---
+jump 7
+peek 1
+peek 1
+tail_call 1
+return
+close 3 1 0
+peek 0
+float64 42
+call 1
+dump
+drop

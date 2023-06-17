@@ -52,6 +52,9 @@ pub fn format_instructions(codes: &[u8]) -> Result<String, FormatError> {
                 Instruction::Call => InstructionIr::Call {
                     arity: decode_u8(codes, &mut index),
                 },
+                Instruction::TailCall => InstructionIr::TailCall {
+                    arity: decode_u8(codes, &mut index),
+                },
                 Instruction::Close => InstructionIr::Close {
                     pointer: decode_u32(codes, &mut index),
                     arity: decode_u8(codes, &mut index),

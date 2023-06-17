@@ -111,30 +111,21 @@ impl Vm {
                 Instruction::Call => {
                     let arity = self.read_u8(codes) as usize;
 
-                    if let Some(closure) = self.stack.peek(arity).as_closure() {
-                        let id = closure.id();
-                        let closure_arity = closure.arity() as usize;
+                    self.frames.push(Frame::new(
+                        self.program_counter as u32,
+                        (self.stack.len() - arity - 1) as u32,
+                    ));
 
-                        self.frames.push(Frame::new(
-                            self.program_counter as u32,
-                            (self.stack.len() - arity - 1) as u32,
-                        ));
-                        self.program_counter = id as usize;
+                    self.call(arity)
+                }
+                Instruction::TailCall => {
+                    let arity = self.read_u8(codes) as usize;
 
-                        for _ in 0..arity.saturating_sub(closure_arity) {
-                            self.stack.pop();
-                        }
+                    let frame = self.frames.last().expect("frame");
+                    self.stack
+                        .truncate(frame.pointer() as usize, self.stack.len() - arity - 1);
 
-                        for _ in 0..closure_arity.saturating_sub(arity) {
-                            self.stack.push(NIL);
-                        }
-                    } else {
-                        for _ in 0..arity + 1 {
-                            self.stack.pop();
-                        }
-
-                        self.stack.push(NIL);
-                    }
+                    self.call(arity)
                 }
                 Instruction::Close => {
                     let id = self.read_u32(codes);
@@ -151,7 +142,7 @@ impl Vm {
                     self.stack.push(closure.into());
                 }
                 Instruction::Environment => {
-                    let pointer = self.frames.last().expect("frame").frame_pointer();
+                    let pointer = self.frames.last().expect("frame").pointer();
                     let index = self.read_u8(codes) as usize;
 
                     self.stack.push(
@@ -196,7 +187,7 @@ impl Vm {
                     let value = self.stack.pop();
                     let frame = self.frames.pop().expect("frame");
 
-                    while self.stack.len() > frame.frame_pointer() as usize {
+                    while self.stack.len() > frame.pointer() as usize {
                         self.stack.pop();
                     }
 
@@ -205,6 +196,29 @@ impl Vm {
                     self.stack.push(value);
                 }
             }
+        }
+    }
+
+    fn call(&mut self, arity: usize) {
+        if let Some(closure) = self.stack.peek(arity).as_closure() {
+            let id = closure.id();
+            let closure_arity = closure.arity() as usize;
+
+            self.program_counter = id as usize;
+
+            for _ in 0..arity.saturating_sub(closure_arity) {
+                self.stack.pop();
+            }
+
+            for _ in 0..closure_arity.saturating_sub(arity) {
+                self.stack.push(NIL);
+            }
+        } else {
+            for _ in 0..arity + 1 {
+                self.stack.pop();
+            }
+
+            self.stack.push(NIL);
         }
     }
 

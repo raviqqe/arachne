@@ -24,6 +24,10 @@ impl Stack {
         self.values.get(self.get_index(index)).unwrap()
     }
 
+    pub fn truncate(&mut self, start: usize, end: usize) {
+        self.values.splice(start..end, []);
+    }
+
     pub fn len(&self) -> usize {
         self.values.len()
     }
