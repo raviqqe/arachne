@@ -4,8 +4,7 @@ pub struct Frame {
 }
 
 impl Frame {
-    // TODO Swap the argument order.
-    pub fn new(return_address: u32, pointer: u32) -> Self {
+    pub fn new(pointer: u32, return_address: u32) -> Self {
         Self {
             pointer,
             return_address,
