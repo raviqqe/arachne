@@ -173,22 +173,24 @@ impl Vm {
                         .program_counter
                         .wrapping_add(address as i16 as isize as usize);
                 }
-                Instruction::Branch => {
-                    let address = self.read_u16(codes);
-                    let value = self.stack.pop();
-
-                    if value != NIL {
-                        self.program_counter = self
-                            .program_counter
-                            .wrapping_add(address as i16 as isize as usize);
-                    }
-                }
-                Instruction::Return => self.r#return(),
-            }
+                Instruction::Branch => Self::branch
+                Instruction::Return => Self::r#return,
+            })()
         }
     }
 
-    fn r#return(&mut self) {
+    fn branch(&mut self, , codes: &[u8]) {
+        let address = self.read_u16(codes);
+        let value = self.stack.pop();
+
+        if value != NIL {
+            self.program_counter = self
+                .program_counter
+                .wrapping_add(address as i16 as isize as usize);
+        }
+    }
+
+    fn r#return(&mut self, _codes: &[u8]) {
         let value = self.stack.pop();
         let frame = self.frames.pop().expect("frame");
 
