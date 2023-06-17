@@ -199,7 +199,7 @@ impl Vm {
         }
     }
 
-    #[inline(always)]
+    #[inline]
     fn call(&mut self, arity: usize) {
         if let Some(closure) = self.stack.peek(arity).as_closure() {
             let id = closure.id();
@@ -223,27 +223,27 @@ impl Vm {
         }
     }
 
-    #[inline(always)]
+    #[inline]
     fn read_f64(&mut self, codes: &[u8]) -> f64 {
         decode_f64(codes, &mut self.program_counter)
     }
 
-    #[inline(always)]
+    #[inline]
     fn read_u32(&mut self, codes: &[u8]) -> u32 {
         decode_u32(codes, &mut self.program_counter)
     }
 
-    #[inline(always)]
+    #[inline]
     fn read_u16(&mut self, codes: &[u8]) -> u16 {
         decode_u16(codes, &mut self.program_counter)
     }
 
-    #[inline(always)]
+    #[inline]
     fn read_u8(&mut self, codes: &[u8]) -> u8 {
         decode_u8(codes, &mut self.program_counter)
     }
 
-    #[inline(always)]
+    #[inline]
     fn read_bytes<'a>(&mut self, codes: &'a [u8], len: usize) -> &'a [u8] {
         decode_bytes(codes, len, &mut self.program_counter)
     }
