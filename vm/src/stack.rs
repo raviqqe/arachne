@@ -6,39 +6,39 @@ pub struct Stack {
 }
 
 impl Stack {
-    #[inline]
+    #[inline(always)]
     pub fn new(size: usize) -> Self {
         Self {
             values: Vec::with_capacity(size),
         }
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn push(&mut self, value: Value) {
         self.values.push(value);
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn pop(&mut self) -> Value {
         self.values.pop().expect("stack value")
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn peek(&self, index: usize) -> &Value {
         self.values.get(self.get_index(index)).unwrap()
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn truncate(&mut self, start: usize, end: usize) {
         self.values.splice(start..end, []);
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn len(&self) -> usize {
         self.values.len()
     }
 
-    #[inline]
+    #[inline(always)]
     fn get_index(&self, index: usize) -> usize {
         self.values.len() - 1 - index
     }
