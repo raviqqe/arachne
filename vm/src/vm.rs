@@ -70,7 +70,7 @@ impl Vm {
         }
     }
 
-    fn nil(&mut self, codes: &[u8]) {
+    fn nil(&mut self, _codes: &[u8]) {
         self.stack.push(NIL)
     }
 
@@ -93,7 +93,7 @@ impl Vm {
         self.stack.push(value);
     }
 
-    fn get(&mut self, codes: &[u8]) {
+    fn get(&mut self, _codes: &[u8]) {
         let value = (|| {
             let index = self.stack.pop();
             let array = self.stack.pop().into_array()?;
@@ -105,7 +105,7 @@ impl Vm {
         self.stack.push(value);
     }
 
-    fn set(&mut self, codes: &[u8]) {
+    fn set(&mut self, _codes: &[u8]) {
         let value = (|| {
             let value = self.stack.pop();
             let index = self.stack.pop();
@@ -118,33 +118,33 @@ impl Vm {
         self.stack.push(value);
     }
 
-    fn length(&mut self, codes: &[u8]) {
+    fn length(&mut self, _codes: &[u8]) {
         let value = (|| Some(self.stack.pop().into_array()?.len().into()))().unwrap_or(NIL);
 
         self.stack.push(value);
     }
 
-    fn add(&mut self, codes: &[u8]) {
+    fn add(&mut self, _codes: &[u8]) {
         binary_operation!(self, +);
     }
 
-    fn subtract(&mut self, codes: &[u8]) {
+    fn subtract(&mut self, _codes: &[u8]) {
         binary_operation!(self, -);
     }
 
-    fn multiply(&mut self, codes: &[u8]) {
+    fn multiply(&mut self, _codes: &[u8]) {
         binary_operation!(self, *);
     }
 
-    fn divide(&mut self, codes: &[u8]) {
+    fn divide(&mut self, _codes: &[u8]) {
         binary_operation!(self, /);
     }
 
-    fn drop(&mut self, codes: &[u8]) {
+    fn drop(&mut self, _codes: &[u8]) {
         self.stack.pop();
     }
 
-    fn dump(&mut self, codes: &[u8]) {
+    fn dump(&mut self, _codes: &[u8]) {
         let value = self.stack.pop();
 
         println!("{}", value);
@@ -209,7 +209,7 @@ impl Vm {
         self.stack.push(self.stack.peek(index as usize).clone());
     }
 
-    fn equal(&mut self, codes: &[u8]) {
+    fn equal(&mut self, _codes: &[u8]) {
         let rhs = self.stack.pop();
         let lhs = self.stack.pop();
 
