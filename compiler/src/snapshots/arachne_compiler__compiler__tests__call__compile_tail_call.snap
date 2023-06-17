@@ -1,13 +1,12 @@
 ---
 source: compiler/src/compiler.rs
-expression: "compile([[\"let\".into(), \"f\".into(),\n                            [\"fn\".into(), [].into(),\n                                        [\"f\".into()].into()].into()].into(),\n                [\"f\".into()].into()]).await"
+expression: "compile([[\"let-rec\".into(), \"f\".into(),\n                            [\"fn\".into(), [].into(),\n                                        [\"f\".into()].into()].into()].into(),\n                [\"f\".into()].into()]).await"
 ---
 jump 5
-environment 0
+peek 0
 tail_call 0
 return
-environment 0
-close 3 0 1
+close 3 0 0
 peek 0
 call 0
 dump

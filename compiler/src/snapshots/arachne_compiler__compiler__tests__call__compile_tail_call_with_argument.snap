@@ -1,15 +1,14 @@
 ---
 source: compiler/src/compiler.rs
-expression: "compile([[\"let\".into(), \"x\".into(), 42.0.into()].into(),\n                [\"let\".into(), \"f\".into(),\n                            [\"fn\".into(), [\"x\".into()].into(),\n                                        [\"f\".into(), \"x\".into()].into()].into()].into(),\n                [\"f\".into()].into()]).await"
+expression: "compile([[\"let\".into(), \"x\".into(), 42.0.into()].into(),\n                [\"let-rec\".into(), \"f\".into(),\n                            [\"fn\".into(), [\"x\".into()].into(),\n                                        [\"f\".into(), \"x\".into()].into()].into()].into(),\n                [\"f\".into()].into()]).await"
 ---
 float64 42
 jump 7
-environment 0
+peek 1
 peek 1
 tail_call 1
 return
-environment 0
-close c 1 1
+close c 1 0
 peek 0
 call 0
 dump
