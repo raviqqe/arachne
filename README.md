@@ -15,16 +15,6 @@ The programming language for dark mages.
 
 ## Primitives
 
-### Array
-
-```lisp
-(array any) ; -> ()
-(array any 42) ; -> ()
-(array f64) ; -> ()
-```
-
-Arguments are an element type and capacity.
-
 ### Get
 
 ```lisp
@@ -87,19 +77,21 @@ If a value is invalid, the `set` function does nothing and returns the original 
 ### Lambda expression
 
 ```lisp
-(fn (x y) (+ 42 2045))
+(fn (x y) (+ x y))
 ```
 
 ### Macro expression
 
 ```lisp
-(macro (x y) (+ 42 2045))
+(macro (x y) `(let ,x ,y))
 ```
 
 ### Quote
 
+- Quasi-quotation
+
 ```lisp
-'(foo bar) ; -> (foo bar)
+`(foo bar) ; -> (foo bar)
 (quote (foo bar)) ; -> (foo bar)
 ```
 
