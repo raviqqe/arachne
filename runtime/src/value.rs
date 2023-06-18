@@ -180,12 +180,11 @@ impl Eq for Value {}
 impl Clone for Value {
     #[inline]
     fn clone(&self) -> Self {
-        if let Some(array) = self.as_array() {
-            array.clone().into()
-        } else if let Some(closure) = self.as_closure() {
-            closure.clone().into()
-        } else {
-            Self(self.0)
+        match self.as_typed() {
+            None => NIL,
+            Some(TypedValueRef::Array(array)) => array.clone().into(),
+            Some(TypedValueRef::Closure(closure)) => closure.clone().into(),
+            Some(_) => Self(self.0),
         }
     }
 }
