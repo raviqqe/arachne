@@ -4,7 +4,7 @@ members = ["command", "compiler", "interpreter", "parse", "runtime", "vm"]
 [profile.release]
 debug = 0
 lto = true
-opt-level = 3
+opt-level = 2
 overflow-checks = false
 panic = "abort"
 strip = true
