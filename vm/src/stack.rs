@@ -1,4 +1,4 @@
-use runtime::Value;
+use runtime::{Value, NIL};
 
 #[derive(Debug)]
 pub struct Stack {
@@ -9,7 +9,7 @@ pub struct Stack {
 
 impl Stack {
     pub fn new(size: usize) -> Self {
-        let values = Vec::with_capacity(size).into();
+        let values = vec![NIL; size].into();
 
         Self {
             values,
@@ -35,7 +35,7 @@ impl Stack {
     }
 
     pub fn len(&self) -> usize {
-        self.values.len()
+        (unsafe { self.pointer.sub(self.base as usize) }) as usize
     }
 
     fn get_index(&self, index: usize) -> usize {
