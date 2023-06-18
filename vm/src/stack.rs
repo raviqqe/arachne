@@ -16,6 +16,7 @@ impl Stack {
         self.values.push(value);
     }
 
+    #[inline]
     pub fn pop(&mut self) -> Value {
         self.values.pop().expect("stack value")
     }
