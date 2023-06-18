@@ -2,13 +2,17 @@ use runtime::Value;
 
 #[derive(Debug)]
 pub struct Stack {
-    values: Vec<Value>,
+    values: Box<[Value]>,
+    pointer: *const Value,
 }
 
 impl Stack {
     pub fn new(size: usize) -> Self {
+        let values = Vec::with_capacity(size).into();
+
         Self {
-            values: Box::with_capacity(size),
+            values,
+            pointer: &values[0],
         }
     }
 
@@ -32,7 +36,6 @@ impl Stack {
         self.values.len()
     }
 
-    #[inline]
     fn get_index(&self, index: usize) -> usize {
         self.values.len() - 1 - index
     }
