@@ -15,9 +15,9 @@ pub struct Interpreter {
 }
 
 impl Interpreter {
-    pub fn new(byte_code_capacity: usize) -> Self {
+    pub fn new(bytecode_capacity: usize) -> Self {
         Self {
-            codes: Vec::with_capacity(byte_code_capacity).into(),
+            codes: Vec::with_capacity(bytecode_capacity).into(),
         }
     }
 
