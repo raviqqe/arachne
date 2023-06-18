@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct Frame {
     pointer: u32,
     return_address: u32,
