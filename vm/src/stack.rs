@@ -1,37 +1,47 @@
 use runtime::{Value, NIL};
+use std::ptr::replace;
 
 #[derive(Debug)]
 pub struct Stack {
     values: Box<[Value]>,
-    base: *const Value,
-    pointer: *const Value,
+    base: *mut Value,
+    pointer: *mut Value,
 }
 
 impl Stack {
     pub fn new(size: usize) -> Self {
-        let values = vec![NIL; size].into();
+        let mut values: Box<[Value]> = vec![NIL; size].into();
 
         Self {
+            base: &mut values[0],
+            pointer: &mut values[0],
             values,
-            base: &values[0],
-            pointer: &values[0],
         }
     }
 
     pub fn push(&mut self, value: Value) {
-        self.values.push(value);
+        unsafe {
+            *self.pointer = value;
+        }
+
+        self.pointer = unsafe { self.pointer.add(1) };
     }
 
     pub fn pop(&mut self) -> Value {
-        self.values.pop().expect("stack value")
+        self.pointer = unsafe { self.pointer.sub(1) };
+
+        let value = unsafe { replace(self.pointer, NIL) };
+
+        value
     }
 
     pub fn peek(&self, index: usize) -> &Value {
-        self.values.get(self.get_index(index)).unwrap()
+        unsafe { &*self.pointer.sub(index + 1) }
     }
 
     pub fn truncate(&mut self, start: usize, end: usize) {
-        self.values.splice(start..end, []);
+        todo!();
+        // self.values.splice(start..end, []);
     }
 
     pub fn len(&self) -> usize {
