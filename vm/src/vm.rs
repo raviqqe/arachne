@@ -1,5 +1,5 @@
 use crate::{
-    decode::{decode_bytes, decode_f64, decode_u16, decode_u32, decode_u8},
+    decode::{decode_bytes, decode_f64, decode_u16, decode_u32, decode_u8, decode_u8_option},
     frame::Frame,
     stack::Stack,
     Instruction,
@@ -38,8 +38,10 @@ impl Vm {
     }
 
     pub fn run(&mut self, codes: &[u8]) {
-        while self.program_counter < codes.len() {
-            match Instruction::from_u8(self.read_u8(codes)).expect("valid instruction") {
+        loop {
+            let Some(instruction) = self.read_u8_option(codes) else { return; };
+
+            match Instruction::from_u8(instruction).expect("valid instruction") {
                 Instruction::Nil => self.stack.push(NIL),
                 Instruction::Float64 => {
                     let value = self.read_f64(codes);
@@ -241,6 +243,11 @@ impl Vm {
     #[inline(always)]
     fn read_u8(&mut self, codes: &[u8]) -> u8 {
         decode_u8(codes, &mut self.program_counter)
+    }
+
+    #[inline(always)]
+    fn read_u8_option(&mut self, codes: &[u8]) -> Option<u8> {
+        decode_u8_option(codes, &mut self.program_counter)
     }
 
     #[inline(always)]

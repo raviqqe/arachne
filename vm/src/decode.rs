@@ -51,6 +51,15 @@ pub fn decode_u8(codes: &[u8], index: &mut usize) -> u8 {
 }
 
 #[inline]
+pub fn decode_u8_option(codes: &[u8], index: &mut usize) -> Option<u8> {
+    let Some(value) = codes.get(*index) else { return None };
+
+    *index += 1;
+
+    Some(*value)
+}
+
+#[inline]
 pub fn decode_bytes<'a>(codes: &'a [u8], len: usize, index: &mut usize) -> &'a [u8] {
     let value = &codes[*index..*index + len];
 
