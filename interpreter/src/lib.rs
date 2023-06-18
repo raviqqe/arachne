@@ -8,7 +8,7 @@ use runtime::Value;
 use std::{cell::RefCell, error::Error};
 use vm::Vm;
 
-const VM_STACK_SIZE: usize = 1 << (2 * 10);
+const VM_STACK_SIZE: usize = 1 << 20;
 
 pub struct Interpreter {
     codes: RefCell<Vec<u8>>,
