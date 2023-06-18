@@ -7,4 +7,3 @@ lto = true
 opt-level = 2
 overflow-checks = false
 panic = "abort"
-strip = true
