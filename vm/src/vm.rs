@@ -39,7 +39,9 @@ impl<'a> Vm<'a> {
         }
     }
 
-    pub fn run(&mut self, codes: &[u8]) {
+    pub fn run(&mut self) {
+        let codes = &self.program.borrow();
+
         while self.program_counter < codes.len() {
             match Instruction::from_u8(self.read_u8(codes)).expect("valid instruction") {
                 Instruction::Nil => self.stack.push(NIL),

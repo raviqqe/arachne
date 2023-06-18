@@ -27,14 +27,14 @@ impl Interpreter {
     ) -> impl Stream<Item = Result<(), InterpretError>> + 'a {
         try_stream! {
             let mut compiler = Compiler::new(&self.codes);
-            let mut vm = Vm::new(VM_STACK_SIZE);
+            let mut vm = Vm::new(&self.codes, VM_STACK_SIZE);
             let results = compiler.compile(values);
 
             pin_mut!(results);
 
             while let Some(result) = results.next().await {
                 result.map_err(|error| InterpretError::Other(error.into()))?;
-                vm.run(&self.codes.borrow());
+                vm.run();
                 yield ();
             }
         }
