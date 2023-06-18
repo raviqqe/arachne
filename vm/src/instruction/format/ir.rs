@@ -39,6 +39,7 @@ pub enum InstructionIr {
         pointer: i16,
     },
     Return,
+    Exit,
     Dump,
 }
 
@@ -74,6 +75,7 @@ impl Display for InstructionIr {
             Self::Jump { pointer } => write!(formatter, "jump {:x}", pointer),
             Self::Branch { pointer } => write!(formatter, "branch {:x}", pointer),
             Self::Return => write!(formatter, "return"),
+            Self::Exit => write!(formatter, "exit"),
             Self::Dump => write!(formatter, "dump"),
         }
     }

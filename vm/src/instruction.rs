@@ -35,6 +35,7 @@ pub enum Instruction {
     Return,
     Jump,
     Branch,
+    Exit,
 
     // Debug
     Dump,
