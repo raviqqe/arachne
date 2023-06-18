@@ -3,6 +3,7 @@ use runtime::Value;
 #[derive(Debug)]
 pub struct Stack {
     values: Box<[Value]>,
+    base: *const Value,
     pointer: *const Value,
 }
 
@@ -12,6 +13,7 @@ impl Stack {
 
         Self {
             values,
+            base: &values[0],
             pointer: &values[0],
         }
     }
