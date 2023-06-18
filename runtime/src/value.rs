@@ -184,7 +184,9 @@ impl Clone for Value {
             None => NIL,
             Some(TypedValueRef::Array(array)) => array.clone().into(),
             Some(TypedValueRef::Closure(closure)) => closure.clone().into(),
-            Some(_) => Self(self.0),
+            Some(
+                TypedValueRef::Float64(_) | TypedValueRef::Integer32(_) | TypedValueRef::Symbol(_),
+            ) => Self(self.0),
         }
     }
 }
