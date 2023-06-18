@@ -6,7 +6,7 @@ use crate::{
 };
 use num_traits::FromPrimitive;
 use runtime::{Closure, NIL};
-use std::str;
+use std::{cell::RefCell, str};
 
 macro_rules! binary_operation {
     ($self:expr, $operator:tt) => {
@@ -22,15 +22,17 @@ macro_rules! binary_operation {
     };
 }
 
-pub struct Vm {
+pub struct Vm<'a> {
+    program: &'a RefCell<Vec<u8>>,
     program_counter: usize,
     stack: Stack,
     frames: Vec<Frame>,
 }
 
-impl Vm {
-    pub fn new(stack_size: usize) -> Self {
+impl<'a> Vm<'a> {
+    pub fn new(program: &'a RefCell<Vec<u8>>, stack_size: usize) -> Self {
         Self {
+            program,
             program_counter: 0,
             stack: Stack::new(stack_size),
             frames: Default::default(),
