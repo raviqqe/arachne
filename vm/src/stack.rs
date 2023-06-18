@@ -43,7 +43,7 @@ impl Stack {
     }
 
     pub fn len(&self) -> usize {
-        (unsafe { self.pointer.sub(self.base as usize) }) as usize
+        (unsafe { self.pointer.offset_from(self.base) }) as usize
     }
 
     fn get_index(&self, index: usize) -> usize {
