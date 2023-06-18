@@ -73,6 +73,7 @@ pub fn format_instructions(codes: &[u8]) -> Result<String, FormatError> {
                     pointer: decode_u16(codes, &mut index) as i16,
                 },
                 Instruction::Return => InstructionIr::Return,
+                Instruction::Exit => InstructionIr::Exit,
             },
         );
     }
