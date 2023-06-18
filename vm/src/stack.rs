@@ -30,9 +30,7 @@ impl Stack {
     pub fn pop(&mut self) -> Value {
         self.pointer = unsafe { self.pointer.sub(1) };
 
-        let value = unsafe { replace(self.pointer, NIL) };
-
-        value
+        unsafe { replace(self.pointer, NIL) }
     }
 
     pub fn peek(&self, index: usize) -> &Value {
