@@ -22,6 +22,7 @@ macro_rules! binary_operation {
     };
 }
 
+#[derive(Debug, Default)]
 pub struct Vm {
     program_counter: usize,
     stack: Stack,
@@ -29,10 +30,10 @@ pub struct Vm {
 }
 
 impl Vm {
-    pub fn new(stack_size: usize) -> Self {
+    pub fn new() -> Self {
         Self {
             program_counter: 0,
-            stack: Stack::new(stack_size),
+            stack: Stack::new(),
             frames: Default::default(),
         }
     }

@@ -1,15 +1,13 @@
 use runtime::Value;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Stack {
     values: Vec<Value>,
 }
 
 impl Stack {
-    pub fn new(size: usize) -> Self {
-        Self {
-            values: Vec::with_capacity(size),
-        }
+    pub fn new() -> Self {
+        Self::default()
     }
 
     pub fn push(&mut self, value: Value) {
