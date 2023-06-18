@@ -8,7 +8,7 @@ pub struct Stack {
 impl Stack {
     pub fn new(size: usize) -> Self {
         Self {
-            values: Vec::with_capacity(size),
+            values: Box::with_capacity(size),
         }
     }
 
