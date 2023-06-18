@@ -3,5 +3,4 @@ members = ["command", "compiler", "interpreter", "parse", "runtime", "vm"]
 
 [profile.release]
 lto = true
-panic = "abort"
-# strip = true
+strip = true
