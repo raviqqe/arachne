@@ -3,4 +3,3 @@ members = ["command", "compiler", "interpreter", "parse", "runtime", "vm"]
 
 [profile.release]
 lto = true
-strip = true
