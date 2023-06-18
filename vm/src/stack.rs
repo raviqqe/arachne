@@ -32,6 +32,7 @@ impl Stack {
         self.values.len()
     }
 
+    #[inline]
     fn get_index(&self, index: usize) -> usize {
         self.values.len() - 1 - index
     }
