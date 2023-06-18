@@ -246,7 +246,7 @@ impl<'a> Vm<'a> {
     }
 
     #[inline(always)]
-    fn read_bytes<'a>(&mut self, codes: &'a [u8], len: usize) -> &'a [u8] {
+    fn read_bytes<'b>(&mut self, codes: &'b [u8], len: usize) -> &'b [u8] {
         decode_bytes(codes, len, &mut self.program_counter)
     }
 }
