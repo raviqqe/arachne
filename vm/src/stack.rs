@@ -1,7 +1,7 @@
 use runtime::{Value, NIL};
-use std::ptr::replace;
+use std::ptr::{replace, write};
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct Stack {
     values: Box<[Value]>,
     base: *mut Value,
@@ -21,7 +21,7 @@ impl Stack {
 
     pub fn push(&mut self, value: Value) {
         unsafe {
-            *self.pointer = value;
+            write(self.pointer, value);
         }
 
         self.pointer = unsafe { self.pointer.add(1) };
@@ -44,5 +44,11 @@ impl Stack {
 
     pub fn len(&self) -> usize {
         (unsafe { self.pointer.offset_from(self.base) }) as usize
+    }
+}
+
+impl Default for Stack {
+    fn default() -> Self {
+        Self::new()
     }
 }
