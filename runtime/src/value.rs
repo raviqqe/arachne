@@ -8,7 +8,6 @@ use core::{
     cmp::Ordering,
     fmt::{self, Display, Formatter},
     mem::forget,
-    ptr::read,
 };
 
 pub const NIL: Value = Value(0);
@@ -233,7 +232,15 @@ impl Clone for Value {
 impl Drop for Value {
     #[inline]
     fn drop(&mut self) {
-        unsafe { read(self) }.into_typed();
+        match self.r#type() {
+            Type::Array => unsafe {
+                Array::from_raw(self.0);
+            },
+            Type::Closure => unsafe {
+                Closure::from_raw(self.0);
+            },
+            Type::Float64 | Type::Integer32 | Type::Symbol => {}
+        }
     }
 }
 
