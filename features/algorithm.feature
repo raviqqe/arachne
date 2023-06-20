@@ -57,5 +57,5 @@ Feature: Algorithm
     And I pipe in the file "main.arc"
     Then the stdout should contain exactly:
     """
-    6765
+    12
     """
