@@ -137,7 +137,7 @@ impl Value {
 
     #[inline]
     pub fn into_typed(self) -> Option<TypedValue> {
-        if self.is_nil() {
+        let value = if self.is_nil() {
             None
         } else {
             Some(match self.r#type() {
@@ -147,7 +147,11 @@ impl Value {
                 Type::Integer32 => TypedValue::Integer32(unsafe { Integer32::from_raw(self.0) }),
                 Type::Symbol => TypedValue::Symbol(unsafe { Symbol::from_raw(self.0) }),
             })
-        }
+        };
+
+        forget(self);
+
+        value
     }
 
     #[inline]
