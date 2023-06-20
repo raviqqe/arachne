@@ -51,11 +51,11 @@ Feature: Algorithm
             (tak (- z 1) x y))
           z)))
 
-    (tak 40 20 11)
+    (tak 32 16 8)
     """
     When I run `arachne` interactively
     And I pipe in the file "main.arc"
     Then the stdout should contain exactly:
     """
-    12
+    9
     """
