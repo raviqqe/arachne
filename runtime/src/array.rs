@@ -370,6 +370,18 @@ mod tests {
         );
     }
 
+    #[test]
+    fn ord() {
+        assert!(Array::from([]) < Array::from([1.0.into()]));
+        assert!(Array::from([]) <= Array::from([]));
+        assert!(Array::from([]) <= Array::from([1.0.into()]));
+        assert!(Array::from([1.0.into()]) <= Array::from([1.0.into()]));
+        assert!(Array::from([1.0.into()]) < Array::from([1.0.into(), 2.0.into()]));
+        assert!(Array::from([1.0.into()]) <= Array::from([1.0.into(), 2.0.into()]));
+        assert!(!(Array::from(["foo".into()]) < Array::from([1.0.into()])));
+        assert!(!(Array::from(["foo".into()]) > Array::from([1.0.into()])));
+    }
+
     mod set {
         use super::*;
         use pretty_assertions::assert_eq;
