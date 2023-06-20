@@ -32,7 +32,7 @@ pub(crate) const INTEGER32_MASK: u64 = build_mask(INTEGER32_SUB_MASK);
 pub struct Value(u64);
 
 impl Value {
-    #[inline]
+    #[inline(always)]
     pub const fn r#type(&self) -> Type {
         if self.0 & EXPONENT_MASK != EXPONENT_MASK {
             return Type::Float64;
@@ -47,77 +47,77 @@ impl Value {
         }
     }
 
-    #[inline]
+    #[inline(always)]
     pub const fn is_nil(&self) -> bool {
         self.0 == 0
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn is_array(&self) -> bool {
         self.is_nil() || self.r#type() == Type::Array
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn is_float64(&self) -> bool {
         self.is_nil() || self.r#type() == Type::Float64
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn is_integer32(&self) -> bool {
         self.is_nil() || self.r#type() == Type::Integer32
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn is_closure(&self) -> bool {
         self.is_nil() || self.r#type() == Type::Closure
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn is_symbol(&self) -> bool {
         self.r#type() == Type::Symbol
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn into_float64(self) -> Option<Float64> {
         self.try_into().ok()
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn to_float64(&self) -> Option<Float64> {
         self.try_into().ok()
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn to_integer32(&self) -> Option<Integer32> {
         self.try_into().ok()
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn to_symbol(&self) -> Option<Symbol> {
         self.try_into().ok()
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn into_array(self) -> Option<Array> {
         self.try_into().ok()
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn as_array(&self) -> Option<&Array> {
         self.try_into().ok()
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn into_closure(self) -> Option<Closure> {
         self.try_into().ok()
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn as_closure(&self) -> Option<&Closure> {
         self.try_into().ok()
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn as_typed(&self) -> Option<TypedValueRef> {
         if self.is_nil() {
             None
@@ -134,7 +134,7 @@ impl Value {
         }
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn into_typed(self) -> Option<TypedValue> {
         let value = if self.is_nil() {
             None
@@ -188,6 +188,7 @@ impl PartialEq for Value {
 impl Eq for Value {}
 
 impl PartialOrd for Value {
+    #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         if let Some(value) = self.as_typed() {
             match value {
