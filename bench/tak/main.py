@@ -8,4 +8,4 @@ def tak(x, y, z):
         return z
 
 
-print(tak(40, 20, 11))
+print(tak(32, 16, 8))
