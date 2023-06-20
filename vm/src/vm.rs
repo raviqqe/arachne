@@ -4,9 +4,8 @@ use crate::{
     stack::Stack,
     Instruction,
 };
-use num_traits::FromPrimitive;
 use runtime::{Closure, NIL};
-use std::str;
+use std::{mem::transmute, str};
 
 macro_rules! binary_operation {
     ($self:expr, $operator:tt) => {
@@ -40,7 +39,7 @@ impl Vm {
 
     pub fn run(&mut self, codes: &[u8]) {
         while self.program_counter < codes.len() {
-            match Instruction::from_u8(self.read_u8(codes)).expect("valid instruction") {
+            match unsafe { transmute(self.read_u8(codes)) } {
                 Instruction::Nil => self.stack.push(NIL),
                 Instruction::Float64 => {
                     let value = self.read_f64(codes);
