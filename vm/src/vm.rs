@@ -171,7 +171,7 @@ impl Vm {
                     let rhs = self.stack.pop();
                     let lhs = self.stack.pop();
 
-                    todo!();
+                    self.stack.push(((lhs < rhs) as usize as f64).into());
                 }
                 Instruction::Not => {
                     let value = self.stack.pop();
