@@ -227,6 +227,7 @@ impl Clone for Value {
 }
 
 impl Drop for Value {
+    #[inline]
     fn drop(&mut self) {
         unsafe { read(self) }.into_typed();
     }
