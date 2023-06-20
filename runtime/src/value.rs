@@ -5,6 +5,7 @@ use crate::{
 };
 use alloc::{string::String, vec::Vec};
 use core::{
+    cmp::Ordering,
     fmt::{self, Display, Formatter},
     mem::forget,
 };
@@ -176,6 +177,32 @@ impl PartialEq for Value {
 }
 
 impl Eq for Value {}
+
+impl PartialOrd for Value {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        if let Some(value) = self.as_typed() {
+            match value {
+                TypedValueRef::Float64(one) => {
+                    other.to_float64().map(|other| one.partial_cmp(&other))
+                }
+                TypedValueRef::Closure(_) => None,
+                TypedValueRef::Integer32(one) => {
+                    other.to_integer32().map(|other| one.partial_cmp(&other))
+                }
+                TypedValueRef::Array(one) => other.as_array().map(|other| one.partial_cmp(&other)),
+                TypedValueRef::Symbol(one) => {
+                    other.to_symbol().map(|other| one.partial_cmp(&other))
+                }
+            }
+        } else {
+            Some(if other.is_nil() {
+                Ordering::Equal
+            } else {
+                Ordering::Less
+            })
+        }
+    }
+}
 
 impl Clone for Value {
     #[inline]
