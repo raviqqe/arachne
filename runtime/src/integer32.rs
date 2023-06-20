@@ -1,13 +1,14 @@
 use super::Value;
 use crate::value::INTEGER32_MASK;
 use core::{
+    cmp::Ordering,
     fmt::{self, Debug, Display, Formatter},
     mem::size_of,
 };
 
 // TODO Inline functions.
 
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Eq, Hash, Ord, PartialEq)]
 pub struct Integer32(u64);
 
 impl Integer32 {
@@ -26,6 +27,12 @@ impl Integer32 {
         buffer.copy_from_slice(&self.0.to_le_bytes()[..SIZE]);
 
         i32::from_le_bytes(buffer)
+    }
+}
+
+impl PartialOrd for Integer32 {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.to_i32().partial_cmp(&other.to_i32())
     }
 }
 
