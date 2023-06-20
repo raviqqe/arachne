@@ -8,7 +8,7 @@ use core::{
 
 // TODO Inline functions.
 
-#[derive(Clone, Copy, Eq, Hash, Ord, PartialEq)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct Integer32(u64);
 
 impl Integer32 {
@@ -33,6 +33,12 @@ impl Integer32 {
 impl PartialOrd for Integer32 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.to_i32().partial_cmp(&other.to_i32())
+    }
+}
+
+impl Ord for Integer32 {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.to_i32().cmp(&other.to_i32())
     }
 }
 
