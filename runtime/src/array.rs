@@ -7,6 +7,7 @@ use alloc::{
     vec::Vec,
 };
 use core::{
+    cmp::Ordering,
     fmt::{self, Display, Formatter},
     mem::forget,
     ptr::{drop_in_place, write},
@@ -206,6 +207,18 @@ impl PartialEq for Array {
 }
 
 impl Eq for Array {}
+
+impl PartialOrd for Array {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.to_i32().partial_cmp(&other.to_i32())
+    }
+}
+
+impl Ord for Array {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.to_i32().cmp(&other.to_i32())
+    }
+}
 
 impl Clone for Array {
     fn clone(&self) -> Self {
