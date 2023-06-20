@@ -42,73 +42,18 @@ impl Vm {
         while self.program_counter < codes.len() {
             match Instruction::from_u8(self.read_u8(codes)).expect("valid instruction") {
                 Instruction::Nil => self.nil(),
-                Instruction::Float64 => {
-                    let value = self.read_f64(codes);
-                    self.stack.push(value.into());
-                }
-                Instruction::Integer32 => {
-                    let value = self.read_u32(codes);
-                    self.stack.push(value.into());
-                }
-                Instruction::Symbol => {
-                    let len = self.read_u8(codes);
-                    let value = str::from_utf8(self.read_bytes(codes, len as usize))
-                        .unwrap()
-                        .into();
-
-                    self.stack.push(value);
-                }
-                Instruction::Get => {
-                    let value = (|| {
-                        let index = self.stack.pop();
-                        let array = self.stack.pop().into_array()?;
-
-                        Some(array.get(index).clone())
-                    })()
-                    .unwrap_or(NIL);
-
-                    self.stack.push(value);
-                }
-                Instruction::Set => {
-                    let value = (|| {
-                        let value = self.stack.pop();
-                        let index = self.stack.pop();
-                        let array = self.stack.pop().into_array()?;
-
-                        Some(array.set(index, value).into())
-                    })()
-                    .unwrap_or(NIL);
-
-                    self.stack.push(value);
-                }
-                Instruction::Length => {
-                    let value =
-                        (|| Some(self.stack.pop().into_array()?.len().into()))().unwrap_or(NIL);
-
-                    self.stack.push(value);
-                }
-                Instruction::Add => {
-                    binary_operation!(self, +);
-                }
-                Instruction::Subtract => {
-                    binary_operation!(self, -);
-                }
-                Instruction::Multiply => {
-                    binary_operation!(self, *);
-                }
-                Instruction::Divide => {
-                    binary_operation!(self, /);
-                }
-                Instruction::Drop => {
-                    self.stack.pop();
-                }
-                Instruction::Dump => {
-                    let value = self.stack.pop();
-
-                    println!("{}", value);
-
-                    self.stack.push(value);
-                }
+                Instruction::Float64 => self.float64(codes),
+                Instruction::Integer32 => self.integer32(codes),
+                Instruction::Symbol => self.symbol(codes),
+                Instruction::Get => self.get(),
+                Instruction::Set => self.set(),
+                Instruction::Length => self.length(),
+                Instruction::Add => self.add(),
+                Instruction::Subtract => self.subtract(),
+                Instruction::Multiply => self.multiply(),
+                Instruction::Divide => self.divide(),
+                Instruction::Drop => self.drop(),
+                Instruction::Dump => self.dump(),
                 Instruction::Call => self.call(codes),
                 Instruction::TailCall => self.tail_call(codes),
                 Instruction::Close => self.close(codes),
@@ -128,6 +73,84 @@ impl Vm {
 
     fn nil(&mut self) {
         self.stack.push(NIL)
+    }
+
+    fn float64(&mut self, codes: &[u8]) {
+        let value = self.read_f64(codes);
+        self.stack.push(value.into());
+    }
+
+    fn integer32(&mut self, codes: &[u8]) {
+        let value = self.read_u32(codes);
+        self.stack.push(value.into());
+    }
+
+    fn symbol(&mut self, codes: &[u8]) {
+        let len = self.read_u8(codes);
+        let value = str::from_utf8(self.read_bytes(codes, len as usize))
+            .unwrap()
+            .into();
+
+        self.stack.push(value);
+    }
+
+    fn get(&mut self) {
+        let value = (|| {
+            let index = self.stack.pop();
+            let array = self.stack.pop().into_array()?;
+
+            Some(array.get(index).clone())
+        })()
+        .unwrap_or(NIL);
+
+        self.stack.push(value);
+    }
+
+    fn set(&mut self) {
+        let value = (|| {
+            let value = self.stack.pop();
+            let index = self.stack.pop();
+            let array = self.stack.pop().into_array()?;
+
+            Some(array.set(index, value).into())
+        })()
+        .unwrap_or(NIL);
+
+        self.stack.push(value);
+    }
+
+    fn length(&mut self) {
+        let value = (|| Some(self.stack.pop().into_array()?.len().into()))().unwrap_or(NIL);
+
+        self.stack.push(value);
+    }
+
+    fn add(&mut self) {
+        binary_operation!(self, +);
+    }
+
+    fn subtract(&mut self) {
+        binary_operation!(self, -);
+    }
+
+    fn multiply(&mut self) {
+        binary_operation!(self, *);
+    }
+
+    fn divide(&mut self) {
+        binary_operation!(self, /);
+    }
+
+    fn drop(&mut self) {
+        self.stack.pop();
+    }
+
+    fn dump(&mut self) {
+        let value = self.stack.pop();
+
+        println!("{}", value);
+
+        self.stack.push(value);
     }
 
     fn call(&mut self, codes: &[u8]) {
