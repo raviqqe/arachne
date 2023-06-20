@@ -216,7 +216,7 @@ impl PartialOrd for Value {
 }
 
 impl Clone for Value {
-    #[inline]
+    #[inline(always)]
     fn clone(&self) -> Self {
         match self.as_typed() {
             None => NIL,
@@ -230,7 +230,7 @@ impl Clone for Value {
 }
 
 impl Drop for Value {
-    #[inline]
+    #[inline(always)]
     fn drop(&mut self) {
         match self.r#type() {
             Type::Array => unsafe {

@@ -202,7 +202,7 @@ impl Vm {
                     let address = self.read_u16(codes);
                     let value = self.stack.pop();
 
-                    if !value.is_nil() {
+                    if value != NIL {
                         self.program_counter = self
                             .program_counter
                             .wrapping_add(address as i16 as isize as usize);
