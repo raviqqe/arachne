@@ -224,6 +224,10 @@ impl Vm {
         }
     }
 
+    fn nil(&mut self) {
+        self.stack.push(NIL)
+    }
+
     #[inline(always)]
     fn call(&mut self, arity: usize) {
         if let Some(closure) = self.stack.peek(arity).as_closure() {
