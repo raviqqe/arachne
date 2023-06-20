@@ -176,7 +176,8 @@ impl Vm {
                 Instruction::Not => {
                     let value = self.stack.pop();
 
-                    todo!();
+                    self.stack
+                        .push(if value.is_nil() { 1.0.into() } else { value });
                 }
                 Instruction::And => {
                     let rhs = self.stack.pop();
