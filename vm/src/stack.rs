@@ -1,5 +1,5 @@
 use runtime::{Value, NIL};
-use std::ptr::{replace, write};
+use std::ptr::{read, write};
 
 #[derive(Debug)]
 pub struct Stack {
@@ -30,7 +30,7 @@ impl Stack {
     pub fn pop(&mut self) -> Value {
         self.pointer = unsafe { self.pointer.sub(1) };
 
-        unsafe { replace(self.pointer, NIL) }
+        unsafe { read(self.pointer) }
     }
 
     pub fn peek(&self, index: usize) -> &Value {
