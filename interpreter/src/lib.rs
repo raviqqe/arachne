@@ -8,16 +8,15 @@ use runtime::Value;
 use std::{cell::RefCell, error::Error};
 use vm::Vm;
 
-const VM_STACK_SIZE: usize = 1 << 20;
-
+#[derive(Debug, Default)]
 pub struct Interpreter {
     codes: RefCell<Vec<u8>>,
 }
 
 impl Interpreter {
-    pub fn new(bytecode_capacity: usize) -> Self {
+    pub fn new() -> Self {
         Self {
-            codes: Vec::with_capacity(bytecode_capacity).into(),
+            codes: Default::default(),
         }
     }
 
@@ -27,7 +26,7 @@ impl Interpreter {
     ) -> impl Stream<Item = Result<(), InterpretError>> + 'a {
         try_stream! {
             let mut compiler = Compiler::new(&self.codes);
-            let mut vm = Vm::new(VM_STACK_SIZE);
+            let mut vm = Vm::new();
             let results = compiler.compile(values);
 
             pin_mut!(results);

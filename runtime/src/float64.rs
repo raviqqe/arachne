@@ -3,7 +3,7 @@ use core::fmt::{self, Display, Formatter};
 use ordered_float::OrderedFloat;
 
 #[repr(transparent)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialOrd)]
 pub struct Float64(f64);
 
 impl Float64 {
@@ -72,6 +72,16 @@ mod tests {
         assert_eq!(Float64::from(1.0), Float64::from(1.0));
         assert_ne!(Float64::from(0.0), Float64::from(1.0));
         assert_eq!(Float64::from(f64::NAN), Float64::from(f64::NAN));
+    }
+
+    #[test]
+    fn ord() {
+        assert!(Float64::from(0.0) < Float64::from(1.0));
+        assert!(Float64::from(0.0) <= Float64::from(0.0));
+        assert!(Float64::from(0.0) <= Float64::from(1.0));
+        assert!(Float64::from(1.0) > Float64::from(0.0));
+        assert!(Float64::from(1.0) >= Float64::from(0.0));
+        assert!(Float64::from(1.0) >= Float64::from(0.0));
     }
 
     #[test]

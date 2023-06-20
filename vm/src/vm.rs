@@ -22,6 +22,7 @@ macro_rules! binary_operation {
     };
 }
 
+#[derive(Debug, Default)]
 pub struct Vm {
     program_counter: usize,
     stack: Stack,
@@ -29,10 +30,10 @@ pub struct Vm {
 }
 
 impl Vm {
-    pub fn new(stack_size: usize) -> Self {
+    pub fn new() -> Self {
         Self {
             program_counter: 0,
-            stack: Stack::new(stack_size),
+            stack: Stack::new(),
             frames: Default::default(),
         }
     }
@@ -165,6 +166,30 @@ impl Vm {
                     let lhs = self.stack.pop();
 
                     self.stack.push(((lhs == rhs) as usize as f64).into());
+                }
+                Instruction::LessThan => {
+                    let rhs = self.stack.pop();
+                    let lhs = self.stack.pop();
+
+                    self.stack.push(((lhs < rhs) as usize as f64).into());
+                }
+                Instruction::Not => {
+                    let value = self.stack.pop();
+
+                    self.stack
+                        .push(if value.is_nil() { 1.0.into() } else { NIL });
+                }
+                Instruction::And => {
+                    let rhs = self.stack.pop();
+                    let lhs = self.stack.pop();
+
+                    self.stack.push(if lhs.is_nil() { lhs } else { rhs });
+                }
+                Instruction::Or => {
+                    let rhs = self.stack.pop();
+                    let lhs = self.stack.pop();
+
+                    self.stack.push(if lhs.is_nil() { rhs } else { lhs });
                 }
                 Instruction::Jump => {
                     let address = self.read_u16(codes);

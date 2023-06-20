@@ -1,6 +1,7 @@
 use super::Value;
 use crate::value::INTEGER32_MASK;
 use core::{
+    cmp::Ordering,
     fmt::{self, Debug, Display, Formatter},
     mem::size_of,
 };
@@ -26,6 +27,18 @@ impl Integer32 {
         buffer.copy_from_slice(&self.0.to_le_bytes()[..SIZE]);
 
         i32::from_le_bytes(buffer)
+    }
+}
+
+impl PartialOrd for Integer32 {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.to_i32().partial_cmp(&other.to_i32())
+    }
+}
+
+impl Ord for Integer32 {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.to_i32().cmp(&other.to_i32())
     }
 }
 
@@ -85,6 +98,16 @@ mod tests {
     #[test]
     fn eq() {
         assert_eq!(Integer32::from(42), Integer32::from(42));
+    }
+
+    #[test]
+    fn ord() {
+        assert!(Integer32::from(0) < Integer32::from(1));
+        assert!(Integer32::from(0) <= Integer32::from(0));
+        assert!(Integer32::from(0) <= Integer32::from(1));
+        assert!(Integer32::from(1) > Integer32::from(0));
+        assert!(Integer32::from(1) >= Integer32::from(0));
+        assert!(Integer32::from(1) >= Integer32::from(0));
     }
 
     #[test]

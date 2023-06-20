@@ -1,7 +1,7 @@
 use runtime::{Value, NIL};
 use std::ptr::replace;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Stack {
     values: Box<[Value]>,
     base: *mut Value,
@@ -9,8 +9,8 @@ pub struct Stack {
 }
 
 impl Stack {
-    pub fn new(size: usize) -> Self {
-        let mut values: Box<[Value]> = vec![NIL; size].into();
+    pub fn new() -> Self {
+        let mut values: Box<[Value]> = vec![NIL; 1 << 20].into();
 
         Self {
             base: &mut values[0],

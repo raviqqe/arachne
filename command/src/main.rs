@@ -5,8 +5,6 @@ use std::{error::Error, process::exit};
 use tokio::io::{stdin, AsyncBufReadExt, BufReader};
 use tokio_stream::wrappers::LinesStream;
 
-const BYTECODE_CAPACITY: usize = 1 << 10;
-
 #[tokio::main]
 async fn main() {
     if let Err(error) = run().await {
@@ -25,7 +23,7 @@ async fn run() -> Result<(), Box<dyn Error>> {
 
     pin_mut!(values);
 
-    let interpreter = Interpreter::new(BYTECODE_CAPACITY);
+    let interpreter = Interpreter::new();
     let outputs = interpreter.interpret(&mut values);
 
     pin_mut!(outputs);

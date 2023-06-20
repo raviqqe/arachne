@@ -5,6 +5,7 @@ use crate::{
 };
 use alloc::{string::String, vec::Vec};
 use core::{
+    cmp::Ordering,
     fmt::{self, Display, Formatter},
     mem::forget,
 };
@@ -177,15 +178,44 @@ impl PartialEq for Value {
 
 impl Eq for Value {}
 
+impl PartialOrd for Value {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        if let Some(value) = self.as_typed() {
+            match value {
+                TypedValueRef::Float64(one) => {
+                    other.to_float64().and_then(|other| one.partial_cmp(&other))
+                }
+                TypedValueRef::Closure(_) => None,
+                TypedValueRef::Integer32(one) => other
+                    .to_integer32()
+                    .and_then(|other| one.partial_cmp(&other)),
+                TypedValueRef::Array(one) => {
+                    other.as_array().and_then(|other| one.partial_cmp(other))
+                }
+                TypedValueRef::Symbol(one) => {
+                    other.to_symbol().and_then(|other| one.partial_cmp(&other))
+                }
+            }
+        } else {
+            Some(if other.is_nil() {
+                Ordering::Equal
+            } else {
+                Ordering::Less
+            })
+        }
+    }
+}
+
 impl Clone for Value {
     #[inline]
     fn clone(&self) -> Self {
-        if let Some(array) = self.as_array() {
-            array.clone().into()
-        } else if let Some(closure) = self.as_closure() {
-            closure.clone().into()
-        } else {
-            Self(self.0)
+        match self.as_typed() {
+            None => NIL,
+            Some(TypedValueRef::Array(array)) => array.clone().into(),
+            Some(TypedValueRef::Closure(closure)) => closure.clone().into(),
+            Some(
+                TypedValueRef::Float64(_) | TypedValueRef::Integer32(_) | TypedValueRef::Symbol(_),
+            ) => Self(self.0),
         }
     }
 }
