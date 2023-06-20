@@ -167,6 +167,30 @@ impl Vm {
 
                     self.stack.push(((lhs == rhs) as usize as f64).into());
                 }
+                Instruction::LessThan => {
+                    let rhs = self.stack.pop();
+                    let lhs = self.stack.pop();
+
+                    self.stack.push(((lhs < rhs) as usize as f64).into());
+                }
+                Instruction::Not => {
+                    let value = self.stack.pop();
+
+                    self.stack
+                        .push(if value.is_nil() { 1.0.into() } else { NIL });
+                }
+                Instruction::And => {
+                    let rhs = self.stack.pop();
+                    let lhs = self.stack.pop();
+
+                    self.stack.push(if lhs.is_nil() { lhs } else { rhs });
+                }
+                Instruction::Or => {
+                    let rhs = self.stack.pop();
+                    let lhs = self.stack.pop();
+
+                    self.stack.push(if lhs.is_nil() { rhs } else { lhs });
+                }
                 Instruction::Jump => {
                     let address = self.read_u16(codes);
 

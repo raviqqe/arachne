@@ -112,7 +112,6 @@ impl<'a> Compiler<'a> {
                         } else if symbol == "if" {
                             self.compile_if(array, 1, block, tail)?;
                         } else if let Some(instruction) = match symbol {
-                            "=" => Some(Instruction::Equal),
                             "get" => Some(Instruction::Get),
                             "set" => Some(Instruction::Set),
                             "len" => Some(Instruction::Length),
@@ -120,12 +119,19 @@ impl<'a> Compiler<'a> {
                             "-" => Some(Instruction::Subtract),
                             "*" => Some(Instruction::Multiply),
                             "/" => Some(Instruction::Divide),
+                            "=" => Some(Instruction::Equal),
+                            "<" => Some(Instruction::LessThan),
+                            "not" => Some(Instruction::Not),
+                            "and" => Some(Instruction::And),
+                            "or" => Some(Instruction::Or),
                             _ => None,
                         } {
                             self.compile_arguments(array, block)?;
                             self.codes.borrow_mut().push(instruction as u8);
+
                             *block.temporary_count_mut() -= match instruction {
                                 Instruction::Length => 0,
+                                Instruction::Not => 0,
                                 Instruction::Set => 2,
                                 _ => 1,
                             };

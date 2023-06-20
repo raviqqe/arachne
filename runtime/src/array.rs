@@ -7,6 +7,7 @@ use alloc::{
     vec::Vec,
 };
 use core::{
+    cmp::Ordering,
     fmt::{self, Display, Formatter},
     mem::forget,
     ptr::{drop_in_place, write},
@@ -207,6 +208,20 @@ impl PartialEq for Array {
 
 impl Eq for Array {}
 
+impl PartialOrd for Array {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        for index in 0..self.len_usize().max(other.len_usize()) {
+            let ordering = self.get_usize(index).partial_cmp(other.get_usize(index));
+
+            if ordering != Some(Ordering::Equal) {
+                return ordering;
+            }
+        }
+
+        Some(Ordering::Equal)
+    }
+}
+
 impl Clone for Array {
     fn clone(&self) -> Self {
         if !self.is_nil() {
@@ -352,6 +367,24 @@ mod tests {
         assert_ne!(
             Array::new(0).set(0.0.into(), 42.0.into()),
             Array::new(0).set(1.0.into(), 42.0.into())
+        );
+    }
+
+    #[test]
+    fn ord() {
+        assert!(Array::from([]) < Array::from([1.0.into()]));
+        assert!(Array::from([]) <= Array::from([]));
+        assert!(Array::from([]) <= Array::from([1.0.into()]));
+        assert!(Array::from([1.0.into()]) <= Array::from([1.0.into()]));
+        assert!(Array::from([1.0.into()]) < Array::from([1.0.into(), 2.0.into()]));
+        assert!(Array::from([1.0.into()]) <= Array::from([1.0.into(), 2.0.into()]));
+        assert_eq!(
+            Array::from(["foo".into()]).partial_cmp(&Array::from([1.0.into()])),
+            None
+        );
+        assert_eq!(
+            Array::from(["foo".into()]).partial_cmp(&Array::from([1.0.into()])),
+            None
         );
     }
 
