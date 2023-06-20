@@ -210,13 +210,15 @@ impl Eq for Array {}
 
 impl PartialOrd for Array {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.to_i32().partial_cmp(&other.to_i32())
-    }
-}
+        for index in 0..self.len_usize().max(other.len_usize()) {
+            let ordering = self.get_usize(index).partial_cmp(&other.get_usize(index));
 
-impl Ord for Array {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.to_i32().cmp(&other.to_i32())
+            if ordering != Some(Ordering::Equal) {
+                return ordering;
+            }
+        }
+
+        Some(Ordering::Equal)
     }
 }
 
