@@ -18,6 +18,9 @@ pub enum Instruction {
     Set,
     Length,
     Equal,
+    LessThan,
+    And,
+    Or,
 
     // Constant
     Nil,
