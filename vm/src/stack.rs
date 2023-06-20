@@ -3,19 +3,17 @@ use std::ptr::{read, write};
 
 #[derive(Debug)]
 pub struct Stack {
-    values: Box<[Value]>,
     base: *mut Value,
     pointer: *mut Value,
 }
 
 impl Stack {
     pub fn new() -> Self {
-        let mut values: Box<[Value]> = vec![NIL; 1 << 20].into();
+        let values = Box::<[Value]>::leak(vec![NIL; 1 << 20].into());
 
         Self {
             base: &mut values[0],
             pointer: &mut values[0],
-            values,
         }
     }
 
