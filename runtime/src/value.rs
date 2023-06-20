@@ -78,7 +78,7 @@ impl Value {
     }
 
     #[inline]
-    pub fn into_float64(&self) -> Option<Float64> {
+    pub fn into_float64(self) -> Option<Float64> {
         self.try_into().ok()
     }
 
