@@ -11,8 +11,8 @@ use std::str;
 macro_rules! binary_operation {
     ($self:expr, $operator:tt) => {
         let value = (|| {
-            let rhs = $self.stack.pop().to_float64()?;
-            let lhs = $self.stack.pop().to_float64()?;
+            let rhs = $self.stack.pop().into_float64()?;
+            let lhs = $self.stack.pop().into_float64()?;
 
             Some((lhs.to_f64() $operator rhs.to_f64()).into())
         })()
