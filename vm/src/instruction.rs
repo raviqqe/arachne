@@ -19,6 +19,7 @@ pub enum Instruction {
     Length,
     Equal,
     LessThan,
+    Not,
     And,
     Or,
 
