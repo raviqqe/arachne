@@ -1,8 +1,5 @@
 use super::Value;
-use core::{
-    cmp::Ordering,
-    fmt::{self, Display, Formatter},
-};
+use core::fmt::{self, Display, Formatter};
 use ordered_float::OrderedFloat;
 
 #[repr(transparent)]
@@ -24,13 +21,6 @@ impl PartialEq for Float64 {
 }
 
 impl Eq for Float64 {}
-
-impl Ord for Float64 {
-    #[inline]
-    fn cmp(&self, other: &Self) -> Ordering {
-        OrderedFloat::from(self.0).cmp(&OrderedFloat::from(other.0))
-    }
-}
 
 impl Display for Float64 {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {

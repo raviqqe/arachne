@@ -211,7 +211,7 @@ impl Eq for Array {}
 impl PartialOrd for Array {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         for index in 0..self.len_usize().max(other.len_usize()) {
-            let ordering = self.get_usize(index).partial_cmp(&other.get_usize(index));
+            let ordering = self.get_usize(index).partial_cmp(other.get_usize(index));
 
             if ordering != Some(Ordering::Equal) {
                 return ordering;
@@ -378,8 +378,14 @@ mod tests {
         assert!(Array::from([1.0.into()]) <= Array::from([1.0.into()]));
         assert!(Array::from([1.0.into()]) < Array::from([1.0.into(), 2.0.into()]));
         assert!(Array::from([1.0.into()]) <= Array::from([1.0.into(), 2.0.into()]));
-        assert!(!(Array::from(["foo".into()]) < Array::from([1.0.into()])));
-        assert!(!(Array::from(["foo".into()]) > Array::from([1.0.into()])));
+        assert_eq!(
+            Array::from(["foo".into()]).partial_cmp(&Array::from([1.0.into()])),
+            None
+        );
+        assert_eq!(
+            Array::from(["foo".into()]).partial_cmp(&Array::from([1.0.into()])),
+            None
+        );
     }
 
     mod set {

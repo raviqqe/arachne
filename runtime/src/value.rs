@@ -190,7 +190,7 @@ impl PartialOrd for Value {
                     .to_integer32()
                     .and_then(|other| one.partial_cmp(&other)),
                 TypedValueRef::Array(one) => {
-                    other.as_array().and_then(|other| one.partial_cmp(&other))
+                    other.as_array().and_then(|other| one.partial_cmp(other))
                 }
                 TypedValueRef::Symbol(one) => {
                     other.to_symbol().and_then(|other| one.partial_cmp(&other))
