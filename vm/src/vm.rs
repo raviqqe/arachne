@@ -119,78 +119,15 @@ impl Vm {
 
                     self.call(arity)
                 }
-                Instruction::TailCall => {
-                    let arity = self.read_u8(codes) as usize;
-
-                    let frame = self.frames.last().expect("frame");
-                    self.stack
-                        .truncate(frame.pointer() as usize, self.stack.len() - arity - 1);
-
-                    self.call(arity)
-                }
-                Instruction::Close => {
-                    let id = self.read_u32(codes);
-                    let arity = self.read_u8(codes);
-                    let environment_size = self.read_u8(codes);
-                    let mut closure = Closure::new(id, arity, environment_size);
-
-                    for index in (0..environment_size).rev() {
-                        let value = self.stack.pop();
-
-                        closure.write_environment(index as usize, value);
-                    }
-
-                    self.stack.push(closure.into());
-                }
-                Instruction::Environment => {
-                    let pointer = self.frames.last().expect("frame").pointer();
-                    let index = self.read_u8(codes) as usize;
-
-                    self.stack.push(
-                        self.stack
-                            .peek(self.stack.len() - pointer as usize)
-                            .as_closure()
-                            .expect("closure")
-                            .get_environment(index)
-                            .clone(),
-                    );
-                }
-                Instruction::Peek => {
-                    // TODO Move local variables when possible.
-                    let index = self.read_u8(codes);
-
-                    self.stack.push(self.stack.peek(index as usize).clone());
-                }
-                Instruction::Equal => {
-                    let rhs = self.stack.pop();
-                    let lhs = self.stack.pop();
-
-                    self.stack.push(((lhs == rhs) as usize as f64).into());
-                }
-                Instruction::LessThan => {
-                    let rhs = self.stack.pop();
-                    let lhs = self.stack.pop();
-
-                    self.stack.push(((lhs < rhs) as usize as f64).into());
-                }
-                Instruction::Not => {
-                    let value = self.stack.pop();
-
-                    self.stack
-                        .push(if value.is_nil() { 1.0.into() } else { NIL });
-                }
-                Instruction::And => {
-                    let rhs = self.stack.pop();
-                    let lhs = self.stack.pop();
-
-                    self.stack.push(if lhs.is_nil() { lhs } else { rhs });
-                }
-                Instruction::Or => {
-                    let rhs = self.stack.pop();
-                    let lhs = self.stack.pop();
-
-                    self.stack.push(if lhs.is_nil() { rhs } else { lhs });
-                }
+                Instruction::TailCall => self.tail_call(codes),
+                Instruction::Close => self.close(codes),
+                Instruction::Environment => self.environment(codes),
+                Instruction::Peek => self.peek(codes),
+                Instruction::Equal => self.equal(),
+                Instruction::LessThan => self.less_than(),
+                Instruction::Not => self.not(),
+                Instruction::And => self.and(),
+                Instruction::Or => self.or(),
                 Instruction::Jump => self.jump(codes),
                 Instruction::Branch => self.branch(codes),
                 Instruction::Return => self.r#return(),
@@ -200,6 +137,87 @@ impl Vm {
 
     fn nil(&mut self) {
         self.stack.push(NIL)
+    }
+
+    fn tail_call(&mut self, codes: &[u8]) {
+        let arity = self.read_u8(codes) as usize;
+
+        let frame = self.frames.last().expect("frame");
+        self.stack
+            .truncate(frame.pointer() as usize, self.stack.len() - arity - 1);
+
+        self.call(arity)
+    }
+
+    fn close(&mut self, codes: &[u8]) {
+        let id = self.read_u32(codes);
+        let arity = self.read_u8(codes);
+        let environment_size = self.read_u8(codes);
+        let mut closure = Closure::new(id, arity, environment_size);
+
+        for index in (0..environment_size).rev() {
+            let value = self.stack.pop();
+
+            closure.write_environment(index as usize, value);
+        }
+
+        self.stack.push(closure.into());
+    }
+
+    fn environment(&mut self, codes: &[u8]) {
+        let pointer = self.frames.last().expect("frame").pointer();
+        let index = self.read_u8(codes) as usize;
+
+        self.stack.push(
+            self.stack
+                .peek(self.stack.len() - pointer as usize)
+                .as_closure()
+                .expect("closure")
+                .get_environment(index)
+                .clone(),
+        );
+    }
+
+    fn peek(&mut self, codes: &[u8]) {
+        // TODO Move local variables when possible.
+        let index = self.read_u8(codes);
+
+        self.stack.push(self.stack.peek(index as usize).clone());
+    }
+
+    fn equal(&mut self) {
+        let rhs = self.stack.pop();
+        let lhs = self.stack.pop();
+
+        self.stack.push(((lhs == rhs) as usize as f64).into());
+    }
+
+    fn less_than(&mut self) {
+        let rhs = self.stack.pop();
+        let lhs = self.stack.pop();
+
+        self.stack.push(((lhs < rhs) as usize as f64).into());
+    }
+
+    fn not(&mut self) {
+        let value = self.stack.pop();
+
+        self.stack
+            .push(if value.is_nil() { 1.0.into() } else { NIL });
+    }
+
+    fn and(&mut self) {
+        let rhs = self.stack.pop();
+        let lhs = self.stack.pop();
+
+        self.stack.push(if lhs.is_nil() { lhs } else { rhs });
+    }
+
+    fn or(&mut self) {
+        let rhs = self.stack.pop();
+        let lhs = self.stack.pop();
+
+        self.stack.push(if lhs.is_nil() { rhs } else { lhs });
     }
 
     fn jump(&mut self, codes: &[u8]) {
