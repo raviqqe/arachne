@@ -41,7 +41,7 @@ impl Vm {
     pub fn run(&mut self, codes: &[u8]) {
         while self.program_counter < codes.len() {
             match Instruction::from_u8(self.read_u8(codes)).expect("valid instruction") {
-                Instruction::Nil => self.stack.push(NIL),
+                Instruction::Nil => self.nil(),
                 Instruction::Float64 => {
                     let value = self.read_f64(codes);
                     self.stack.push(value.into());
@@ -198,34 +198,38 @@ impl Vm {
                         .program_counter
                         .wrapping_add(address as i16 as isize as usize);
                 }
-                Instruction::Branch => {
-                    let address = self.read_u16(codes);
-                    let value = self.stack.pop();
-
-                    if value != NIL {
-                        self.program_counter = self
-                            .program_counter
-                            .wrapping_add(address as i16 as isize as usize);
-                    }
-                }
-                Instruction::Return => {
-                    let value = self.stack.pop();
-                    let frame = self.frames.pop().expect("frame");
-
-                    while self.stack.len() > frame.pointer() as usize {
-                        self.stack.pop();
-                    }
-
-                    self.program_counter = frame.return_address() as usize;
-
-                    self.stack.push(value);
-                }
+                Instruction::Branch => self.branch(codes),
+                Instruction::Return => self.r#return(),
             }
         }
     }
 
     fn nil(&mut self) {
         self.stack.push(NIL)
+    }
+
+    fn branch(&mut self, codes: &[u8]) {
+        let address = self.read_u16(codes);
+        let value = self.stack.pop();
+
+        if value != NIL {
+            self.program_counter = self
+                .program_counter
+                .wrapping_add(address as i16 as isize as usize);
+        }
+    }
+
+    fn r#return(&mut self) {
+        let value = self.stack.pop();
+        let frame = self.frames.pop().expect("frame");
+
+        while self.stack.len() > frame.pointer() as usize {
+            self.stack.pop();
+        }
+
+        self.program_counter = frame.return_address() as usize;
+
+        self.stack.push(value);
     }
 
     #[inline(always)]
