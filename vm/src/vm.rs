@@ -191,13 +191,7 @@ impl Vm {
 
                     self.stack.push(if lhs.is_nil() { rhs } else { lhs });
                 }
-                Instruction::Jump => {
-                    let address = self.read_u16(codes);
-
-                    self.program_counter = self
-                        .program_counter
-                        .wrapping_add(address as i16 as isize as usize);
-                }
+                Instruction::Jump => self.jump(codes),
                 Instruction::Branch => self.branch(codes),
                 Instruction::Return => self.r#return(),
             }
@@ -206,6 +200,14 @@ impl Vm {
 
     fn nil(&mut self) {
         self.stack.push(NIL)
+    }
+
+    fn jump(&mut self, codes: &[u8]) {
+        let address = self.read_u16(codes);
+
+        self.program_counter = self
+            .program_counter
+            .wrapping_add(address as i16 as isize as usize);
     }
 
     fn branch(&mut self, codes: &[u8]) {
