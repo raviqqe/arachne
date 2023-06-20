@@ -221,7 +221,6 @@ impl Clone for Value {
 }
 
 impl Drop for Value {
-    #[inline]
     fn drop(&mut self) {
         match self.r#type() {
             Type::Array => unsafe {

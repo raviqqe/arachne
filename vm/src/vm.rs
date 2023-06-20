@@ -87,9 +87,7 @@ impl Vm {
 
                     self.stack.push(value);
                 }
-                Instruction::Add => {
-                    binary_operation!(self, +);
-                }
+                Instruction::Add => Self::add(self),
                 Instruction::Subtract => {
                     binary_operation!(self, -);
                 }
@@ -222,6 +220,11 @@ impl Vm {
                 }
             }
         }
+    }
+
+    #[inline(never)]
+    fn add(&mut self) {
+        binary_operation!(self, +);
     }
 
     #[inline(always)]
