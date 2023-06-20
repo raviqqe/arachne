@@ -109,16 +109,7 @@ impl Vm {
 
                     self.stack.push(value);
                 }
-                Instruction::Call => {
-                    let arity = self.read_u8(codes) as usize;
-
-                    self.frames.push(Frame::new(
-                        (self.stack.len() - arity - 1) as u32,
-                        self.program_counter as u32,
-                    ));
-
-                    self.call(arity)
-                }
+                Instruction::Call => self.call(codes),
                 Instruction::TailCall => self.tail_call(codes),
                 Instruction::Close => self.close(codes),
                 Instruction::Environment => self.environment(codes),
@@ -139,6 +130,17 @@ impl Vm {
         self.stack.push(NIL)
     }
 
+    fn call(&mut self, codes: &[u8]) {
+        let arity = self.read_u8(codes) as usize;
+
+        self.frames.push(Frame::new(
+            (self.stack.len() - arity - 1) as u32,
+            self.program_counter as u32,
+        ));
+
+        self.call_function(arity)
+    }
+
     fn tail_call(&mut self, codes: &[u8]) {
         let arity = self.read_u8(codes) as usize;
 
@@ -146,7 +148,7 @@ impl Vm {
         self.stack
             .truncate(frame.pointer() as usize, self.stack.len() - arity - 1);
 
-        self.call(arity)
+        self.call_function(arity)
     }
 
     fn close(&mut self, codes: &[u8]) {
@@ -253,7 +255,7 @@ impl Vm {
     }
 
     #[inline(always)]
-    fn call(&mut self, arity: usize) {
+    fn call_function(&mut self, arity: usize) {
         if let Some(closure) = self.stack.peek(arity).as_closure() {
             let id = closure.id();
             let closure_arity = closure.arity() as usize;
