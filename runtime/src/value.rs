@@ -183,15 +183,15 @@ impl PartialOrd for Value {
         if let Some(value) = self.as_typed() {
             match value {
                 TypedValueRef::Float64(one) => {
-                    other.to_float64().map(|other| one.partial_cmp(&other))
+                    other.to_float64().and_then(|other| one.partial_cmp(&other))
                 }
                 TypedValueRef::Closure(_) => None,
-                TypedValueRef::Integer32(one) => {
-                    other.to_integer32().map(|other| one.partial_cmp(&other))
-                }
+                TypedValueRef::Integer32(one) => other
+                    .to_integer32()
+                    .and_then(|other| one.partial_cmp(&other)),
                 TypedValueRef::Array(one) => other.as_array().map(|other| one.partial_cmp(&other)),
                 TypedValueRef::Symbol(one) => {
-                    other.to_symbol().map(|other| one.partial_cmp(&other))
+                    other.to_symbol().and_then(|other| one.partial_cmp(&other))
                 }
             }
         } else {

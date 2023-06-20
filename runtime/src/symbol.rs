@@ -2,6 +2,7 @@ use super::Value;
 use crate::value::SYMBOL_MASK;
 use alloc::{borrow::ToOwned, boxed::Box, string::String};
 use core::{
+    cmp::Ordering,
     fmt::{self, Debug, Display, Formatter},
     ops::Deref,
     pin::Pin,
@@ -28,6 +29,18 @@ impl Symbol {
 
     pub fn as_str(&self) -> &str {
         unsafe { &*((self.0 & !SYMBOL_MASK) as *const u8 as *const String) }
+    }
+}
+
+impl PartialOrd for Symbol {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.as_str().partial_cmp(other.as_str())
+    }
+}
+
+impl Ord for Symbol {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.as_str().cmp(other.as_str())
     }
 }
 
@@ -94,6 +107,11 @@ mod tests {
     fn eq() {
         assert_eq!(Symbol::from("foo"), Symbol::from("foo"));
         assert_ne!(Symbol::from("foo"), Symbol::from("bar"));
+    }
+
+    #[test]
+    fn ord() {
+        assert!(Symbol::from("bar") < Symbol::from("foo"));
     }
 
     #[test]
