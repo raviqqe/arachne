@@ -101,6 +101,16 @@ mod tests {
     }
 
     #[test]
+    fn ord() {
+        assert!(Integer32::from(0) < Integer32::from(1));
+        assert!(Integer32::from(0) <= Integer32::from(0));
+        assert!(Integer32::from(0) <= Integer32::from(1));
+        assert!(Integer32::from(1) > Integer32::from(0));
+        assert!(Integer32::from(1) >= Integer32::from(0));
+        assert!(Integer32::from(1) >= Integer32::from(0));
+    }
+
+    #[test]
     fn convert() {
         assert_eq!(Integer32::from(42).to_i32(), 42);
         assert_eq!(Integer32::from(-42).to_i32(), -42);
