@@ -216,7 +216,7 @@ impl Vm {
 
         self.call_function(arity);
 
-        dispatch!(self, codes)
+        // Do not dispatch to clear a stack.
     }
 
     fn close(&mut self, codes: &[u8]) {
@@ -266,18 +266,22 @@ impl Vm {
         dispatch!(self, codes)
     }
 
-    fn less_than(&mut self, _codes: &[u8]) {
+    fn less_than(&mut self, codes: &[u8]) {
         let rhs = self.stack.pop();
         let lhs = self.stack.pop();
 
         self.stack.push(((lhs < rhs) as usize as f64).into());
+
+        dispatch!(self, codes)
     }
 
-    fn not(&mut self, _codes: &[u8]) {
+    fn not(&mut self, codes: &[u8]) {
         let value = self.stack.pop();
 
         self.stack
             .push(if value.is_nil() { 1.0.into() } else { NIL });
+
+        dispatch!(self, codes)
     }
 
     fn and(&mut self, _codes: &[u8]) {
@@ -300,6 +304,8 @@ impl Vm {
         self.program_counter = self
             .program_counter
             .wrapping_add(address as i16 as isize as usize);
+
+        dispatch!(self, codes)
     }
 
     fn branch(&mut self, codes: &[u8]) {
@@ -311,6 +317,8 @@ impl Vm {
                 .program_counter
                 .wrapping_add(address as i16 as isize as usize);
         }
+
+        dispatch!(self, codes)
     }
 
     fn r#return(&mut self, _codes: &[u8]) {
@@ -324,6 +332,8 @@ impl Vm {
         self.program_counter = frame.return_address() as usize;
 
         self.stack.push(value);
+
+        // Do not dispatch to clear a stack.
     }
 
     #[inline(always)]
