@@ -180,8 +180,10 @@ impl Vm {
         binary_operation!(self, /);
     }
 
-    fn drop(&mut self, _codes: &[u8]) {
+    fn drop(&mut self, codes: &[u8]) {
         self.stack.pop();
+
+        dispatch!(self, codes)
     }
 
     fn dump(&mut self, _codes: &[u8]) {
@@ -200,7 +202,9 @@ impl Vm {
             self.program_counter as u32,
         ));
 
-        self.call_function(arity)
+        self.call_function(arity);
+
+        dispatch!(self, codes)
     }
 
     fn tail_call(&mut self, codes: &[u8]) {
@@ -210,7 +214,9 @@ impl Vm {
         self.stack
             .truncate(frame.pointer() as usize, self.stack.len() - arity - 1);
 
-        self.call_function(arity)
+        self.call_function(arity);
+
+        dispatch!(self, codes)
     }
 
     fn close(&mut self, codes: &[u8]) {
@@ -247,13 +253,17 @@ impl Vm {
         let index = self.read_u8(codes);
 
         self.stack.push(self.stack.peek(index as usize).clone());
+
+        dispatch!(self, codes)
     }
 
-    fn equal(&mut self, _codes: &[u8]) {
+    fn equal(&mut self, codes: &[u8]) {
         let rhs = self.stack.pop();
         let lhs = self.stack.pop();
 
         self.stack.push(((lhs == rhs) as usize as f64).into());
+
+        dispatch!(self, codes)
     }
 
     fn less_than(&mut self, _codes: &[u8]) {
