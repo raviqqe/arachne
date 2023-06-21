@@ -70,3 +70,38 @@ impl Default for Stack {
         Self::new()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn push_and_pop_scalars() {
+        let mut stack = Stack::new();
+        stack.push(1.0.into());
+        stack.push(2.0.into());
+
+        assert_eq!(stack.pop(), 2.0.into());
+        assert_eq!(stack.pop(), 1.0.into());
+    }
+
+    #[test]
+    fn push_and_pop_containers() {
+        let mut stack = Stack::new();
+        stack.push([1.0.into()].into());
+        stack.push([2.0.into()].into());
+
+        assert_eq!(stack.pop(), [2.0.into()].into());
+        assert_eq!(stack.pop(), [1.0.into()].into());
+    }
+
+    #[test]
+    fn peek() {
+        let mut stack = Stack::new();
+        stack.push(1.0.into());
+        stack.push(2.0.into());
+
+        assert_eq!(stack.peek(0), &2.0.into());
+        assert_eq!(stack.peek(1), &1.0.into());
+    }
+}
