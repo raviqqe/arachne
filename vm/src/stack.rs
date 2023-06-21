@@ -1,5 +1,5 @@
 use std::{
-    alloc::{alloc, Layout},
+    alloc::{alloc, dealloc, Layout},
     ptr::{copy, read, write},
 };
 
@@ -70,6 +70,12 @@ impl<T> Stack<T> {
     #[inline(always)]
     pub fn len(&self) -> usize {
         (unsafe { self.ptr.offset_from(self.base) }) as usize
+    }
+}
+
+impl<T> Drop for Stack<T> {
+    fn drop(&mut self) {
+        unsafe { dealloc(self.base as _, Layout::array::<T>(0).unwrap()) }
     }
 }
 
