@@ -154,14 +154,18 @@ impl Vm {
         self.stack.push(value);
     }
 
-    fn length(&mut self, _codes: &[u8]) {
+    fn length(&mut self, codes: &[u8]) {
         let value = (|| Some(self.stack.pop().into_array()?.len().into()))().unwrap_or(NIL);
 
         self.stack.push(value);
+
+        dispatch!(self, codes)
     }
 
-    fn add(&mut self, _codes: &[u8]) {
+    fn add(&mut self, codes: &[u8]) {
         binary_operation!(self, +);
+
+        dispatch!(self, codes)
     }
 
     fn subtract(&mut self, _codes: &[u8]) {
