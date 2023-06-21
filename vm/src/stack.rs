@@ -19,7 +19,7 @@ impl Stack {
         }
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn push(&mut self, value: Value) {
         if self.len() >= SIZE {
             panic!("stack overflow");
@@ -32,19 +32,19 @@ impl Stack {
         self.pointer = unsafe { self.pointer.add(1) };
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn pop(&mut self) -> Value {
         self.pointer = unsafe { self.pointer.sub(1) };
 
         unsafe { read(self.pointer) }
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn peek(&self, index: usize) -> &Value {
         unsafe { &*self.pointer.sub(index + 1) }
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn truncate(&mut self, start: usize, end: usize) {
         for index in start..end {
             unsafe { read(self.base.add(index)) };
@@ -59,7 +59,7 @@ impl Stack {
         };
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn len(&self) -> usize {
         (unsafe { self.pointer.offset_from(self.base) }) as usize
     }
