@@ -1,5 +1,5 @@
 use runtime::{Value, NIL};
-use std::ptr::{read, write};
+use std::ptr::{copy, read, write};
 
 #[derive(Debug)]
 pub struct Stack {
@@ -36,8 +36,16 @@ impl Stack {
     }
 
     pub fn truncate(&mut self, start: usize, end: usize) {
-        todo!();
-        // self.values.splice(start..end, []);
+        for index in start..end {
+            unsafe { read(self.base.add(index)) };
+        }
+
+        let count = self.len() - end;
+        unsafe {
+            copy(self.base.add(end), self.base.add(start), count);
+
+            self.pointer = self.base.add(start).add(count);
+        };
     }
 
     pub fn len(&self) -> usize {
