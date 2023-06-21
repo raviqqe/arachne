@@ -104,4 +104,14 @@ mod tests {
         assert_eq!(stack.peek(0), &2.0.into());
         assert_eq!(stack.peek(1), &1.0.into());
     }
+
+    #[test]
+    #[should_panic]
+    fn overflow() {
+        let mut stack = Stack::new();
+
+        for _ in 0..SIZE + 1 {
+            stack.push(NIL);
+        }
+    }
 }
