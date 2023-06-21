@@ -1,12 +1,11 @@
 use crate::{
     decode::{decode_bytes, decode_f64, decode_u16, decode_u32, decode_u8},
     frame::Frame,
-    frame_stack::FrameStack,
     stack::Stack,
     Instruction,
 };
 use num_traits::FromPrimitive;
-use runtime::{Closure, NIL};
+use runtime::{Closure, Value, NIL};
 use std::str;
 
 macro_rules! binary_operation {
@@ -23,19 +22,19 @@ macro_rules! binary_operation {
     };
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct Vm {
     program_counter: usize,
-    stack: Stack,
-    frames: FrameStack,
+    stack: Stack<Value>,
+    frames: Stack<Frame>,
 }
 
 impl Vm {
     pub fn new() -> Self {
         Self {
             program_counter: 0,
-            stack: Stack::new(),
-            frames: FrameStack::new(),
+            stack: Stack::new(1 << 11),
+            frames: Stack::new(1 << 8),
         }
     }
 
@@ -168,7 +167,7 @@ impl Vm {
     fn tail_call(&mut self, codes: &[u8]) {
         let arity = self.read_u8(codes) as usize;
 
-        let frame = self.frames.peek();
+        let frame = self.frames.top();
         self.stack
             .truncate(frame.pointer() as usize, self.stack.len() - arity - 1);
 
@@ -191,7 +190,7 @@ impl Vm {
     }
 
     fn environment(&mut self, codes: &[u8]) {
-        let pointer = self.frames.peek().pointer();
+        let pointer = self.frames.top().pointer();
         let index = self.read_u8(codes) as usize;
 
         self.stack.push(
