@@ -106,6 +106,30 @@ mod tests {
     }
 
     #[test]
+    fn truncate() {
+        let mut stack = Stack::new();
+        stack.push(1.0.into());
+        stack.push(2.0.into());
+
+        stack.truncate(0, 1);
+
+        assert_eq!(stack.pop(), 2.0.into());
+    }
+
+    #[test]
+    fn truncate_overlapping() {
+        let mut stack = Stack::new();
+        stack.push(1.0.into());
+        stack.push(2.0.into());
+        stack.push(3.0.into());
+
+        stack.truncate(0, 1);
+
+        assert_eq!(stack.pop(), 3.0.into());
+        assert_eq!(stack.pop(), 2.0.into());
+    }
+
+    #[test]
     #[should_panic]
     fn overflow() {
         let mut stack = Stack::new();
