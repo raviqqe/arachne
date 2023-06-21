@@ -1,6 +1,8 @@
 use runtime::{Value, NIL};
 use std::ptr::{copy, read, write};
 
+const SIZE: usize = 1 << 11;
+
 #[derive(Debug)]
 pub struct Stack {
     base: *mut Value,
@@ -9,7 +11,7 @@ pub struct Stack {
 
 impl Stack {
     pub fn new() -> Self {
-        let values = Box::<[Value]>::leak(vec![NIL; 1 << 20].into());
+        let values = Box::<[Value]>::leak(vec![NIL; SIZE].into());
 
         Self {
             base: &mut values[0],
@@ -18,6 +20,10 @@ impl Stack {
     }
 
     pub fn push(&mut self, value: Value) {
+        if self.len() >= SIZE {
+            panic!("stack overflow");
+        }
+
         unsafe {
             write(self.pointer, value);
         }
@@ -41,6 +47,7 @@ impl Stack {
         }
 
         let count = self.len() - end;
+
         unsafe {
             copy(self.base.add(end), self.base.add(start), count);
 
