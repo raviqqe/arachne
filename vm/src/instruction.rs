@@ -3,7 +3,7 @@ mod format;
 pub use format::{format_instructions, FormatError};
 
 #[repr(u8)]
-#[derive(Clone, Copy, Debug, num_derive::FromPrimitive)]
+#[derive(Clone, Copy, Debug)]
 pub enum Instruction {
     // Stack operation
     Drop,

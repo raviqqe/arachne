@@ -4,7 +4,6 @@ use crate::{
     stack::Stack,
     Instruction,
 };
-use num_traits::FromPrimitive;
 use runtime::{Closure, NIL};
 use std::str;
 
