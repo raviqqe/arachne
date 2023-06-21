@@ -41,191 +41,244 @@ impl Vm {
     pub fn run(&mut self, codes: &[u8]) {
         while self.program_counter < codes.len() {
             match Instruction::from_u8(self.read_u8(codes)).expect("valid instruction") {
-                Instruction::Nil => self.stack.push(NIL),
-                Instruction::Float64 => {
-                    let value = self.read_f64(codes);
-                    self.stack.push(value.into());
-                }
-                Instruction::Integer32 => {
-                    let value = self.read_u32(codes);
-                    self.stack.push(value.into());
-                }
-                Instruction::Symbol => {
-                    let len = self.read_u8(codes);
-                    let value = str::from_utf8(self.read_bytes(codes, len as usize))
-                        .unwrap()
-                        .into();
-
-                    self.stack.push(value);
-                }
-                Instruction::Get => {
-                    let value = (|| {
-                        let index = self.stack.pop();
-                        let array = self.stack.pop().into_array()?;
-
-                        Some(array.get(index).clone())
-                    })()
-                    .unwrap_or(NIL);
-
-                    self.stack.push(value);
-                }
-                Instruction::Set => {
-                    let value = (|| {
-                        let value = self.stack.pop();
-                        let index = self.stack.pop();
-                        let array = self.stack.pop().into_array()?;
-
-                        Some(array.set(index, value).into())
-                    })()
-                    .unwrap_or(NIL);
-
-                    self.stack.push(value);
-                }
-                Instruction::Length => {
-                    let value =
-                        (|| Some(self.stack.pop().into_array()?.len().into()))().unwrap_or(NIL);
-
-                    self.stack.push(value);
-                }
-                Instruction::Add => {
-                    binary_operation!(self, +);
-                }
-                Instruction::Subtract => {
-                    binary_operation!(self, -);
-                }
-                Instruction::Multiply => {
-                    binary_operation!(self, *);
-                }
-                Instruction::Divide => {
-                    binary_operation!(self, /);
-                }
-                Instruction::Drop => {
-                    self.stack.pop();
-                }
-                Instruction::Dump => {
-                    let value = self.stack.pop();
-
-                    println!("{}", value);
-
-                    self.stack.push(value);
-                }
-                Instruction::Call => {
-                    let arity = self.read_u8(codes) as usize;
-
-                    self.frames.push(Frame::new(
-                        (self.stack.len() - arity - 1) as u32,
-                        self.program_counter as u32,
-                    ));
-
-                    self.call(arity)
-                }
-                Instruction::TailCall => {
-                    let arity = self.read_u8(codes) as usize;
-
-                    let frame = self.frames.last().expect("frame");
-                    self.stack
-                        .truncate(frame.pointer() as usize, self.stack.len() - arity - 1);
-
-                    self.call(arity)
-                }
-                Instruction::Close => {
-                    let id = self.read_u32(codes);
-                    let arity = self.read_u8(codes);
-                    let environment_size = self.read_u8(codes);
-                    let mut closure = Closure::new(id, arity, environment_size);
-
-                    for index in (0..environment_size).rev() {
-                        let value = self.stack.pop();
-
-                        closure.write_environment(index as usize, value);
-                    }
-
-                    self.stack.push(closure.into());
-                }
-                Instruction::Environment => {
-                    let pointer = self.frames.last().expect("frame").pointer();
-                    let index = self.read_u8(codes) as usize;
-
-                    self.stack.push(
-                        self.stack
-                            .peek(self.stack.len() - pointer as usize)
-                            .as_closure()
-                            .expect("closure")
-                            .get_environment(index)
-                            .clone(),
-                    );
-                }
-                Instruction::Peek => {
-                    // TODO Move local variables when possible.
-                    let index = self.read_u8(codes);
-
-                    self.stack.push(self.stack.peek(index as usize).clone());
-                }
-                Instruction::Equal => {
-                    let rhs = self.stack.pop();
-                    let lhs = self.stack.pop();
-
-                    self.stack.push(((lhs == rhs) as usize as f64).into());
-                }
-                Instruction::LessThan => {
-                    let rhs = self.stack.pop();
-                    let lhs = self.stack.pop();
-
-                    self.stack.push(((lhs < rhs) as usize as f64).into());
-                }
-                Instruction::Not => {
-                    let value = self.stack.pop();
-
-                    self.stack
-                        .push(if value.is_nil() { 1.0.into() } else { NIL });
-                }
-                Instruction::And => {
-                    let rhs = self.stack.pop();
-                    let lhs = self.stack.pop();
-
-                    self.stack.push(if lhs.is_nil() { lhs } else { rhs });
-                }
-                Instruction::Or => {
-                    let rhs = self.stack.pop();
-                    let lhs = self.stack.pop();
-
-                    self.stack.push(if lhs.is_nil() { rhs } else { lhs });
-                }
-                Instruction::Jump => {
-                    let address = self.read_u16(codes);
-
-                    self.program_counter = self
-                        .program_counter
-                        .wrapping_add(address as i16 as isize as usize);
-                }
-                Instruction::Branch => {
-                    let address = self.read_u16(codes);
-                    let value = self.stack.pop();
-
-                    if value != NIL {
-                        self.program_counter = self
-                            .program_counter
-                            .wrapping_add(address as i16 as isize as usize);
-                    }
-                }
-                Instruction::Return => {
-                    let value = self.stack.pop();
-                    let frame = self.frames.pop().expect("frame");
-
-                    while self.stack.len() > frame.pointer() as usize {
-                        self.stack.pop();
-                    }
-
-                    self.program_counter = frame.return_address() as usize;
-
-                    self.stack.push(value);
-                }
+                Instruction::Nil => self.nil(),
+                Instruction::Float64 => self.float64(codes),
+                Instruction::Integer32 => self.integer32(codes),
+                Instruction::Symbol => self.symbol(codes),
+                Instruction::Get => self.get(),
+                Instruction::Set => self.set(),
+                Instruction::Length => self.length(),
+                Instruction::Add => self.add(),
+                Instruction::Subtract => self.subtract(),
+                Instruction::Multiply => self.multiply(),
+                Instruction::Divide => self.divide(),
+                Instruction::Drop => self.drop(),
+                Instruction::Dump => self.dump(),
+                Instruction::Call => self.call(codes),
+                Instruction::TailCall => self.tail_call(codes),
+                Instruction::Close => self.close(codes),
+                Instruction::Environment => self.environment(codes),
+                Instruction::Peek => self.peek(codes),
+                Instruction::Equal => self.equal(),
+                Instruction::LessThan => self.less_than(),
+                Instruction::Not => self.not(),
+                Instruction::And => self.and(),
+                Instruction::Or => self.or(),
+                Instruction::Jump => self.jump(codes),
+                Instruction::Branch => self.branch(codes),
+                Instruction::Return => self.r#return(),
             }
         }
     }
 
+    fn nil(&mut self) {
+        self.stack.push(NIL)
+    }
+
+    fn float64(&mut self, codes: &[u8]) {
+        let value = self.read_f64(codes);
+        self.stack.push(value.into());
+    }
+
+    fn integer32(&mut self, codes: &[u8]) {
+        let value = self.read_u32(codes);
+        self.stack.push(value.into());
+    }
+
+    fn symbol(&mut self, codes: &[u8]) {
+        let len = self.read_u8(codes);
+        let value = str::from_utf8(self.read_bytes(codes, len as usize))
+            .unwrap()
+            .into();
+
+        self.stack.push(value);
+    }
+
+    fn get(&mut self) {
+        let value = (|| {
+            let index = self.stack.pop();
+            let array = self.stack.pop().into_array()?;
+
+            Some(array.get(index).clone())
+        })()
+        .unwrap_or(NIL);
+
+        self.stack.push(value);
+    }
+
+    fn set(&mut self) {
+        let value = (|| {
+            let value = self.stack.pop();
+            let index = self.stack.pop();
+            let array = self.stack.pop().into_array()?;
+
+            Some(array.set(index, value).into())
+        })()
+        .unwrap_or(NIL);
+
+        self.stack.push(value);
+    }
+
+    fn length(&mut self) {
+        let value = (|| Some(self.stack.pop().into_array()?.len().into()))().unwrap_or(NIL);
+
+        self.stack.push(value);
+    }
+
+    fn add(&mut self) {
+        binary_operation!(self, +);
+    }
+
+    fn subtract(&mut self) {
+        binary_operation!(self, -);
+    }
+
+    fn multiply(&mut self) {
+        binary_operation!(self, *);
+    }
+
+    fn divide(&mut self) {
+        binary_operation!(self, /);
+    }
+
+    fn drop(&mut self) {
+        self.stack.pop();
+    }
+
+    fn dump(&mut self) {
+        let value = self.stack.pop();
+
+        println!("{}", value);
+
+        self.stack.push(value);
+    }
+
+    fn call(&mut self, codes: &[u8]) {
+        let arity = self.read_u8(codes) as usize;
+
+        self.frames.push(Frame::new(
+            (self.stack.len() - arity - 1) as u32,
+            self.program_counter as u32,
+        ));
+
+        self.call_function(arity)
+    }
+
+    fn tail_call(&mut self, codes: &[u8]) {
+        let arity = self.read_u8(codes) as usize;
+
+        let frame = self.frames.last().expect("frame");
+        self.stack
+            .truncate(frame.pointer() as usize, self.stack.len() - arity - 1);
+
+        self.call_function(arity)
+    }
+
+    fn close(&mut self, codes: &[u8]) {
+        let id = self.read_u32(codes);
+        let arity = self.read_u8(codes);
+        let environment_size = self.read_u8(codes);
+        let mut closure = Closure::new(id, arity, environment_size);
+
+        for index in (0..environment_size).rev() {
+            let value = self.stack.pop();
+
+            closure.write_environment(index as usize, value);
+        }
+
+        self.stack.push(closure.into());
+    }
+
+    fn environment(&mut self, codes: &[u8]) {
+        let pointer = self.frames.last().expect("frame").pointer();
+        let index = self.read_u8(codes) as usize;
+
+        self.stack.push(
+            self.stack
+                .peek(self.stack.len() - pointer as usize)
+                .as_closure()
+                .expect("closure")
+                .get_environment(index)
+                .clone(),
+        );
+    }
+
+    fn peek(&mut self, codes: &[u8]) {
+        // TODO Move local variables when possible.
+        let index = self.read_u8(codes);
+
+        self.stack.push(self.stack.peek(index as usize).clone());
+    }
+
+    fn equal(&mut self) {
+        let rhs = self.stack.pop();
+        let lhs = self.stack.pop();
+
+        self.stack.push(((lhs == rhs) as usize as f64).into());
+    }
+
+    fn less_than(&mut self) {
+        let rhs = self.stack.pop();
+        let lhs = self.stack.pop();
+
+        self.stack.push(((lhs < rhs) as usize as f64).into());
+    }
+
+    fn not(&mut self) {
+        let value = self.stack.pop();
+
+        self.stack
+            .push(if value.is_nil() { 1.0.into() } else { NIL });
+    }
+
+    fn and(&mut self) {
+        let rhs = self.stack.pop();
+        let lhs = self.stack.pop();
+
+        self.stack.push(if lhs.is_nil() { lhs } else { rhs });
+    }
+
+    fn or(&mut self) {
+        let rhs = self.stack.pop();
+        let lhs = self.stack.pop();
+
+        self.stack.push(if lhs.is_nil() { rhs } else { lhs });
+    }
+
+    fn jump(&mut self, codes: &[u8]) {
+        let address = self.read_u16(codes);
+
+        self.program_counter = self
+            .program_counter
+            .wrapping_add(address as i16 as isize as usize);
+    }
+
+    fn branch(&mut self, codes: &[u8]) {
+        let address = self.read_u16(codes);
+        let value = self.stack.pop();
+
+        if value != NIL {
+            self.program_counter = self
+                .program_counter
+                .wrapping_add(address as i16 as isize as usize);
+        }
+    }
+
+    fn r#return(&mut self) {
+        let value = self.stack.pop();
+        let frame = self.frames.pop().expect("frame");
+
+        while self.stack.len() > frame.pointer() as usize {
+            self.stack.pop();
+        }
+
+        self.program_counter = frame.return_address() as usize;
+
+        self.stack.push(value);
+    }
+
     #[inline(always)]
-    fn call(&mut self, arity: usize) {
+    fn call_function(&mut self, arity: usize) {
         if let Some(closure) = self.stack.peek(arity).as_closure() {
             let id = closure.id();
             let closure_arity = closure.arity() as usize;
