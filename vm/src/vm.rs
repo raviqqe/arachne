@@ -326,3 +326,9 @@ impl Vm {
         decode_bytes(codes, len, &mut self.program_counter)
     }
 }
+
+impl Default for Vm {
+    fn default() -> Self {
+        Self::new()
+    }
+}
