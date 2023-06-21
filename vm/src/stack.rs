@@ -11,6 +11,7 @@ pub struct Stack<T> {
 }
 
 impl<T> Stack<T> {
+    #[inline(always)]
     pub fn new(capacity: usize) -> Self {
         let ptr = unsafe { alloc(Layout::array::<T>(capacity).unwrap()) } as *mut T;
 
