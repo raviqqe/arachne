@@ -71,10 +71,12 @@ impl Vm {
         }
     }
 
+    #[inline(never)]
     fn nil(&mut self) {
         self.stack.push(NIL)
     }
 
+    #[inline(never)]
     fn float64(&mut self, codes: &[u8]) {
         let value = self.read_f64(codes);
         self.stack.push(value.into());
