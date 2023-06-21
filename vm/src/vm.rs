@@ -108,8 +108,10 @@ impl Vm {
         }
     }
 
-    fn nil(&mut self, _codes: &[u8]) {
-        self.stack.push(NIL)
+    fn nil(&mut self, codes: &[u8]) {
+        self.stack.push(NIL);
+
+        dispatch!(self, codes)
     }
 
     fn float64(&mut self, codes: &[u8]) {
