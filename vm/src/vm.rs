@@ -22,6 +22,39 @@ macro_rules! binary_operation {
     };
 }
 
+macro_rules! dispatch {
+    ($self:expr, $codes:expr) => {
+        (match Instruction::from_u8($self.read_u8($codes)).expect("valid instruction") {
+            Instruction::Nil => Self::nil,
+            Instruction::Float64 => Self::float64,
+            Instruction::Integer32 => Self::integer32,
+            Instruction::Symbol => Self::symbol,
+            Instruction::Get => Self::get,
+            Instruction::Set => Self::set,
+            Instruction::Length => Self::length,
+            Instruction::Add => Self::add,
+            Instruction::Subtract => Self::subtract,
+            Instruction::Multiply => Self::multiply,
+            Instruction::Divide => Self::divide,
+            Instruction::Drop => Self::drop,
+            Instruction::Dump => Self::dump,
+            Instruction::Call => Self::call,
+            Instruction::TailCall => Self::tail_call,
+            Instruction::Close => Self::close,
+            Instruction::Environment => Self::environment,
+            Instruction::Peek => Self::peek,
+            Instruction::Equal => Self::equal,
+            Instruction::LessThan => Self::less_than,
+            Instruction::Not => Self::not,
+            Instruction::And => Self::and,
+            Instruction::Or => Self::or,
+            Instruction::Jump => Self::jump,
+            Instruction::Branch => Self::branch,
+            Instruction::Return => Self::r#return,
+        })($self, $codes);
+    };
+}
+
 #[derive(Debug, Default)]
 pub struct Vm {
     program_counter: usize,
@@ -40,38 +73,38 @@ impl Vm {
 
     pub fn run(&mut self, codes: &[u8]) {
         while self.program_counter < codes.len() {
-            match Instruction::from_u8(self.read_u8(codes)).expect("valid instruction") {
-                Instruction::Nil => self.nil(),
-                Instruction::Float64 => self.float64(codes),
-                Instruction::Integer32 => self.integer32(codes),
-                Instruction::Symbol => self.symbol(codes),
-                Instruction::Get => self.get(),
-                Instruction::Set => self.set(),
-                Instruction::Length => self.length(),
-                Instruction::Add => self.add(),
-                Instruction::Subtract => self.subtract(),
-                Instruction::Multiply => self.multiply(),
-                Instruction::Divide => self.divide(),
-                Instruction::Drop => self.drop(),
-                Instruction::Dump => self.dump(),
-                Instruction::Call => self.call(codes),
-                Instruction::TailCall => self.tail_call(codes),
-                Instruction::Close => self.close(codes),
-                Instruction::Environment => self.environment(codes),
-                Instruction::Peek => self.peek(codes),
-                Instruction::Equal => self.equal(),
-                Instruction::LessThan => self.less_than(),
-                Instruction::Not => self.not(),
-                Instruction::And => self.and(),
-                Instruction::Or => self.or(),
-                Instruction::Jump => self.jump(codes),
-                Instruction::Branch => self.branch(codes),
-                Instruction::Return => self.r#return(),
-            }
+            (match Instruction::from_u8(self.read_u8(codes)).expect("valid instruction") {
+                Instruction::Nil => Self::nil,
+                Instruction::Float64 => Self::float64,
+                Instruction::Integer32 => Self::integer32,
+                Instruction::Symbol => Self::symbol,
+                Instruction::Get => Self::get,
+                Instruction::Set => Self::set,
+                Instruction::Length => Self::length,
+                Instruction::Add => Self::add,
+                Instruction::Subtract => Self::subtract,
+                Instruction::Multiply => Self::multiply,
+                Instruction::Divide => Self::divide,
+                Instruction::Drop => Self::drop,
+                Instruction::Dump => Self::dump,
+                Instruction::Call => Self::call,
+                Instruction::TailCall => Self::tail_call,
+                Instruction::Close => Self::close,
+                Instruction::Environment => Self::environment,
+                Instruction::Peek => Self::peek,
+                Instruction::Equal => Self::equal,
+                Instruction::LessThan => Self::less_than,
+                Instruction::Not => Self::not,
+                Instruction::And => Self::and,
+                Instruction::Or => Self::or,
+                Instruction::Jump => Self::jump,
+                Instruction::Branch => Self::branch,
+                Instruction::Return => Self::r#return,
+            })(self, codes)
         }
     }
 
-    fn nil(&mut self) {
+    fn nil(&mut self, _codes: &[u8]) {
         self.stack.push(NIL)
     }
 
@@ -94,7 +127,7 @@ impl Vm {
         self.stack.push(value);
     }
 
-    fn get(&mut self) {
+    fn get(&mut self, _codes: &[u8]) {
         let value = (|| {
             let index = self.stack.pop();
             let array = self.stack.pop().into_array()?;
@@ -106,7 +139,7 @@ impl Vm {
         self.stack.push(value);
     }
 
-    fn set(&mut self) {
+    fn set(&mut self, _codes: &[u8]) {
         let value = (|| {
             let value = self.stack.pop();
             let index = self.stack.pop();
@@ -119,33 +152,33 @@ impl Vm {
         self.stack.push(value);
     }
 
-    fn length(&mut self) {
+    fn length(&mut self, _codes: &[u8]) {
         let value = (|| Some(self.stack.pop().into_array()?.len().into()))().unwrap_or(NIL);
 
         self.stack.push(value);
     }
 
-    fn add(&mut self) {
+    fn add(&mut self, _codes: &[u8]) {
         binary_operation!(self, +);
     }
 
-    fn subtract(&mut self) {
+    fn subtract(&mut self, _codes: &[u8]) {
         binary_operation!(self, -);
     }
 
-    fn multiply(&mut self) {
+    fn multiply(&mut self, _codes: &[u8]) {
         binary_operation!(self, *);
     }
 
-    fn divide(&mut self) {
+    fn divide(&mut self, _codes: &[u8]) {
         binary_operation!(self, /);
     }
 
-    fn drop(&mut self) {
+    fn drop(&mut self, _codes: &[u8]) {
         self.stack.pop();
     }
 
-    fn dump(&mut self) {
+    fn dump(&mut self, _codes: &[u8]) {
         let value = self.stack.pop();
 
         println!("{}", value);
@@ -210,35 +243,35 @@ impl Vm {
         self.stack.push(self.stack.peek(index as usize).clone());
     }
 
-    fn equal(&mut self) {
+    fn equal(&mut self, _codes: &[u8]) {
         let rhs = self.stack.pop();
         let lhs = self.stack.pop();
 
         self.stack.push(((lhs == rhs) as usize as f64).into());
     }
 
-    fn less_than(&mut self) {
+    fn less_than(&mut self, _codes: &[u8]) {
         let rhs = self.stack.pop();
         let lhs = self.stack.pop();
 
         self.stack.push(((lhs < rhs) as usize as f64).into());
     }
 
-    fn not(&mut self) {
+    fn not(&mut self, _codes: &[u8]) {
         let value = self.stack.pop();
 
         self.stack
             .push(if value.is_nil() { 1.0.into() } else { NIL });
     }
 
-    fn and(&mut self) {
+    fn and(&mut self, _codes: &[u8]) {
         let rhs = self.stack.pop();
         let lhs = self.stack.pop();
 
         self.stack.push(if lhs.is_nil() { lhs } else { rhs });
     }
 
-    fn or(&mut self) {
+    fn or(&mut self, _codes: &[u8]) {
         let rhs = self.stack.pop();
         let lhs = self.stack.pop();
 
@@ -264,7 +297,7 @@ impl Vm {
         }
     }
 
-    fn r#return(&mut self) {
+    fn r#return(&mut self, _codes: &[u8]) {
         let value = self.stack.pop();
         let frame = self.frames.pop().expect("frame");
 
