@@ -14,5 +14,5 @@ jobs:
         with:
           python-version: "3.11"
       - uses: Homebrew/actions/setup-homebrew@master
-      - run: brew install chicken
+      - run: brew install chezscheme
       - run: tools/bench.sh
