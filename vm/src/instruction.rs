@@ -5,41 +5,30 @@ pub use format::{format_instructions, FormatError};
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, num_derive::FromPrimitive)]
 pub enum Instruction {
-    // Stack operation
-    Drop,
-    Peek,
-
-    // Computation
     Add,
-    Subtract,
-    Multiply,
-    Divide,
-    Get,
-    Set,
-    Length,
-    Equal,
-    LessThan,
-    Not,
     And,
-    Or,
-
-    // Constant
-    Nil,
-    Float64,
-    Integer32,
-    Symbol,
-
-    // Closure
-    Close,
-    Environment,
-
-    // Control
-    Call,
-    TailCall,
-    Return,
-    Jump,
     Branch,
-
-    // Debug
+    Call,
+    Close,
+    Divide,
+    Drop,
     Dump,
+    Environment,
+    Equal,
+    Float64,
+    Get,
+    Integer32,
+    Jump,
+    Length,
+    LessThan,
+    Multiply,
+    Nil,
+    Not,
+    Or,
+    Peek,
+    Return,
+    Set,
+    Subtract,
+    Symbol,
+    TailCall,
 }

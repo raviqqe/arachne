@@ -2,9 +2,7 @@ use crate::{
     decode::{decode_bytes, decode_f64, decode_u16, decode_u32, decode_u8},
     frame::Frame,
     stack::Stack,
-    Instruction,
 };
-use num_traits::FromPrimitive;
 use runtime::{Closure, NIL};
 use std::str;
 
@@ -28,36 +26,38 @@ macro_rules! dispatch {
             return;
         }
 
-        return (match Instruction::from_u8($self.read_u8($codes)).expect("valid instruction") {
-            Instruction::Nil => Self::nil,
-            Instruction::Float64 => Self::float64,
-            Instruction::Integer32 => Self::integer32,
-            Instruction::Symbol => Self::symbol,
-            Instruction::Get => Self::get,
-            Instruction::Set => Self::set,
-            Instruction::Length => Self::length,
-            Instruction::Add => Self::add,
-            Instruction::Subtract => Self::subtract,
-            Instruction::Multiply => Self::multiply,
-            Instruction::Divide => Self::divide,
-            Instruction::Drop => Self::drop,
-            Instruction::Dump => Self::dump,
-            Instruction::Call => Self::call,
-            Instruction::TailCall => Self::tail_call,
-            Instruction::Close => Self::close,
-            Instruction::Environment => Self::environment,
-            Instruction::Peek => Self::peek,
-            Instruction::Equal => Self::equal,
-            Instruction::LessThan => Self::less_than,
-            Instruction::Not => Self::not,
-            Instruction::And => Self::and,
-            Instruction::Or => Self::or,
-            Instruction::Jump => Self::jump,
-            Instruction::Branch => Self::branch,
-            Instruction::Return => Self::r#return,
-        })($self, $codes);
+        INSTRUCTION_FUNCTIONS[$self.read_u8($codes) as usize]($self, $codes);
     }};
 }
+
+const INSTRUCTION_FUNCTIONS: &[fn(&mut Vm, &[u8])] = &[
+    Vm::add,
+    Vm::and,
+    Vm::branch,
+    Vm::call,
+    Vm::close,
+    Vm::divide,
+    Vm::drop,
+    Vm::dump,
+    Vm::environment,
+    Vm::equal,
+    Vm::float64,
+    Vm::get,
+    Vm::integer32,
+    Vm::jump,
+    Vm::length,
+    Vm::less_than,
+    Vm::multiply,
+    Vm::nil,
+    Vm::not,
+    Vm::or,
+    Vm::peek,
+    Vm::r#return,
+    Vm::set,
+    Vm::subtract,
+    Vm::symbol,
+    Vm::tail_call,
+];
 
 #[derive(Debug, Default)]
 pub struct Vm {
