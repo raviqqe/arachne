@@ -1,6 +1,7 @@
 use crate::{
     decode::{decode_bytes, decode_f64, decode_u16, decode_u32, decode_u8},
     frame::Frame,
+    frame_stack::FrameStack,
     stack::Stack,
     Instruction,
 };
@@ -26,7 +27,7 @@ macro_rules! binary_operation {
 pub struct Vm {
     program_counter: usize,
     stack: Stack,
-    frames: Vec<Frame>,
+    frames: FrameStack,
 }
 
 impl Vm {
@@ -34,7 +35,7 @@ impl Vm {
         Self {
             program_counter: 0,
             stack: Stack::new(),
-            frames: Default::default(),
+            frames: FrameStack::new(),
         }
     }
 
@@ -167,7 +168,7 @@ impl Vm {
     fn tail_call(&mut self, codes: &[u8]) {
         let arity = self.read_u8(codes) as usize;
 
-        let frame = self.frames.last().expect("frame");
+        let frame = self.frames.peek();
         self.stack
             .truncate(frame.pointer() as usize, self.stack.len() - arity - 1);
 
@@ -190,7 +191,7 @@ impl Vm {
     }
 
     fn environment(&mut self, codes: &[u8]) {
-        let pointer = self.frames.last().expect("frame").pointer();
+        let pointer = self.frames.peek().pointer();
         let index = self.read_u8(codes) as usize;
 
         self.stack.push(
@@ -266,7 +267,7 @@ impl Vm {
 
     fn r#return(&mut self) {
         let value = self.stack.pop();
-        let frame = self.frames.pop().expect("frame");
+        let frame = self.frames.pop();
 
         while self.stack.len() > frame.pointer() as usize {
             self.stack.pop();

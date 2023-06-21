@@ -1,45 +1,52 @@
-use runtime::{Value, NIL};
+use crate::frame::Frame;
 use std::ptr::{read, write};
 
 const SIZE: usize = 1 << 8;
 
 #[derive(Debug)]
 pub struct FrameStack {
-    pointer: *mut Value,
+    base: *mut Frame,
+    pointer: *mut Frame,
 }
 
 impl FrameStack {
     pub fn new() -> Self {
-        let values = Box::<[Value]>::leak(vec![NIL; SIZE].into());
+        let values = Box::<[Frame]>::leak(vec![Frame::new(0, 0); SIZE].into());
 
         Self {
+            base: &mut values[0],
             pointer: &mut values[0],
         }
     }
 
     #[inline(always)]
-    pub fn push(&mut self, value: Value) {
+    pub fn push(&mut self, frame: Frame) {
         if self.len() >= SIZE {
             panic!("stack overflow");
         }
 
         unsafe {
-            write(self.pointer, value);
+            write(self.pointer, frame);
         }
 
         self.pointer = unsafe { self.pointer.add(1) };
     }
 
     #[inline(always)]
-    pub fn pop(&mut self) -> Value {
+    pub fn pop(&mut self) -> Frame {
         self.pointer = unsafe { self.pointer.sub(1) };
 
         unsafe { read(self.pointer) }
     }
 
     #[inline(always)]
-    pub fn peek(&self) -> &Value {
-        unsafe { &*self.pointer.sub(index + 1) }
+    pub fn peek(&self) -> &Frame {
+        unsafe { &*self.pointer.sub(1) }
+    }
+
+    #[inline(always)]
+    pub fn len(&self) -> usize {
+        (unsafe { self.pointer.offset_from(self.base) }) as usize
     }
 }
 
