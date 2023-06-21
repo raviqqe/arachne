@@ -1,11 +1,11 @@
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Frame {
     pointer: u32,
     return_address: u32,
 }
 
 impl Frame {
-    pub fn new(pointer: u32, return_address: u32) -> Self {
+    pub const fn new(pointer: u32, return_address: u32) -> Self {
         Self {
             pointer,
             return_address,

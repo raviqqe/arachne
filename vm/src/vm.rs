@@ -4,7 +4,7 @@ use crate::{
     stack::Stack,
     Instruction,
 };
-use runtime::{Closure, NIL};
+use runtime::{Closure, Value, NIL};
 use std::str;
 
 macro_rules! binary_operation {
@@ -21,19 +21,19 @@ macro_rules! binary_operation {
     };
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct Vm {
     program_counter: usize,
-    stack: Stack,
-    frames: Vec<Frame>,
+    stack: Stack<Value>,
+    frames: Stack<Frame>,
 }
 
 impl Vm {
     pub fn new() -> Self {
         Self {
             program_counter: 0,
-            stack: Stack::new(),
-            frames: Default::default(),
+            stack: Stack::new(1 << 11),
+            frames: Stack::new(1 << 8),
         }
     }
 
@@ -167,7 +167,7 @@ impl Vm {
     fn tail_call(&mut self, codes: &[u8]) {
         let arity = self.read_u8(codes) as usize;
 
-        let frame = self.frames.last().expect("frame");
+        let frame = self.frames.top();
         self.stack
             .truncate(frame.pointer() as usize, self.stack.len() - arity - 1);
 
@@ -190,7 +190,7 @@ impl Vm {
     }
 
     fn environment(&mut self, codes: &[u8]) {
-        let pointer = self.frames.last().expect("frame").pointer();
+        let pointer = self.frames.top().pointer();
         let index = self.read_u8(codes) as usize;
 
         self.stack.push(
@@ -266,7 +266,7 @@ impl Vm {
 
     fn r#return(&mut self) {
         let value = self.stack.pop();
-        let frame = self.frames.pop().expect("frame");
+        let frame = self.frames.pop();
 
         while self.stack.len() > frame.pointer() as usize {
             self.stack.pop();
@@ -324,5 +324,11 @@ impl Vm {
     #[inline(always)]
     fn read_bytes<'a>(&mut self, codes: &'a [u8], len: usize) -> &'a [u8] {
         decode_bytes(codes, len, &mut self.program_counter)
+    }
+}
+
+impl Default for Vm {
+    fn default() -> Self {
+        Self::new()
     }
 }
