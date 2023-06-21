@@ -39,8 +39,8 @@ impl Vm {
     }
 
     pub fn run(&mut self, codes: &[u8]) {
-        while self.program_counter < codes.len() {
-            match Instruction::from_u8(self.read_u8(codes)).expect("valid instruction") {
+        while let Some(instruction) = self.read_u8(codes) {
+            match Instruction::from_u8(instruction).expect("valid instruction") {
                 Instruction::Nil => self.nil(),
                 Instruction::Float64 => self.float64(codes),
                 Instruction::Integer32 => self.integer32(codes),
