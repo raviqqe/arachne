@@ -4,4 +4,4 @@
     [(= x 1) 1]
     [else (+ (fibonacci (- x 1)) (fibonacci (- x 2)))]))
 
-(print (fibonacci 40))
+(display (fibonacci 40))
