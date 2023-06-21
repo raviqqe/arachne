@@ -24,7 +24,7 @@ macro_rules! binary_operation {
 
 macro_rules! dispatch {
     ($self:expr, $codes:expr) => {
-        (match Instruction::from_u8($self.read_u8($codes)).expect("valid instruction") {
+        return (match Instruction::from_u8($self.read_u8($codes)).expect("valid instruction") {
             Instruction::Nil => Self::nil,
             Instruction::Float64 => Self::float64,
             Instruction::Integer32 => Self::integer32,
@@ -51,7 +51,7 @@ macro_rules! dispatch {
             Instruction::Jump => Self::jump,
             Instruction::Branch => Self::branch,
             Instruction::Return => Self::r#return,
-        })($self, $codes);
+        })($self, $codes)
     };
 }
 
@@ -111,6 +111,8 @@ impl Vm {
     fn float64(&mut self, codes: &[u8]) {
         let value = self.read_f64(codes);
         self.stack.push(value.into());
+
+        dispatch!(self, codes)
     }
 
     fn integer32(&mut self, codes: &[u8]) {
