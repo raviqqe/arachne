@@ -4,27 +4,22 @@ use std::{
 };
 
 #[derive(Debug)]
-pub struct Stack<T> {
+pub struct Stack<T, const N: usize> {
     base: *mut T,
     ptr: *mut T,
-    capacity: usize,
 }
 
-impl<T> Stack<T> {
+impl<T, const N: usize> Stack<T, N> {
     #[inline(always)]
-    pub fn new(capacity: usize) -> Self {
-        let ptr = unsafe { alloc(Layout::array::<T>(capacity).unwrap()) } as *mut T;
+    pub fn new() -> Self {
+        let ptr = unsafe { alloc(Layout::array::<T>(N).unwrap()) } as *mut T;
 
-        Self {
-            base: ptr,
-            ptr,
-            capacity,
-        }
+        Self { base: ptr, ptr }
     }
 
     #[inline(always)]
     pub fn push(&mut self, value: T) {
-        if self.len() >= self.capacity {
+        if self.len() >= N {
             panic!("stack overflow");
         }
 
@@ -73,7 +68,7 @@ impl<T> Stack<T> {
     }
 }
 
-impl<T> Drop for Stack<T> {
+impl<T, const N: usize> Drop for Stack<T, N> {
     fn drop(&mut self) {
         unsafe { dealloc(self.base as _, Layout::array::<T>(0).unwrap()) }
     }
@@ -83,8 +78,8 @@ impl<T> Drop for Stack<T> {
 mod tests {
     use super::*;
 
-    fn create_stack<T>() -> Stack<T> {
-        Stack::new(256)
+    fn create_stack<T>() -> Stack<T, 256> {
+        Stack::new()
     }
 
     #[test]
