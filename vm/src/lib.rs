@@ -1,5 +1,6 @@
 mod decode;
 mod frame;
+mod frame_stack;
 mod instruction;
 mod stack;
 mod vm;
