@@ -4,7 +4,6 @@ use crate::{
     stack::Stack,
     Instruction,
 };
-use num_traits::FromPrimitive;
 use runtime::{Closure, Value, NIL};
 use std::str;
 
@@ -40,33 +39,34 @@ impl Vm {
 
     pub fn run(&mut self, codes: &[u8]) {
         while let Some(instruction) = decode_u8_option(codes, &mut self.program_counter) {
-            match Instruction::from_u8(instruction).expect("valid instruction") {
-                Instruction::Nil => self.nil(),
-                Instruction::Float64 => self.float64(codes),
-                Instruction::Integer32 => self.integer32(codes),
-                Instruction::Symbol => self.symbol(codes),
-                Instruction::Get => self.get(),
-                Instruction::Set => self.set(),
-                Instruction::Length => self.length(),
-                Instruction::Add => self.add(),
-                Instruction::Subtract => self.subtract(),
-                Instruction::Multiply => self.multiply(),
-                Instruction::Divide => self.divide(),
-                Instruction::Drop => self.drop(),
-                Instruction::Dump => self.dump(),
-                Instruction::Call => self.call(codes),
-                Instruction::TailCall => self.tail_call(codes),
-                Instruction::Close => self.close(codes),
-                Instruction::Environment => self.environment(codes),
-                Instruction::Peek => self.peek(codes),
-                Instruction::Equal => self.equal(),
-                Instruction::LessThan => self.less_than(),
-                Instruction::Not => self.not(),
-                Instruction::And => self.and(),
-                Instruction::Or => self.or(),
-                Instruction::Jump => self.jump(codes),
-                Instruction::Branch => self.branch(codes),
-                Instruction::Return => self.r#return(),
+            match instruction {
+                Instruction::NIL => self.nil(),
+                Instruction::FLOAT64 => self.float64(codes),
+                Instruction::INTEGER32 => self.integer32(codes),
+                Instruction::SYMBOL => self.symbol(codes),
+                Instruction::GET => self.get(),
+                Instruction::SET => self.set(),
+                Instruction::LENGTH => self.length(),
+                Instruction::ADD => self.add(),
+                Instruction::SUBTRACT => self.subtract(),
+                Instruction::MULTIPLY => self.multiply(),
+                Instruction::DIVIDE => self.divide(),
+                Instruction::DROP => self.drop(),
+                Instruction::DUMP => self.dump(),
+                Instruction::CALL => self.call(codes),
+                Instruction::TAIL_CALL => self.tail_call(codes),
+                Instruction::CLOSE => self.close(codes),
+                Instruction::ENVIRONMENT => self.environment(codes),
+                Instruction::PEEK => self.peek(codes),
+                Instruction::EQUAL => self.equal(),
+                Instruction::LESS_THAN => self.less_than(),
+                Instruction::NOT => self.not(),
+                Instruction::AND => self.and(),
+                Instruction::OR => self.or(),
+                Instruction::JUMP => self.jump(codes),
+                Instruction::BRANCH => self.branch(codes),
+                Instruction::RETURN => self.r#return(),
+                _ => panic!("invalid instruction"),
             }
         }
     }
