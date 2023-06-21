@@ -23,7 +23,11 @@ macro_rules! binary_operation {
 }
 
 macro_rules! dispatch {
-    ($self:expr, $codes:expr) => {
+    ($self:expr, $codes:expr) => {{
+        if $self.program_counter >= $codes.len() {
+            return;
+        }
+
         return (match Instruction::from_u8($self.read_u8($codes)).expect("valid instruction") {
             Instruction::Nil => Self::nil,
             Instruction::Float64 => Self::float64,
@@ -51,8 +55,8 @@ macro_rules! dispatch {
             Instruction::Jump => Self::jump,
             Instruction::Branch => Self::branch,
             Instruction::Return => Self::r#return,
-        })($self, $codes)
-    };
+        })($self, $codes);
+    }};
 }
 
 #[derive(Debug, Default)]
