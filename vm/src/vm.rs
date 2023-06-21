@@ -1,5 +1,5 @@
 use crate::{
-    decode::{decode_bytes, decode_f64, decode_u16, decode_u32, decode_u8},
+    decode::{decode_bytes, decode_f64, decode_u16, decode_u32, decode_u8, decode_u8_option},
     frame::Frame,
     stack::Stack,
     Instruction,
@@ -39,8 +39,8 @@ impl Vm {
     }
 
     pub fn run(&mut self, codes: &[u8]) {
-        while self.program_counter < codes.len() {
-            match Instruction::from_u8(self.read_u8(codes)).expect("valid instruction") {
+        while let Some(instruction) = decode_u8_option(codes, &mut self.program_counter) {
+            match Instruction::from_u8(instruction).expect("valid instruction") {
                 Instruction::Nil => self.nil(),
                 Instruction::Float64 => self.float64(codes),
                 Instruction::Integer32 => self.integer32(codes),
