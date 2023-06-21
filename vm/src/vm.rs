@@ -24,16 +24,16 @@ macro_rules! binary_operation {
 #[derive(Debug)]
 pub struct Vm {
     program_counter: usize,
-    stack: Stack<Value>,
-    frames: Stack<Frame>,
+    stack: Stack<Value, { 1 << 11 }>,
+    frames: Stack<Frame, { 1 << 8 }>,
 }
 
 impl Vm {
     pub fn new() -> Self {
         Self {
             program_counter: 0,
-            stack: Stack::new(1 << 11),
-            frames: Stack::new(1 << 8),
+            stack: Stack::new(),
+            frames: Stack::new(),
         }
     }
 
