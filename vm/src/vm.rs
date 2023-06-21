@@ -76,35 +76,8 @@ impl Vm {
     }
 
     pub fn run(&mut self, codes: &[u8]) {
-        while self.program_counter < codes.len() {
-            (match Instruction::from_u8(self.read_u8(codes)).expect("valid instruction") {
-                Instruction::Nil => Self::nil,
-                Instruction::Float64 => Self::float64,
-                Instruction::Integer32 => Self::integer32,
-                Instruction::Symbol => Self::symbol,
-                Instruction::Get => Self::get,
-                Instruction::Set => Self::set,
-                Instruction::Length => Self::length,
-                Instruction::Add => Self::add,
-                Instruction::Subtract => Self::subtract,
-                Instruction::Multiply => Self::multiply,
-                Instruction::Divide => Self::divide,
-                Instruction::Drop => Self::drop,
-                Instruction::Dump => Self::dump,
-                Instruction::Call => Self::call,
-                Instruction::TailCall => Self::tail_call,
-                Instruction::Close => Self::close,
-                Instruction::Environment => Self::environment,
-                Instruction::Peek => Self::peek,
-                Instruction::Equal => Self::equal,
-                Instruction::LessThan => Self::less_than,
-                Instruction::Not => Self::not,
-                Instruction::And => Self::and,
-                Instruction::Or => Self::or,
-                Instruction::Jump => Self::jump,
-                Instruction::Branch => Self::branch,
-                Instruction::Return => Self::r#return,
-            })(self, codes)
+        loop {
+            dispatch!(self, codes)
         }
     }
 
@@ -124,6 +97,8 @@ impl Vm {
     fn integer32(&mut self, codes: &[u8]) {
         let value = self.read_u32(codes);
         self.stack.push(value.into());
+
+        dispatch!(self, codes)
     }
 
     fn symbol(&mut self, codes: &[u8]) {
@@ -133,9 +108,11 @@ impl Vm {
             .into();
 
         self.stack.push(value);
+
+        dispatch!(self, codes)
     }
 
-    fn get(&mut self, _codes: &[u8]) {
+    fn get(&mut self, codes: &[u8]) {
         let value = (|| {
             let index = self.stack.pop();
             let array = self.stack.pop().into_array()?;
@@ -145,9 +122,11 @@ impl Vm {
         .unwrap_or(NIL);
 
         self.stack.push(value);
+
+        dispatch!(self, codes)
     }
 
-    fn set(&mut self, _codes: &[u8]) {
+    fn set(&mut self, codes: &[u8]) {
         let value = (|| {
             let value = self.stack.pop();
             let index = self.stack.pop();
@@ -158,6 +137,8 @@ impl Vm {
         .unwrap_or(NIL);
 
         self.stack.push(value);
+
+        dispatch!(self, codes)
     }
 
     fn length(&mut self, codes: &[u8]) {
@@ -174,16 +155,22 @@ impl Vm {
         dispatch!(self, codes)
     }
 
-    fn subtract(&mut self, _codes: &[u8]) {
+    fn subtract(&mut self, codes: &[u8]) {
         binary_operation!(self, -);
+
+        dispatch!(self, codes)
     }
 
-    fn multiply(&mut self, _codes: &[u8]) {
+    fn multiply(&mut self, codes: &[u8]) {
         binary_operation!(self, *);
+
+        dispatch!(self, codes)
     }
 
-    fn divide(&mut self, _codes: &[u8]) {
+    fn divide(&mut self, codes: &[u8]) {
         binary_operation!(self, /);
+
+        dispatch!(self, codes)
     }
 
     fn drop(&mut self, codes: &[u8]) {
@@ -192,12 +179,14 @@ impl Vm {
         dispatch!(self, codes)
     }
 
-    fn dump(&mut self, _codes: &[u8]) {
+    fn dump(&mut self, codes: &[u8]) {
         let value = self.stack.pop();
 
         println!("{}", value);
 
         self.stack.push(value);
+
+        dispatch!(self, codes)
     }
 
     fn call(&mut self, codes: &[u8]) {
@@ -238,6 +227,8 @@ impl Vm {
         }
 
         self.stack.push(closure.into());
+
+        dispatch!(self, codes)
     }
 
     fn environment(&mut self, codes: &[u8]) {
@@ -252,6 +243,8 @@ impl Vm {
                 .get_environment(index)
                 .clone(),
         );
+
+        dispatch!(self, codes)
     }
 
     fn peek(&mut self, codes: &[u8]) {
@@ -290,18 +283,22 @@ impl Vm {
         dispatch!(self, codes)
     }
 
-    fn and(&mut self, _codes: &[u8]) {
+    fn and(&mut self, codes: &[u8]) {
         let rhs = self.stack.pop();
         let lhs = self.stack.pop();
 
         self.stack.push(if lhs.is_nil() { lhs } else { rhs });
+
+        dispatch!(self, codes)
     }
 
-    fn or(&mut self, _codes: &[u8]) {
+    fn or(&mut self, codes: &[u8]) {
         let rhs = self.stack.pop();
         let lhs = self.stack.pop();
 
         self.stack.push(if lhs.is_nil() { rhs } else { lhs });
+
+        dispatch!(self, codes)
     }
 
     fn jump(&mut self, codes: &[u8]) {
