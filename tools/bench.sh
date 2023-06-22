@@ -25,6 +25,5 @@ for name in fibonacci sum tak; do
 
   if which petite >/dev/null && [ -r $directory/main.scm ]; then
     run "petite --script $directory/main.scm"
-    echo
   fi
 done
