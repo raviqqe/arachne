@@ -6,11 +6,11 @@ use std::{cell::RefCell, error::Error, mem::size_of};
 use vm::Instruction;
 
 pub struct Compiler<'a> {
-    codes: &'a RefCell<Vec<u8>>,
+    codes: &'a RefCell<Vec<u64>>,
 }
 
 impl<'a> Compiler<'a> {
-    pub fn new(codes: &'a RefCell<Vec<u8>>) -> Self {
+    pub fn new(codes: &'a RefCell<Vec<u64>>) -> Self {
         Self { codes }
     }
 

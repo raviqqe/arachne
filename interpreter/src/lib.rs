@@ -10,7 +10,7 @@ use vm::Vm;
 
 #[derive(Debug, Default)]
 pub struct Interpreter {
-    codes: RefCell<Vec<u8>>,
+    codes: RefCell<Vec<u64>>,
 }
 
 impl Interpreter {
