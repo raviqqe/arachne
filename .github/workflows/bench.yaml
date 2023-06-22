@@ -18,7 +18,10 @@ jobs:
       - run: |
           old=${{ github.base_ref }}
 
-          git fetch main
+          if [ -n "$old" ]; then
+            git fetch $old
+          fi
+
           git switch ${old:-HEAD^}
           cargo build --release
           cp target/release/arachne target/release/arachne-old
