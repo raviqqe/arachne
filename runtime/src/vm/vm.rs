@@ -1,10 +1,10 @@
-use crate::{
+use super::{
     decode::{decode_bytes, decode_f64, decode_u16, decode_u32, decode_u8, decode_u8_option},
     frame::Frame,
     stack::Stack,
     Instruction,
 };
-use runtime::{Closure, Value, NIL};
+use crate::{Closure, Value, NIL};
 use std::str;
 
 macro_rules! binary_operation {

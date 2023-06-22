@@ -1,6 +1,6 @@
 mod ir;
 
-use crate::{
+use super::super::{
     decode::{decode_bytes, decode_u16, decode_u32, decode_u64, decode_u8},
     Instruction,
 };

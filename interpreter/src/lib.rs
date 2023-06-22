@@ -5,8 +5,8 @@ use compiler::Compiler;
 use error::InterpretError;
 use futures::{pin_mut, Stream, StreamExt};
 use runtime::Value;
+use runtime::Vm;
 use std::{cell::RefCell, error::Error};
-use vm::Vm;
 
 #[derive(Debug, Default)]
 pub struct Interpreter {
