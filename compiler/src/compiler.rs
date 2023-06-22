@@ -228,7 +228,7 @@ impl<'a> Compiler<'a> {
 
             codes.push(Instruction::Return as u8);
             *block.temporary_count_mut() -= 1;
-            assert_eq!(*block.temporary_count_mut(), 0);
+            debug_assert_eq!(*block.temporary_count_mut(), 0);
 
             function
         };
