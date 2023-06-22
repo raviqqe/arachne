@@ -2,7 +2,10 @@ use futures::{pin_mut, StreamExt};
 use interpreter::Interpreter;
 use parse::parse;
 use std::{error::Error, process::exit};
-use tokio::io::{stdin, AsyncBufReadExt, BufReader};
+use tokio::{
+    fs::File,
+    io::{stdin, AsyncBufReadExt, AsyncRead, BufReader},
+};
 use tokio_stream::wrappers::LinesStream;
 
 #[tokio::main]
@@ -14,11 +17,23 @@ async fn main() {
 }
 
 async fn run() -> Result<(), Box<dyn Error>> {
-    clap::Command::new(clap::crate_name!())
+    let matches = clap::Command::new(clap::crate_name!())
         .version(clap::crate_version!())
+        .arg(clap::Arg::new("source file").required(false))
         .get_matches();
 
-    let mut lines = LinesStream::new(BufReader::new(stdin()).lines());
+    if let Some(path) = matches.get_one::<String>("source file") {
+        interpret(File::open(&path).await?).await
+    } else {
+        interpret(stdin()).await
+    }
+}
+
+async fn interpret<T: AsyncRead>(input: T) -> Result<(), Box<dyn Error>> {
+    let lines = LinesStream::new(BufReader::new(input).lines());
+
+    pin_mut!(lines);
+
     let values = parse(&mut lines);
 
     pin_mut!(values);
