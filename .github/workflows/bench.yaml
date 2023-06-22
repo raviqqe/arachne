@@ -19,8 +19,7 @@ jobs:
           old=${{ github.base_ref }}
 
           if [ -n "$old" ]; then
-            git fetch $old
-            git checkout $old
+            git checkout origin/$old
           else
             git checkout HEAD^
           fi
