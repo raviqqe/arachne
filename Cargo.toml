@@ -1,5 +1,5 @@
 [workspace]
-members = ["command", "compiler", "interpreter", "parse", "runtime", "vm"]
+members = ["command", "compiler", "interpreter", "parse", "runtime"]
 
 [profile.release]
 lto = true

@@ -57,7 +57,6 @@ version = "0.1.0"
 dependencies = [
  "arachne-interpreter",
  "arachne-parse",
- "arachne-vm",
  "async-recursion",
  "async-stream",
  "clap",
@@ -72,7 +71,6 @@ name = "arachne-compiler"
 version = "0.1.0"
 dependencies = [
  "arachne-runtime",
- "arachne-vm",
  "async-stream",
  "futures",
  "insta",
@@ -86,7 +84,6 @@ version = "0.1.0"
 dependencies = [
  "arachne-compiler",
  "arachne-runtime",
- "arachne-vm",
  "async-stream",
  "futures",
  "once_cell",
@@ -110,18 +107,10 @@ name = "arachne-runtime"
 version = "0.1.0"
 dependencies = [
  "dashmap",
- "once_cell",
- "ordered-float",
- "pretty_assertions",
-]
-
-[[package]]
-name = "arachne-vm"
-version = "0.1.0"
-dependencies = [
- "arachne-runtime",
  "num-derive",
  "num-traits",
+ "once_cell",
+ "ordered-float",
  "pretty_assertions",
 ]
 

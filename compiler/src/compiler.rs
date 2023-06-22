@@ -1,9 +1,9 @@
 use crate::{block::Block, function::Function, variable::Variable, CompileError};
 use async_stream::try_stream;
 use futures::{Stream, StreamExt};
+use runtime::Instruction;
 use runtime::{Array, Symbol, TypedValueRef, Value};
 use std::{cell::RefCell, error::Error, mem::size_of};
-use vm::Instruction;
 
 pub struct Compiler<'a> {
     codes: &'a RefCell<Vec<u8>>,
