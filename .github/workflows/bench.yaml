@@ -17,8 +17,8 @@ jobs:
       - run: brew install chezscheme
       - run: |
           old=${{ github.base_ref }}
-          git checkout ${old:-HEAD^}
+          git switch ${old:-HEAD^}
           cargo build --release
           cp target/release/arachne target/release/arachne-old
-      - run: git checkout ${{ github.sha }}
+      - run: git switch ${{ github.sha }}
       - run: tools/bench.sh
