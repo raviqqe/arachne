@@ -4,5 +4,5 @@ set -e
 
 cd $(dirname $0)/..
 
-rnm -r '#\[inline[^\]]*\]' ''
+rnm --no-git --include '.*\.rs$' -r '#\[inline[^\]]*\]' ''
 cargo fmt --all
