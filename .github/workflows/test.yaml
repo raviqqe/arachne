@@ -30,4 +30,5 @@ jobs:
       - uses: ruby/setup-ruby@v1
       - uses: Homebrew/actions/setup-homebrew@master
       - run: brew install valgrind
+      - run: sudo apt install libc6-dbg
       - run: tools/integration_test.sh
