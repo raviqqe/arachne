@@ -2,7 +2,6 @@ mod format;
 
 pub use format::{format_instructions, FormatError};
 
-#[repr(u8)]
 #[derive(Clone, Copy, Debug, num_derive::FromPrimitive)]
 pub enum Instruction {
     // Stack operation
