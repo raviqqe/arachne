@@ -24,7 +24,7 @@ struct Header {
 impl Closure {
     pub fn new(id: ClosureId, arity: usize, environment_size: usize) -> Self {
         let (layout, _) = Layout::new::<Header>()
-            .extend(Layout::array::<Value>(environment_size as usize).unwrap())
+            .extend(Layout::array::<Value>(environment_size).unwrap())
             .unwrap();
         let this = Self(unsafe { alloc(layout) } as u64 | CLOSURE_MASK);
 
@@ -47,14 +47,14 @@ impl Closure {
 
     #[inline]
     pub fn get_environment(&self, index: usize) -> &Value {
-        debug_assert!(index < self.header().environment_size as usize);
+        debug_assert!(index < self.header().environment_size);
 
         unsafe { &*self.environment_mut(index) }
     }
 
     #[inline]
     pub fn write_environment(&mut self, index: usize, value: Value) {
-        debug_assert!(index < self.header().environment_size as usize);
+        debug_assert!(index < self.header().environment_size);
 
         unsafe { write(self.environment_mut(index), value) }
     }
@@ -130,7 +130,7 @@ impl Drop for Closure {
         } else if self.header().count == 0 {
             unsafe {
                 for index in 0..self.header().environment_size {
-                    drop_in_place(self.environment_mut(index as usize));
+                    drop_in_place(self.environment_mut(index));
                 }
 
                 dealloc(self.as_ptr(), Layout::new::<Header>());

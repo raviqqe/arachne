@@ -183,7 +183,7 @@ impl Vm {
         for index in (0..environment_size).rev() {
             let value = self.stack.pop();
 
-            closure.write_environment(index as usize, value);
+            closure.write_environment(index, value);
         }
 
         self.stack.push(closure.into());
@@ -275,9 +275,9 @@ impl Vm {
     fn call_function(&mut self, arity: usize) {
         if let Some(closure) = self.stack.peek(arity).as_closure() {
             let id = closure.id();
-            let closure_arity = closure.arity() as usize;
+            let closure_arity = closure.arity();
 
-            self.program_counter = id as usize;
+            self.program_counter = id;
 
             for _ in 0..arity.saturating_sub(closure_arity) {
                 self.stack.pop();
