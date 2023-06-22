@@ -1,6 +1,6 @@
 Feature: Memory
   @linux
-  Scenario: Do not cause any memory error
+  Scenario Outline: Do not cause any memory error
     Given a file named "build.ninja" with:
     """
     rule cp
@@ -17,3 +17,9 @@ Feature: Memory
     """
     hello
     """
+
+    Examples:
+      | name      |
+      | fibonacci |
+      | sum       |
+      | tak       |
