@@ -18,7 +18,7 @@ for name in fibonacci sum tak; do
 
   run \
     "target/release/arachne $directory/main.arc" \
-    "arachne < $directory/main.arc" \
+    "arachne $directory/main.arc" \
     "python3 $directory/main.py"
 
   echo
