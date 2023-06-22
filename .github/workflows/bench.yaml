@@ -20,9 +20,11 @@ jobs:
 
           if [ -n "$old" ]; then
             git fetch $old
+            git checkout $old
+          else
+            git checkout HEAD^
           fi
 
-          git checkout ${old:-HEAD^}
           cargo install --path command
       - run: git checkout ${{ github.sha }}
       - run: tools/bench.sh
