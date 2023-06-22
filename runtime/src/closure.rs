@@ -7,7 +7,7 @@ use core::{
     ptr::{drop_in_place, write},
 };
 
-pub type ClosureId = u32;
+pub type ClosureId = usize;
 
 pub struct Closure(u64);
 
@@ -17,12 +17,12 @@ struct Header {
     // In the current implementation, function IDs are equivalent to function pointers in
     // bytecodes.
     id: ClosureId,
-    arity: u8,
-    environment_size: u8,
+    arity: usize,
+    environment_size: usize,
 }
 
 impl Closure {
-    pub fn new(id: ClosureId, arity: u8, environment_size: u8) -> Self {
+    pub fn new(id: ClosureId, arity: usize, environment_size: usize) -> Self {
         let (layout, _) = Layout::new::<Header>()
             .extend(Layout::array::<Value>(environment_size as usize).unwrap())
             .unwrap();
@@ -41,7 +41,7 @@ impl Closure {
     }
 
     #[inline]
-    pub fn arity(&self) -> u8 {
+    pub fn arity(&self) -> usize {
         self.header().arity
     }
 

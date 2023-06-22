@@ -11,6 +11,17 @@ pub fn decode_word_u64(codes: &[u64], index: &mut usize) -> u64 {
 }
 
 #[inline]
+pub fn decode_word_u64_option(codes: &[u64], index: &mut usize) -> Option<u64> {
+    if let Some(&value) = codes.get(*index) {
+        *index += 1;
+
+        Some(value)
+    } else {
+        None
+    }
+}
+
+#[inline]
 pub fn decode_word_f64(codes: &[u64], index: &mut usize) -> f64 {
     f64::from_bits(decode_word_u64(codes, index))
 }

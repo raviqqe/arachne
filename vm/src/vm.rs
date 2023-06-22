@@ -1,5 +1,5 @@
 use crate::{
-    decode::{decode_bytes, decode_f64, decode_u16, decode_u32, decode_u8, decode_u8_option},
+    decode::{decode_word_bytes, decode_word_f64, decode_word_u64, decode_word_u64_option},
     frame::Frame,
     stack::Stack,
     Instruction,
@@ -37,8 +37,8 @@ impl Vm {
         }
     }
 
-    pub fn run(&mut self, codes: &[u8]) {
-        while let Some(instruction) = decode_u8_option(codes, &mut self.program_counter) {
+    pub fn run(&mut self, codes: &[u64]) {
+        while let Some(instruction) = decode_word_u64_option(codes, &mut self.program_counter) {
             match instruction {
                 Instruction::NIL => self.nil(),
                 Instruction::FLOAT64 => self.float64(codes),
@@ -75,18 +75,18 @@ impl Vm {
         self.stack.push(NIL)
     }
 
-    fn float64(&mut self, codes: &[u8]) {
+    fn float64(&mut self, codes: &[u64]) {
         let value = self.read_f64(codes);
         self.stack.push(value.into());
     }
 
-    fn integer32(&mut self, codes: &[u8]) {
-        let value = self.read_u32(codes);
+    fn integer32(&mut self, codes: &[u64]) {
+        let value = self.read_u64(codes) as i64 as i32;
         self.stack.push(value.into());
     }
 
-    fn symbol(&mut self, codes: &[u8]) {
-        let len = self.read_u8(codes);
+    fn symbol(&mut self, codes: &[u64]) {
+        let len = self.read_u64(codes);
         let value = str::from_utf8(self.read_bytes(codes, len as usize))
             .unwrap()
             .into();
@@ -153,8 +153,8 @@ impl Vm {
         self.stack.push(value);
     }
 
-    fn call(&mut self, codes: &[u8]) {
-        let arity = self.read_u8(codes) as usize;
+    fn call(&mut self, codes: &[u64]) {
+        let arity = self.read_u64(codes) as usize;
 
         self.frames.push(Frame::new(
             (self.stack.len() - arity - 1) as u32,
@@ -164,8 +164,8 @@ impl Vm {
         self.call_function(arity)
     }
 
-    fn tail_call(&mut self, codes: &[u8]) {
-        let arity = self.read_u8(codes) as usize;
+    fn tail_call(&mut self, codes: &[u64]) {
+        let arity = self.read_u64(codes) as usize;
 
         let frame = self.frames.top();
         self.stack
@@ -174,10 +174,10 @@ impl Vm {
         self.call_function(arity)
     }
 
-    fn close(&mut self, codes: &[u8]) {
-        let id = self.read_u32(codes);
-        let arity = self.read_u8(codes);
-        let environment_size = self.read_u8(codes);
+    fn close(&mut self, codes: &[u64]) {
+        let id = self.read_u64(codes) as usize;
+        let arity = self.read_u64(codes) as usize;
+        let environment_size = self.read_u64(codes) as usize;
         let mut closure = Closure::new(id, arity, environment_size);
 
         for index in (0..environment_size).rev() {
@@ -189,9 +189,9 @@ impl Vm {
         self.stack.push(closure.into());
     }
 
-    fn environment(&mut self, codes: &[u8]) {
+    fn environment(&mut self, codes: &[u64]) {
         let pointer = self.frames.top().pointer();
-        let index = self.read_u8(codes) as usize;
+        let index = self.read_u64(codes) as usize;
 
         self.stack.push(
             self.stack
@@ -203,9 +203,9 @@ impl Vm {
         );
     }
 
-    fn peek(&mut self, codes: &[u8]) {
+    fn peek(&mut self, codes: &[u64]) {
         // TODO Move local variables when possible.
-        let index = self.read_u8(codes);
+        let index = self.read_u64(codes);
 
         self.stack.push(self.stack.peek(index as usize).clone());
     }
@@ -245,16 +245,16 @@ impl Vm {
         self.stack.push(if lhs.is_nil() { rhs } else { lhs });
     }
 
-    fn jump(&mut self, codes: &[u8]) {
-        let address = self.read_u16(codes);
+    fn jump(&mut self, codes: &[u64]) {
+        let address = self.read_u64(codes);
 
         self.program_counter = self
             .program_counter
             .wrapping_add(address as i16 as isize as usize);
     }
 
-    fn branch(&mut self, codes: &[u8]) {
-        let address = self.read_u16(codes);
+    fn branch(&mut self, codes: &[u64]) {
+        let address = self.read_u64(codes);
         let value = self.stack.pop();
 
         if value != NIL {
@@ -302,28 +302,18 @@ impl Vm {
     }
 
     #[inline(always)]
-    fn read_f64(&mut self, codes: &[u8]) -> f64 {
-        decode_f64(codes, &mut self.program_counter)
+    fn read_f64(&mut self, codes: &[u64]) -> f64 {
+        decode_word_f64(codes, &mut self.program_counter)
     }
 
     #[inline(always)]
-    fn read_u32(&mut self, codes: &[u8]) -> u32 {
-        decode_u32(codes, &mut self.program_counter)
+    fn read_u64(&mut self, codes: &[u64]) -> u64 {
+        decode_word_u64(codes, &mut self.program_counter)
     }
 
     #[inline(always)]
-    fn read_u16(&mut self, codes: &[u8]) -> u16 {
-        decode_u16(codes, &mut self.program_counter)
-    }
-
-    #[inline(always)]
-    fn read_u8(&mut self, codes: &[u8]) -> u8 {
-        decode_u8(codes, &mut self.program_counter)
-    }
-
-    #[inline(always)]
-    fn read_bytes<'a>(&mut self, codes: &'a [u8], len: usize) -> &'a [u8] {
-        decode_bytes(codes, len, &mut self.program_counter)
+    fn read_bytes<'a>(&mut self, codes: &'a [u64], len: usize) -> &'a [u8] {
+        decode_word_bytes(codes, len, &mut self.program_counter)
     }
 }
 
