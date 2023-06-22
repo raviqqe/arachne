@@ -20,5 +20,5 @@ jobs:
           git switch ${old:-HEAD^}
           cargo build --release
           cp target/release/arachne target/release/arachne-old
-      - run: git switch ${{ github.sha }}
+      - run: git checkout ${{ github.sha }}
       - run: tools/bench.sh
