@@ -6,10 +6,10 @@ pub enum InstructionIr {
     Add,
     And,
     Branch {
-        pointer: i16,
+        pointer: u64,
     },
     Call {
-        arity: u8,
+        arity: u64,
     },
     Close {
         pointer: u64,
@@ -19,13 +19,13 @@ pub enum InstructionIr {
     Divide,
     Drop,
     Dump,
-    Environment(u8),
+    Environment(u64),
     Equal,
     Float64(f64),
     Get,
     Integer32(i32),
     Jump {
-        pointer: i16,
+        pointer: u64,
     },
     Length,
     LessThan,
@@ -33,12 +33,12 @@ pub enum InstructionIr {
     Nil,
     Not,
     Or,
-    Peek(u8),
+    Peek(u64),
     Return,
     Set,
     Subtract,
     Symbol {
-        len: u8,
+        len: u64,
         string: String,
     },
     TailCall {
