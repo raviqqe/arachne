@@ -1,45 +1,29 @@
-use std::{
-    alloc::{alloc, dealloc, Layout},
-    ptr::{copy, read, write},
-};
-
 #[derive(Debug)]
 pub struct Stack<T, const N: usize> {
-    base: *mut T,
-    ptr: *mut T,
+    values: Vec<T>,
 }
 
 impl<T, const N: usize> Stack<T, N> {
     #[inline(always)]
     pub fn new() -> Self {
-        let ptr = unsafe { alloc(Layout::array::<T>(N).unwrap()) } as *mut T;
-
-        Self { base: ptr, ptr }
+        Self {
+            values: Default::default(),
+        }
     }
 
     #[inline(always)]
     pub fn push(&mut self, value: T) {
-        if self.len() >= N {
-            panic!("stack overflow");
-        }
-
-        unsafe {
-            write(self.ptr, value);
-        }
-
-        self.ptr = unsafe { self.ptr.add(1) };
+        self.values.push(value)
     }
 
     #[inline(always)]
     pub fn pop(&mut self) -> T {
-        self.ptr = unsafe { self.ptr.sub(1) };
-
-        unsafe { read(self.ptr) }
+        self.values.pop().expect("stack value")
     }
 
     #[inline(always)]
     pub fn peek(&self, index: usize) -> &T {
-        unsafe { &*self.ptr.sub(index + 1) }
+        &self.values[self.values.len() - 1 - index]
     }
 
     #[inline(always)]
@@ -49,28 +33,12 @@ impl<T, const N: usize> Stack<T, N> {
 
     #[inline(always)]
     pub fn truncate(&mut self, start: usize, end: usize) {
-        for index in start..end {
-            unsafe { read(self.base.add(index)) };
-        }
-
-        let count = self.len() - end;
-
-        unsafe {
-            copy(self.base.add(end), self.base.add(start), count);
-
-            self.ptr = self.base.add(start).add(count);
-        };
+        self.values.splice(start..end, []);
     }
 
     #[inline(always)]
     pub fn len(&self) -> usize {
-        (unsafe { self.ptr.offset_from(self.base) }) as usize
-    }
-}
-
-impl<T, const N: usize> Drop for Stack<T, N> {
-    fn drop(&mut self) {
-        unsafe { dealloc(self.base as _, Layout::array::<T>(0).unwrap()) }
+        self.values.len()
     }
 }
 
