@@ -1,5 +1,5 @@
 use crate::{
-    decode::{decode_word_bytes, decode_word_f64, decode_word_u64, decode_word_u64_option},
+    decode::{decode_bytes, decode_f64, decode_u64, decode_u64_option},
     frame::Frame,
     stack::Stack,
     Instruction,
@@ -38,7 +38,7 @@ impl Vm {
     }
 
     pub fn run(&mut self, codes: &[u64]) {
-        while let Some(instruction) = decode_word_u64_option(codes, &mut self.program_counter) {
+        while let Some(instruction) = decode_u64_option(codes, &mut self.program_counter) {
             match instruction {
                 Instruction::NIL => self.nil(),
                 Instruction::FLOAT64 => self.float64(codes),
@@ -297,17 +297,17 @@ impl Vm {
 
     #[inline(always)]
     fn read_f64(&mut self, codes: &[u64]) -> f64 {
-        decode_word_f64(codes, &mut self.program_counter)
+        decode_f64(codes, &mut self.program_counter)
     }
 
     #[inline(always)]
     fn read_u64(&mut self, codes: &[u64]) -> u64 {
-        decode_word_u64(codes, &mut self.program_counter)
+        decode_u64(codes, &mut self.program_counter)
     }
 
     #[inline(always)]
     fn read_bytes<'a>(&mut self, codes: &'a [u64], len: usize) -> &'a [u8] {
-        decode_word_bytes(codes, len, &mut self.program_counter)
+        decode_bytes(codes, len, &mut self.program_counter)
     }
 }
 

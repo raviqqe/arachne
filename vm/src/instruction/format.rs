@@ -1,7 +1,7 @@
 mod ir;
 
 use crate::{
-    decode::{decode_word_bytes, decode_word_f64, decode_word_u64},
+    decode::{decode_bytes, decode_f64, decode_u64},
     Instruction,
 };
 use core::fmt;
@@ -19,27 +19,27 @@ pub fn format_instructions(codes: &[u64]) -> Result<String, FormatError> {
     let mut instructions = Vec::new();
 
     while index < codes.len() {
-        let instruction = decode_word_u64(codes, &mut index);
+        let instruction = decode_u64(codes, &mut index);
 
         instructions.push(
             match Instruction::from_u64(instruction)
                 .ok_or(FormatError::InvalidInstruction(instruction))?
             {
                 Instruction::Nil => InstructionIr::Nil,
-                Instruction::Float64 => InstructionIr::Float64(decode_word_f64(codes, &mut index)),
+                Instruction::Float64 => InstructionIr::Float64(decode_f64(codes, &mut index)),
                 Instruction::Integer32 => {
-                    InstructionIr::Integer32(decode_word_u64(codes, &mut index) as i64 as i32)
+                    InstructionIr::Integer32(decode_u64(codes, &mut index) as i64 as i32)
                 }
                 Instruction::Symbol => {
-                    let len = decode_word_u64(codes, &mut index);
+                    let len = decode_u64(codes, &mut index);
 
                     InstructionIr::Symbol {
                         len,
-                        string: str::from_utf8(decode_word_bytes(codes, len as usize, &mut index))?
+                        string: str::from_utf8(decode_bytes(codes, len as usize, &mut index))?
                             .into(),
                     }
                 }
-                Instruction::Peek => InstructionIr::Peek(decode_word_u64(codes, &mut index)),
+                Instruction::Peek => InstructionIr::Peek(decode_u64(codes, &mut index)),
                 Instruction::Get => InstructionIr::Get,
                 Instruction::Set => InstructionIr::Set,
                 Instruction::Length => InstructionIr::Length,
@@ -48,18 +48,18 @@ pub fn format_instructions(codes: &[u64]) -> Result<String, FormatError> {
                 Instruction::Multiply => InstructionIr::Multiply,
                 Instruction::Divide => InstructionIr::Divide,
                 Instruction::Call => InstructionIr::Call {
-                    arity: decode_word_u64(codes, &mut index),
+                    arity: decode_u64(codes, &mut index),
                 },
                 Instruction::TailCall => InstructionIr::TailCall {
-                    arity: decode_word_u64(codes, &mut index),
+                    arity: decode_u64(codes, &mut index),
                 },
                 Instruction::Close => InstructionIr::Close {
-                    pointer: decode_word_u64(codes, &mut index),
-                    arity: decode_word_u64(codes, &mut index),
-                    environment_size: decode_word_u64(codes, &mut index),
+                    pointer: decode_u64(codes, &mut index),
+                    arity: decode_u64(codes, &mut index),
+                    environment_size: decode_u64(codes, &mut index),
                 },
                 Instruction::Environment => {
-                    InstructionIr::Environment(decode_word_u64(codes, &mut index))
+                    InstructionIr::Environment(decode_u64(codes, &mut index))
                 }
                 Instruction::Equal => InstructionIr::Equal,
                 Instruction::LessThan => InstructionIr::LessThan,
@@ -69,10 +69,10 @@ pub fn format_instructions(codes: &[u64]) -> Result<String, FormatError> {
                 Instruction::Drop => InstructionIr::Drop,
                 Instruction::Dump => InstructionIr::Dump,
                 Instruction::Jump => InstructionIr::Jump {
-                    pointer: decode_word_u64(codes, &mut index),
+                    pointer: decode_u64(codes, &mut index),
                 },
                 Instruction::Branch => InstructionIr::Branch {
-                    pointer: decode_word_u64(codes, &mut index),
+                    pointer: decode_u64(codes, &mut index),
                 },
                 Instruction::Return => InstructionIr::Return,
             },
