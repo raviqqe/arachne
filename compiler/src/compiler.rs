@@ -110,7 +110,7 @@ impl<'a> Compiler<'a> {
                         if symbol == "fn" {
                             self.compile_function(None, array, block)?;
                         } else if symbol == "if" {
-                            self.compile_if(array, 1, block, tail)?;
+                            return self.compile_if(array, 1, block, tail);
                         } else if let Some(instruction) = match symbol {
                             "get" => Some(Instruction::Get),
                             "set" => Some(Instruction::Set),
@@ -136,10 +136,10 @@ impl<'a> Compiler<'a> {
                                 _ => 1,
                             };
                         } else {
-                            self.compile_call(array, block, tail)?;
+                            return self.compile_call(array, block, tail);
                         }
                     } else {
-                        self.compile_call(array, block, tail)?
+                        return self.compile_call(array, block, tail);
                     }
                 }
                 TypedValueRef::Closure(_) => return Err(CompileError::Closure),
@@ -162,6 +162,11 @@ impl<'a> Compiler<'a> {
         } else {
             self.codes.borrow_mut().push(Instruction::Nil as u8);
             *block.temporary_count_mut() += 1;
+        }
+
+        if tail {
+            self.codes.borrow_mut().push(Instruction::Return as u8);
+            *block.temporary_count_mut() -= 1;
         }
 
         Ok(())
@@ -223,12 +228,6 @@ impl<'a> Compiler<'a> {
             }
 
             self.compile_expression(array.get_usize(array.len_usize() - 1), &mut block, true)?;
-
-            let mut codes = self.codes.borrow_mut();
-
-            codes.push(Instruction::Return as u8);
-            *block.temporary_count_mut() -= 1;
-            assert_eq!(*block.temporary_count_mut(), 0);
 
             function
         };
@@ -310,10 +309,15 @@ impl<'a> Compiler<'a> {
                 self.compile_expression(array.get_usize(condition_index + 2), &mut block, tail)?;
             }
 
-            let mut codes = self.codes.borrow_mut();
-            codes.push(Instruction::Jump as u8);
-            codes.extend(0u16.to_le_bytes());
-            codes.len()
+            if tail {
+                None
+            } else {
+                let mut codes = self.codes.borrow_mut();
+                codes.push(Instruction::Jump as u8);
+                codes.extend(0u16.to_le_bytes());
+
+                Some(codes.len())
+            }
         };
 
         {
@@ -327,12 +331,15 @@ impl<'a> Compiler<'a> {
             self.compile_expression(array.get_usize(condition_index + 1), &mut block, tail)?;
         }
 
-        let mut codes = self.codes.borrow_mut();
-        let current_index = codes.len();
-        codes[else_index - size_of::<u16>()..else_index]
-            .copy_from_slice(&((current_index - else_index) as i16).to_le_bytes());
+        if let Some(else_index) = else_index {
+            let mut codes = self.codes.borrow_mut();
+            let current_index = codes.len();
 
-        *block.temporary_count_mut() += 1;
+            codes[else_index - size_of::<u16>()..else_index]
+                .copy_from_slice(&((current_index - else_index) as i16).to_le_bytes());
+
+            *block.temporary_count_mut() += 1;
+        }
 
         Ok(())
     }
