@@ -18,7 +18,7 @@ for name in fibonacci sum tak; do
 
   run \
     "target/release/arachne $directory/main.arc" \
-    "target/release/arachne-old $directory/main.arc" \
+    "target/release/arachne-old < $directory/main.arc" \
     "python3 $directory/main.py"
 
   if which petite >/dev/null && [ -r $directory/main.scm ]; then
