@@ -22,8 +22,7 @@ jobs:
             git fetch $old
           fi
 
-          git switch ${old:-HEAD^}
-          cargo build --release
-          cp target/release/arachne target/release/arachne-old
+          git checkout ${old:-HEAD^}
+          cargo install --path command
       - run: git checkout ${{ github.sha }}
       - run: tools/bench.sh
