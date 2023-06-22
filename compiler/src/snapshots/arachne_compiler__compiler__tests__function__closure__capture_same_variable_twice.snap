@@ -3,12 +3,12 @@ source: compiler/src/compiler.rs
 expression: "compile([[\"let\".into(), \"x\".into(), 1.0.into()].into(),\n                [\"fn\".into(), [].into(),\n                            [\"+\".into(), \"x\".into(), \"x\".into()].into()].into()]).await"
 ---
 float64 1
-jump 6
+jump a
 environment 0
 environment 0
 add
 return
 peek 0
-close c 0 1
+close 4 0 1
 dump
 drop

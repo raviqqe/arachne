@@ -246,11 +246,7 @@ impl Vm {
     }
 
     fn jump(&mut self, codes: &[u64]) {
-        let address = self.read_u64(codes);
-
-        self.program_counter = self
-            .program_counter
-            .wrapping_add(address as i16 as isize as usize);
+        self.program_counter = self.read_u64(codes) as usize;
     }
 
     fn branch(&mut self, codes: &[u64]) {
@@ -258,9 +254,7 @@ impl Vm {
         let value = self.stack.pop();
 
         if value != NIL {
-            self.program_counter = self
-                .program_counter
-                .wrapping_add(address as i16 as isize as usize);
+            self.program_counter = address as usize;
         }
     }
 

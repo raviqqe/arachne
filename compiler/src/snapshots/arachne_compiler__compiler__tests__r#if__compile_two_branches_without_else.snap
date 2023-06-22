@@ -3,13 +3,13 @@ source: compiler/src/compiler.rs
 expression: "compile([[\"if\".into(), 1.0.into(), 2.0.into(), 3.0.into(),\n                            4.0.into()].into()]).await"
 ---
 float64 1
-branch 1c
+branch f
 float64 3
-branch 4
+branch b
 nil
-jump 9
+jump d
 float64 4
-jump 9
+jump 11
 float64 2
 dump
 drop

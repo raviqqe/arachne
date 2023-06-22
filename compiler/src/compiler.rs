@@ -2,7 +2,7 @@ use crate::{block::Block, function::Function, variable::Variable, CompileError};
 use async_stream::try_stream;
 use futures::{Stream, StreamExt};
 use runtime::{Array, Symbol, TypedValueRef, Value};
-use std::{cell::RefCell, error::Error, mem::size_of};
+use std::{cell::RefCell, error::Error};
 use vm::Instruction;
 
 pub struct Compiler<'a> {
@@ -86,10 +86,10 @@ impl<'a> Compiler<'a> {
         let mut codes = self.codes.borrow_mut();
 
         if dump {
-            codes.push(Instruction::Dump as u8);
+            codes.push(Instruction::Dump as u64);
         }
 
-        codes.push(Instruction::Drop as u8);
+        codes.push(Instruction::Drop as u64);
         *block.temporary_count_mut() -= 1;
 
         Ok(())
@@ -127,7 +127,7 @@ impl<'a> Compiler<'a> {
                             _ => None,
                         } {
                             self.compile_arguments(array, block)?;
-                            self.codes.borrow_mut().push(instruction as u8);
+                            self.codes.borrow_mut().push(instruction as u64);
 
                             *block.temporary_count_mut() -= match instruction {
                                 Instruction::Length => 0,
@@ -146,21 +146,21 @@ impl<'a> Compiler<'a> {
                 TypedValueRef::Float64(number) => {
                     let mut codes = self.codes.borrow_mut();
 
-                    codes.push(Instruction::Float64 as u8);
-                    codes.extend(number.to_f64().to_le_bytes());
+                    codes.push(Instruction::Float64 as u64);
+                    codes.push(number.to_f64().to_bits());
                     *block.temporary_count_mut() += 1;
                 }
                 TypedValueRef::Integer32(number) => {
                     let mut codes = self.codes.borrow_mut();
 
-                    codes.push(Instruction::Integer32 as u8);
-                    codes.extend(number.to_i32().to_le_bytes());
+                    codes.push(Instruction::Integer32 as u64);
+                    codes.push(number.to_i32() as i64 as u64);
                     *block.temporary_count_mut() += 1;
                 }
                 TypedValueRef::Symbol(symbol) => self.compile_variable(symbol, block),
             }
         } else {
-            self.codes.borrow_mut().push(Instruction::Nil as u8);
+            self.codes.borrow_mut().push(Instruction::Nil as u64);
             *block.temporary_count_mut() += 1;
         }
 
@@ -172,13 +172,13 @@ impl<'a> Compiler<'a> {
 
         match block.get_variable(symbol) {
             Variable::Bound(index) => {
-                codes.push(Instruction::Peek as u8);
-                codes.push(index as u8);
+                codes.push(Instruction::Peek as u64);
+                codes.push(index as u64);
             }
             Variable::Free(index) => {
                 // TODO Throw an error at top level.
-                codes.push(Instruction::Environment as u8);
-                codes.push(index as u8);
+                codes.push(Instruction::Environment as u64);
+                codes.push(index as u64);
             }
         }
 
@@ -193,16 +193,16 @@ impl<'a> Compiler<'a> {
     ) -> Result<(), CompileError> {
         let mut codes = self.codes.borrow_mut();
 
-        codes.push(Instruction::Jump as u8);
-        codes.extend(0u16.to_le_bytes()); // stub address
-        let jump_index = codes.len();
+        codes.push(Instruction::Jump as u64);
+        let jump_address_index = codes.len();
+        codes.push(0); // stub address
 
         let function_index = codes.len();
         drop(codes);
 
         let arguments = array.get_usize(1);
         let Some(arguments) = arguments.as_array() else { return Err(CompileError::Syntax(array.to_string())) };
-        let arity = u8::try_from(arguments.len_usize())?;
+        let arity = arguments.len_usize();
 
         let function = {
             let function = Function::new();
@@ -226,7 +226,7 @@ impl<'a> Compiler<'a> {
 
             let mut codes = self.codes.borrow_mut();
 
-            codes.push(Instruction::Return as u8);
+            codes.push(Instruction::Return as u64);
             *block.temporary_count_mut() -= 1;
             assert_eq!(*block.temporary_count_mut(), 0);
 
@@ -234,10 +234,7 @@ impl<'a> Compiler<'a> {
         };
 
         let mut codes = self.codes.borrow_mut();
-        let current_index = codes.len();
-
-        codes[jump_index - size_of::<u16>()..jump_index]
-            .copy_from_slice(&((current_index - jump_index) as u16).to_le_bytes());
+        codes[jump_address_index] = codes.len() as u64;
         drop(codes);
 
         for &symbol in &*function.free_variables() {
@@ -245,10 +242,10 @@ impl<'a> Compiler<'a> {
         }
 
         let mut codes = self.codes.borrow_mut();
-        codes.push(Instruction::Close as u8);
-        codes.extend((function_index as u32).to_le_bytes());
-        codes.push(arity); // arity
-        codes.push(function.free_variables().len() as u8);
+        codes.push(Instruction::Close as u64);
+        codes.push(function_index as u64);
+        codes.push(arity as u64);
+        codes.push(function.free_variables().len() as u64);
 
         *block.temporary_count_mut() -= function.free_variables().len();
         *block.temporary_count_mut() += 1;
@@ -278,8 +275,8 @@ impl<'a> Compiler<'a> {
             Instruction::TailCall
         } else {
             Instruction::Call
-        } as u8);
-        codes.push((array.len_usize() - 1) as u8);
+        } as u64);
+        codes.push((array.len_usize() - 1) as u64);
         *block.temporary_count_mut() -= array.len_usize() - 1;
 
         Ok(())
@@ -295,13 +292,13 @@ impl<'a> Compiler<'a> {
         self.compile_expression(array.get_usize(condition_index), block, false)?;
 
         let mut codes = self.codes.borrow_mut();
-        codes.push(Instruction::Branch as u8);
-        codes.extend(0u16.to_le_bytes());
-        let branch_index = codes.len();
+        codes.push(Instruction::Branch as u64);
+        let branch_address_index = codes.len();
+        codes.push(0); // stub address
         drop(codes);
         *block.temporary_count_mut() -= 1;
 
-        let else_index = {
+        let else_address_index = {
             let mut block = block.fork();
 
             if condition_index + 3 < array.len_usize() {
@@ -311,16 +308,15 @@ impl<'a> Compiler<'a> {
             }
 
             let mut codes = self.codes.borrow_mut();
-            codes.push(Instruction::Jump as u8);
-            codes.extend(0u16.to_le_bytes());
-            codes.len()
+            codes.push(Instruction::Jump as u64);
+            codes.push(0);
+
+            codes.len() - 1
         };
 
         {
             let mut codes = self.codes.borrow_mut();
-            let current_index = codes.len();
-            codes[branch_index - size_of::<u16>()..branch_index]
-                .copy_from_slice(&((current_index - branch_index) as i16).to_le_bytes());
+            codes[branch_address_index] = codes.len() as u64;
             drop(codes);
 
             let mut block = block.fork();
@@ -328,9 +324,7 @@ impl<'a> Compiler<'a> {
         }
 
         let mut codes = self.codes.borrow_mut();
-        let current_index = codes.len();
-        codes[else_index - size_of::<u16>()..else_index]
-            .copy_from_slice(&((current_index - else_index) as i16).to_le_bytes());
+        codes[else_address_index] = codes.len() as u64;
 
         *block.temporary_count_mut() += 1;
 
@@ -349,7 +343,7 @@ mod tests {
 
     async fn compile_instructions<const N: usize>(
         values: [Value; N],
-    ) -> Result<Vec<u8>, CompileError> {
+    ) -> Result<Vec<u64>, CompileError> {
         let codes = vec![].into();
 
         {

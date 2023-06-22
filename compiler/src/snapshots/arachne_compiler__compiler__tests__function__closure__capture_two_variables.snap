@@ -4,13 +4,13 @@ expression: "compile([[\"let\".into(), \"x\".into(), 1.0.into()].into(),\n      
 ---
 float64 1
 float64 2
-jump 6
+jump c
 environment 0
 environment 1
 add
 return
 peek 1
 peek 1
-close 15 0 2
+close 6 0 2
 dump
 drop

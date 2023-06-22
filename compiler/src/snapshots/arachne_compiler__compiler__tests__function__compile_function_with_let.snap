@@ -2,10 +2,10 @@
 source: compiler/src/compiler.rs
 expression: "compile([[\"fn\".into(), [\"x\".into()].into(),\n                            [\"let\".into(), \"y\".into(), \"x\".into()].into(),\n                            \"y\".into()].into()]).await"
 ---
-jump 5
+jump 7
 peek 0
 peek 0
 return
-close 3 1 0
+close 2 1 0
 dump
 drop
