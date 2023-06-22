@@ -21,7 +21,10 @@ for name in fibonacci sum tak; do
     "arachne < $directory/main.arc" \
     "python3 $directory/main.py"
 
+  echo
+
   if which petite >/dev/null && [ -r $directory/main.scm ]; then
     run "petite --script $directory/main.scm"
+    echo
   fi
 done
