@@ -4,20 +4,20 @@ use std::fmt::{Display, Formatter};
 #[derive(Clone, Debug)]
 pub enum InstructionIr {
     Drop,
-    Peek(u8),
+    Peek(u64),
     Nil,
     Float64(f64),
     Integer32(i32),
     Symbol {
-        len: u8,
+        len: u64,
         string: String,
     },
     Close {
-        pointer: u32,
-        arity: u8,
-        environment_size: u8,
+        pointer: u64,
+        arity: u64,
+        environment_size: u64,
     },
-    Environment(u8),
+    Environment(u64),
     Equal,
     LessThan,
     Not,
@@ -31,16 +31,16 @@ pub enum InstructionIr {
     Set,
     Length,
     Call {
-        arity: u8,
+        arity: u64,
     },
     TailCall {
-        arity: u8,
+        arity: u64,
     },
     Jump {
-        pointer: i16,
+        pointer: u64,
     },
     Branch {
-        pointer: i16,
+        pointer: u64,
     },
     Return,
     Dump,
