@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - uses: Swatinem/rust-cache@v2
       - uses: actions/setup-python@v4
         with:
@@ -19,7 +21,7 @@ jobs:
           old=${{ github.base_ref }}
 
           if [ -n "$old" ]; then
-            git checkout origin/$old
+            git checkout $old
           else
             git checkout HEAD^
           fi
