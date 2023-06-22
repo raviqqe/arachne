@@ -15,4 +15,10 @@ jobs:
           python-version: "3.11"
       - uses: Homebrew/actions/setup-homebrew@master
       - run: brew install chezscheme
+      - run: |
+          git checkout ${{ github.base_ref }}
+          cargo build --release
+          cp target/release/arachne target/release/arachne-old
+        if: foo
+      - run: git checkout ${{ github.sha }}
       - run: tools/bench.sh
