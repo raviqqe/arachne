@@ -6,7 +6,7 @@ pub enum InstructionIr {
     Add,
     And,
     Branch {
-        pointer: i16,
+        pointer: i8,
     },
     Call {
         arity: u8,
@@ -25,7 +25,7 @@ pub enum InstructionIr {
     Get,
     Integer32(i32),
     Jump {
-        pointer: i16,
+        pointer: i8,
     },
     Length,
     LessThan,
