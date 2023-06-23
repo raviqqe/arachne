@@ -640,6 +640,7 @@ mod tests {
             insta::assert_display_snapshot!(
                 compile([[
                     "let".into(),
+                    "x".into(),
                     ["if".into(), NIL, 1.0.into(), NIL, 2.0.into(), 3.0.into()].into()
                 ]
                 .into(),])
