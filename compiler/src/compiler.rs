@@ -635,7 +635,7 @@ mod tests {
         }
 
         #[tokio::test]
-        async fn compile_if_in_let() {
+        async fn compile_nested_if_in_let() {
             insta::assert_display_snapshot!(
                 compile([[
                     "let".into(),
