@@ -567,6 +567,8 @@ mod tests {
     }
 
     mod r#if {
+        use runtime::NIL;
+
         use super::*;
 
         #[tokio::test]
@@ -638,15 +640,7 @@ mod tests {
             insta::assert_display_snapshot!(
                 compile([[
                     "let".into(),
-                    [
-                        "if".into(),
-                        1.0.into(),
-                        2.0.into(),
-                        3.0.into(),
-                        4.0.into(),
-                        5.0.into()
-                    ]
-                    .into()
+                    ["if".into(), NIL, 1.0.into(), NIL, 2.0.into(), 3.0.into()].into()
                 ]
                 .into(),])
                 .await
