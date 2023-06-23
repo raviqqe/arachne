@@ -632,6 +632,32 @@ mod tests {
                 .await
             );
         }
+
+        #[tokio::test]
+        async fn compile_if_in_let() {
+            insta::assert_display_snapshot!(
+                compile([[
+                    "let".into(),
+                    "f".into(),
+                    [
+                        "fn".into(),
+                        [].into(),
+                        [
+                            "if".into(),
+                            1.0.into(),
+                            2.0.into(),
+                            3.0.into(),
+                            4.0.into(),
+                            5.0.into()
+                        ]
+                        .into()
+                    ]
+                    .into()
+                ]
+                .into()])
+                .await
+            );
+        }
     }
 
     mod r#let {
