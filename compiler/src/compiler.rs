@@ -349,6 +349,7 @@ impl<'a> Compiler<'a> {
 mod tests {
     use super::*;
     use futures::{pin_mut, stream::iter};
+    use runtime::NIL;
     use std::io;
     use vm::format_instructions;
 
@@ -567,8 +568,6 @@ mod tests {
     }
 
     mod r#if {
-        use runtime::NIL;
-
         use super::*;
 
         #[tokio::test]
