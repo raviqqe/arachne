@@ -1,0 +1,13 @@
+---
+source: compiler/src/compiler.rs
+expression: "compile([[\"let\".into(), \"x\".into(),\n                            [\"if\".into(), NIL, 1.0.into(), NIL, 2.0.into(),\n                                        3.0.into()].into()].into()]).await"
+---
+nil
+branch c
+float64 1
+jump 19
+nil
+branch c
+float64 2
+jump 9
+float64 3

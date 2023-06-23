@@ -300,24 +300,19 @@ impl<'a> Compiler<'a> {
         drop(codes);
         *block.temporary_count_mut() -= 1;
 
-        let else_index = {
-            let mut block = block.fork();
+        self.compile_expression(
+            array.get_usize(condition_index + 1),
+            &mut block.fork(),
+            tail,
+        )?;
 
-            if condition_index + 3 < array.len_usize() {
-                self.compile_if(array, condition_index + 2, &mut block, tail)?;
-            } else {
-                self.compile_expression(array.get_usize(condition_index + 2), &mut block, tail)?;
-            }
-
-            if tail {
-                None
-            } else {
-                let mut codes = self.codes.borrow_mut();
-                codes.push(Instruction::Jump as u8);
-                codes.extend(0u16.to_le_bytes());
-
-                Some(codes.len())
-            }
+        let then_index = if tail {
+            None
+        } else {
+            let mut codes = self.codes.borrow_mut();
+            codes.push(Instruction::Jump as u8);
+            codes.extend(0u16.to_le_bytes());
+            Some(codes.len())
         };
 
         {
@@ -325,18 +320,24 @@ impl<'a> Compiler<'a> {
             let current_index = codes.len();
             codes[branch_index - size_of::<u16>()..branch_index]
                 .copy_from_slice(&((current_index - branch_index) as i16).to_le_bytes());
-            drop(codes);
-
-            let mut block = block.fork();
-            self.compile_expression(array.get_usize(condition_index + 1), &mut block, tail)?;
         }
 
-        if let Some(else_index) = else_index {
+        {
+            let mut block = block.fork();
+
+            if condition_index + 3 < array.len_usize() {
+                self.compile_if(array, condition_index + 2, &mut block, tail)?;
+            } else {
+                self.compile_expression(array.get_usize(condition_index + 2), &mut block, tail)?;
+            }
+        }
+
+        if let Some(then_index) = then_index {
             let mut codes = self.codes.borrow_mut();
             let current_index = codes.len();
 
-            codes[else_index - size_of::<u16>()..else_index]
-                .copy_from_slice(&((current_index - else_index) as i16).to_le_bytes());
+            codes[then_index - size_of::<u16>()..then_index]
+                .copy_from_slice(&((current_index - then_index) as i16).to_le_bytes());
 
             *block.temporary_count_mut() += 1;
         }
@@ -349,6 +350,7 @@ impl<'a> Compiler<'a> {
 mod tests {
     use super::*;
     use futures::{pin_mut, stream::iter};
+    use runtime::NIL;
     use std::io;
     use vm::format_instructions;
 
@@ -629,6 +631,19 @@ mod tests {
                     .into()
                 ]
                 .into()])
+                .await
+            );
+        }
+
+        #[tokio::test]
+        async fn compile_nested_if_in_let() {
+            insta::assert_display_snapshot!(
+                compile([[
+                    "let".into(),
+                    "x".into(),
+                    ["if".into(), NIL, 1.0.into(), NIL, 2.0.into(), 3.0.into()].into()
+                ]
+                .into(),])
                 .await
             );
         }
