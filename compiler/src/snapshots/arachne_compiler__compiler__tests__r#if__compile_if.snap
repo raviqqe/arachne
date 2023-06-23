@@ -4,8 +4,8 @@ expression: "compile([[\"if\".into(), 1.0.into(), 42.0.into(), 13.0.into()].into
 ---
 float64 1
 branch c
-float64 13
-jump 9
 float64 42
+jump 9
+float64 13
 dump
 drop
