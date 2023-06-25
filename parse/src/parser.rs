@@ -74,7 +74,6 @@ impl Parser {
             if SPECIAL_CHARACTERS.contains(character) {
                 self.buffer.push_front(character);
 
-                dbg!(&string);
                 return Ok(str::parse::<f64>(&string)
                     .map(Into::into)
                     .unwrap_or_else(|_| string.into()));
