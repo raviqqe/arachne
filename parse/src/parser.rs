@@ -132,6 +132,11 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn parse_negative_float64() {
+        assert_eq!(parse("-42").await.unwrap(), Some((-42.0).into()));
+    }
+
+    #[tokio::test]
     async fn parse_symbol() {
         assert_eq!(parse("foo").await.unwrap(), Some("foo".into()));
     }

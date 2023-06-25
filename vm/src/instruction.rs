@@ -17,13 +17,17 @@ pub enum Instruction {
     Equal,
     Float64,
     Get,
+    GreaterThan,
+    GreaterThanOrEqual,
     Integer32,
     Jump,
     Length,
     LessThan,
+    LessThanOrEqual,
     Multiply,
     Nil,
     Not,
+    NotEqual,
     Or,
     Peek,
     Return,
@@ -46,13 +50,17 @@ impl Instruction {
     pub const EQUAL: u8 = Self::Equal as _;
     pub const FLOAT64: u8 = Self::Float64 as _;
     pub const GET: u8 = Self::Get as _;
+    pub const GREATER_THAN: u8 = Self::GreaterThan as _;
+    pub const GREATER_THAN_OR_EQUAL: u8 = Self::GreaterThanOrEqual as _;
     pub const INTEGER32: u8 = Self::Integer32 as _;
     pub const JUMP: u8 = Self::Jump as _;
     pub const LENGTH: u8 = Self::Length as _;
     pub const LESS_THAN: u8 = Self::LessThan as _;
+    pub const LESS_THAN_OR_EQUAL: u8 = Self::LessThanOrEqual as _;
     pub const MULTIPLY: u8 = Self::Multiply as _;
     pub const NIL: u8 = Self::Nil as _;
     pub const NOT: u8 = Self::Not as _;
+    pub const NOT_EQUAL: u8 = Self::NotEqual as _;
     pub const OR: u8 = Self::Or as _;
     pub const PEEK: u8 = Self::Peek as _;
     pub const RETURN: u8 = Self::Return as _;

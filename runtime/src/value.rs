@@ -206,12 +206,10 @@ impl PartialOrd for Value {
                     other.to_symbol().and_then(|other| one.partial_cmp(&other))
                 }
             }
+        } else if other.is_nil() {
+            Some(Ordering::Equal)
         } else {
-            Some(if other.is_nil() {
-                Ordering::Equal
-            } else {
-                Ordering::Less
-            })
+            other.partial_cmp(self).map(Ordering::reverse)
         }
     }
 }
@@ -404,7 +402,17 @@ mod tests {
         assert_eq!(Value::from(0.0), Value::from(0.0));
         assert_eq!(Value::from(1.0), Value::from(1.0));
         assert_ne!(Value::from(0.0), Value::from(1.0));
-        assert_eq!(Value::from(f64::NAN), Value::from(f64::NAN));
+        assert_ne!(Value::from(f64::NAN), Value::from(f64::NAN));
+
+        assert!(Value::from(0.0) < Value::from(1.0));
+        assert!(Value::from(1.0) > Value::from(0.0));
+        assert!(Value::from(-1.0) < Value::from(0.0));
+        assert!(Value::from(0.0) > Value::from(-1.0));
+
+        assert!(Value::from(0.0) <= Value::from(1.0));
+        assert!(Value::from(0.0) <= Value::from(0.0));
+        assert!(Value::from(1.0) >= Value::from(0.0));
+        assert!(Value::from(0.0) >= Value::from(0.0));
     }
 
     #[test]

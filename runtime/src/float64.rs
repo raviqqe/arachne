@@ -1,6 +1,5 @@
 use super::Value;
 use core::fmt::{self, Display, Formatter};
-use ordered_float::OrderedFloat;
 
 #[repr(transparent)]
 #[derive(Clone, Copy, Debug, PartialOrd)]
@@ -16,7 +15,7 @@ impl Float64 {
 impl PartialEq for Float64 {
     #[inline]
     fn eq(&self, other: &Self) -> bool {
-        OrderedFloat::from(self.0) == OrderedFloat::from(other.0)
+        self.0 == other.0
     }
 }
 
@@ -71,7 +70,7 @@ mod tests {
         assert_eq!(Float64::from(0.0), Float64::from(0.0));
         assert_eq!(Float64::from(1.0), Float64::from(1.0));
         assert_ne!(Float64::from(0.0), Float64::from(1.0));
-        assert_eq!(Float64::from(f64::NAN), Float64::from(f64::NAN));
+        assert_ne!(Float64::from(f64::NAN), Float64::from(f64::NAN));
     }
 
     #[test]

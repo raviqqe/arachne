@@ -7,7 +7,7 @@ use crate::{
 use runtime::{Closure, Value, NIL};
 use std::str;
 
-macro_rules! binary_operation {
+macro_rules! arithmetic_operation {
     ($self:expr, $operator:tt) => {
         let value = (|| {
             let rhs = $self.stack.pop().into_float64()?.to_f64();
@@ -18,6 +18,15 @@ macro_rules! binary_operation {
         .unwrap_or(NIL);
 
         $self.stack.push(value);
+    };
+}
+
+macro_rules! comparison_operation {
+    ($self:expr, $operator:tt) => {
+        let rhs = $self.stack.pop();
+        let lhs = $self.stack.pop();
+
+        $self.stack.push(((lhs $operator rhs) as usize as f64).into());
     };
 }
 
@@ -52,13 +61,17 @@ impl Vm {
                 Instruction::EQUAL => self.equal(),
                 Instruction::FLOAT64 => self.float64(codes),
                 Instruction::GET => self.get(),
+                Instruction::GREATER_THAN => self.greater_than(),
+                Instruction::GREATER_THAN_OR_EQUAL => self.greater_than_or_equal(),
                 Instruction::INTEGER32 => self.integer32(codes),
                 Instruction::JUMP => self.jump(codes),
                 Instruction::LENGTH => self.length(),
                 Instruction::LESS_THAN => self.less_than(),
+                Instruction::LESS_THAN_OR_EQUAL => self.less_than_or_equal(),
                 Instruction::MULTIPLY => self.multiply(),
                 Instruction::NIL => self.nil(),
                 Instruction::NOT => self.not(),
+                Instruction::NOT_EQUAL => self.not_equal(),
                 Instruction::OR => self.or(),
                 Instruction::PEEK => self.peek(codes),
                 Instruction::RETURN => self.r#return(),
@@ -126,19 +139,19 @@ impl Vm {
     }
 
     fn add(&mut self) {
-        binary_operation!(self, +);
+        arithmetic_operation!(self, +);
     }
 
     fn subtract(&mut self) {
-        binary_operation!(self, -);
+        arithmetic_operation!(self, -);
     }
 
     fn multiply(&mut self) {
-        binary_operation!(self, *);
+        arithmetic_operation!(self, *);
     }
 
     fn divide(&mut self) {
-        binary_operation!(self, /);
+        arithmetic_operation!(self, /);
     }
 
     fn drop(&mut self) {
@@ -211,17 +224,27 @@ impl Vm {
     }
 
     fn equal(&mut self) {
-        let rhs = self.stack.pop();
-        let lhs = self.stack.pop();
+        comparison_operation!(self, ==);
+    }
 
-        self.stack.push(((lhs == rhs) as usize as f64).into());
+    fn not_equal(&mut self) {
+        comparison_operation!(self, !=);
+    }
+
+    fn greater_than(&mut self) {
+        comparison_operation!(self, >);
+    }
+
+    fn greater_than_or_equal(&mut self) {
+        comparison_operation!(self, >=);
     }
 
     fn less_than(&mut self) {
-        let rhs = self.stack.pop();
-        let lhs = self.stack.pop();
+        comparison_operation!(self, <);
+    }
 
-        self.stack.push(((lhs < rhs) as usize as f64).into());
+    fn less_than_or_equal(&mut self) {
+        comparison_operation!(self, <=);
     }
 
     fn not(&mut self) {

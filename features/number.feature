@@ -48,11 +48,21 @@ Feature: Number
     """
 
     Examples:
-      | literal | result |
-      | (= 1 1) | 1      |
-      | (= 0 1) | ()     |
-      | (< 0 0) | ()     |
-      | (< 0 1) | 1      |
+      | literal   | result |
+      | (= 1 1)   | 1      |
+      | (= 0 1)   | ()     |
+      | (!= 1 1)  | ()     |
+      | (!= 0 1)  | 1      |
+      | (< 0 0)   | ()     |
+      | (< 0 1)   | 1      |
+      | (<= 0 -1) | ()     |
+      | (<= 0 0)  | 1      |
+      | (<= 0 1)  | 1      |
+      | (> 0 0)   | ()     |
+      | (> 1 0)   | 1      |
+      | (>= -1 0) | ()     |
+      | (>= 0 0)  | 1      |
+      | (>= 1 0)  | 1      |
 
   Scenario Outline: Use boolean operations
     Given a file named "main.arc" with:
