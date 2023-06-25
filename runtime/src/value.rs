@@ -206,12 +206,10 @@ impl PartialOrd for Value {
                     other.to_symbol().and_then(|other| one.partial_cmp(&other))
                 }
             }
+        } else if other.is_nil() {
+            Some(Ordering::Equal)
         } else {
-            if other.is_nil() {
-                Some(Ordering::Equal)
-            } else {
-                other.partial_cmp(self).map(Ordering::reverse)
-            }
+            other.partial_cmp(self).map(Ordering::reverse)
         }
     }
 }
