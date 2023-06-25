@@ -64,8 +64,12 @@ pub fn format_instructions(codes: &[u8]) -> Result<String, FormatError> {
                     InstructionIr::Environment(decode_u8(codes, &mut index))
                 }
                 Instruction::Equal => InstructionIr::Equal,
+                Instruction::GreaterThan => InstructionIr::GreaterThan,
+                Instruction::GreaterThanOrEqual => InstructionIr::GreaterThanOrEqual,
                 Instruction::LessThan => InstructionIr::LessThan,
+                Instruction::LessThanOrEqual => InstructionIr::LessThanOrEqual,
                 Instruction::Not => InstructionIr::Not,
+                Instruction::NotEqual => InstructionIr::NotEqual,
                 Instruction::And => InstructionIr::And,
                 Instruction::Or => InstructionIr::Or,
                 Instruction::Drop => InstructionIr::Drop,
