@@ -207,11 +207,11 @@ impl PartialOrd for Value {
                 }
             }
         } else {
-            Some(if other.is_nil() {
-                Ordering::Equal
+            if other.is_nil() {
+                Some(Ordering::Equal)
             } else {
-                Ordering::Less
-            })
+                other.partial_cmp(self).map(Ordering::reverse)
+            }
         }
     }
 }
@@ -409,6 +409,10 @@ mod tests {
         assert!(Value::from(1.0) > Value::from(0.0));
         assert!(Value::from(-1.0) < Value::from(0.0));
         assert!(Value::from(0.0) > Value::from(-1.0));
+        assert!(Value::from(0.0) <= Value::from(1.0));
+        assert!(Value::from(0.0) <= Value::from(0.0));
+        assert!(Value::from(1.0) >= Value::from(0.0));
+        assert!(Value::from(0.0) >= Value::from(0.0));
     }
 
     #[test]
