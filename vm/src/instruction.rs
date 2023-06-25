@@ -6,6 +6,10 @@ pub use format::{format_instructions, FormatError};
 #[derive(Clone, Copy, Debug, num_derive::FromPrimitive)]
 pub enum Instruction {
     Add,
+    NotEqual,
+    GreaterThan,
+    GreaterThanOrEqual,
+    LessThanOrEqual,
     And,
     Branch,
     Call,
