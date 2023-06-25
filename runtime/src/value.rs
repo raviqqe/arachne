@@ -405,10 +405,12 @@ mod tests {
         assert_eq!(Value::from(1.0), Value::from(1.0));
         assert_ne!(Value::from(0.0), Value::from(1.0));
         assert_eq!(Value::from(f64::NAN), Value::from(f64::NAN));
+
         assert!(Value::from(0.0) < Value::from(1.0));
         assert!(Value::from(1.0) > Value::from(0.0));
         assert!(Value::from(-1.0) < Value::from(0.0));
         assert!(Value::from(0.0) > Value::from(-1.0));
+
         assert!(Value::from(0.0) <= Value::from(1.0));
         assert!(Value::from(0.0) <= Value::from(0.0));
         assert!(Value::from(1.0) >= Value::from(0.0));
