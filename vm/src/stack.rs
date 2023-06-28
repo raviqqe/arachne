@@ -32,7 +32,7 @@ impl<T, const N: usize> Stack<T, N> {
 
     #[inline(always)]
     pub fn pop(&mut self) -> T {
-        if self.len() <= 0 {
+        if self.len() == 0 {
             panic!("stack underflow");
         }
 
