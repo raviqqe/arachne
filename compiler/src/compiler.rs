@@ -19,7 +19,6 @@ impl<'a> Compiler<'a> {
         values: &'a mut (impl Stream<Item = Result<Value, E>> + Unpin),
     ) -> impl Stream<Item = Result<(), CompileError>> + 'a {
         try_stream! {
-            // TODO Set a global flag.
             let function = Function::new();
             let mut block = Block::new(&function);
 
