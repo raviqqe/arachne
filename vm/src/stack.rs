@@ -43,7 +43,7 @@ impl<T, const N: usize> Stack<T, N> {
 
     #[inline(always)]
     pub fn peek(&self, index: usize) -> &T {
-        if self.len() as isize - index as isize - 1 <= 0 {
+        if self.len() as isize - index as isize <= 0 {
             panic!("stack underflow");
         }
 
