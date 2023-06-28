@@ -25,6 +25,11 @@ impl<'a> Compiler<'a> {
 
             while let Some(value) = values.next().await {
                 self.compile_statement(&value.map_err(|error| CompileError::Other(error.into()))?, &mut block, true)?;
+
+                if let Some(name) = function.free_variables().iter().next() {
+                    Err(CompileError::VariableNotDefined(name.to_string()))?;
+                }
+
                 yield ();
             }
         }
@@ -185,7 +190,6 @@ impl<'a> Compiler<'a> {
                 codes.push(index as u8);
             }
             Variable::Free(index) => {
-                // TODO Throw an error at top level.
                 codes.push(Instruction::Environment as u8);
                 codes.push(index as u8);
             }
@@ -389,11 +393,6 @@ mod tests {
 
     async fn compile_error<const N: usize>(values: [Value; N]) -> CompileError {
         compile_instructions(values).await.unwrap_err()
-    }
-
-    #[tokio::test]
-    async fn compile_symbol() {
-        insta::assert_display_snapshot!(compile(["foo".into()]).await);
     }
 
     mod call {
