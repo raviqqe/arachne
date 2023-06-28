@@ -111,6 +111,24 @@ mod tests {
     }
 
     #[test]
+    #[should_panic]
+    fn pop_fail() {
+        let mut stack = create_stack();
+
+        stack.pop();
+    }
+
+    #[test]
+    fn push_and_pop_scalars() {
+        let mut stack = create_stack();
+        stack.push(1);
+        stack.push(2);
+
+        assert_eq!(stack.pop(), 2);
+        assert_eq!(stack.pop(), 1);
+    }
+
+    #[test]
     fn peek() {
         let mut stack = create_stack();
         stack.push(1);
