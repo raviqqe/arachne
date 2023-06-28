@@ -32,6 +32,10 @@ impl<T, const N: usize> Stack<T, N> {
 
     #[inline(always)]
     pub fn pop(&mut self) -> T {
+        if self.len() == 0 {
+            panic!("stack underflow");
+        }
+
         self.ptr = unsafe { self.ptr.sub(1) };
 
         unsafe { read(self.ptr) }
@@ -39,6 +43,10 @@ impl<T, const N: usize> Stack<T, N> {
 
     #[inline(always)]
     pub fn peek(&self, index: usize) -> &T {
+        if self.len() as isize - index as isize <= 0 {
+            panic!("stack underflow");
+        }
+
         unsafe { &*self.ptr.sub(index + 1) }
     }
 
@@ -100,6 +108,39 @@ mod tests {
 
         assert_eq!(stack.pop(), Box::new(2));
         assert_eq!(stack.pop(), Box::new(1));
+    }
+
+    #[test]
+    #[should_panic]
+    fn pop_fail() {
+        let mut stack = create_stack::<()>();
+
+        stack.pop();
+    }
+
+    #[test]
+    #[should_panic]
+    fn peek_fail() {
+        let stack = create_stack::<()>();
+
+        stack.peek(0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn peek_fail_deep() {
+        let mut stack = create_stack::<()>();
+
+        stack.push(());
+        stack.peek(1);
+    }
+
+    #[test]
+    #[should_panic]
+    fn top_fail() {
+        let stack = create_stack::<()>();
+
+        stack.top();
     }
 
     #[test]

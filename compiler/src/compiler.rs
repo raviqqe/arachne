@@ -19,12 +19,18 @@ impl<'a> Compiler<'a> {
         values: &'a mut (impl Stream<Item = Result<Value, E>> + Unpin),
     ) -> impl Stream<Item = Result<(), CompileError>> + 'a {
         try_stream! {
-            // TODO Set a global flag.
             let function = Function::new();
             let mut block = Block::new(&function);
 
             while let Some(value) = values.next().await {
                 self.compile_statement(&value.map_err(|error| CompileError::Other(error.into()))?, &mut block, true)?;
+
+                let name = function.free_variables().iter().next().map(ToString::to_string);
+
+                if let Some(name) = name {
+                    Err(CompileError::VariableNotDefined(name))?;
+                }
+
                 yield ();
             }
         }
@@ -185,7 +191,6 @@ impl<'a> Compiler<'a> {
                 codes.push(index as u8);
             }
             Variable::Free(index) => {
-                // TODO Throw an error at top level.
                 codes.push(Instruction::Environment as u8);
                 codes.push(index as u8);
             }
@@ -389,11 +394,6 @@ mod tests {
 
     async fn compile_error<const N: usize>(values: [Value; N]) -> CompileError {
         compile_instructions(values).await.unwrap_err()
-    }
-
-    #[tokio::test]
-    async fn compile_symbol() {
-        insta::assert_display_snapshot!(compile(["foo".into()]).await);
     }
 
     mod call {
