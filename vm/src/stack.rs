@@ -136,6 +136,14 @@ mod tests {
     }
 
     #[test]
+    #[should_panic]
+    fn top_fail() {
+        let stack = create_stack::<()>();
+
+        stack.top();
+    }
+
+    #[test]
     fn peek() {
         let mut stack = create_stack();
         stack.push(1);
