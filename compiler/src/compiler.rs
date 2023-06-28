@@ -26,8 +26,10 @@ impl<'a> Compiler<'a> {
             while let Some(value) = values.next().await {
                 self.compile_statement(&value.map_err(|error| CompileError::Other(error.into()))?, &mut block, true)?;
 
-                if let Some(name) = function.free_variables().iter().next() {
-                    Err(CompileError::VariableNotDefined(name.to_string()))?;
+                let name = function.free_variables().iter().next().map(ToString::to_string);
+
+                if let Some(name) = name {
+                    Err(CompileError::VariableNotDefined(name))?;
                 }
 
                 yield ();
