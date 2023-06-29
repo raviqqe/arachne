@@ -1,6 +1,7 @@
 use crate::{
     decode::{decode_bytes, decode_f64, decode_u16, decode_u32, decode_u8, decode_u8_option},
     frame::Frame,
+    prompt::Prompt,
     stack::Stack,
     Instruction,
 };
@@ -35,6 +36,7 @@ pub struct Vm {
     program_counter: usize,
     stack: Stack<Value, { 1 << 11 }>,
     frames: Stack<Frame, { 1 << 8 }>,
+    prompts: Stack<Prompt, { 1 << 8 }>,
 }
 
 impl Vm {
@@ -43,6 +45,7 @@ impl Vm {
             program_counter: 0,
             stack: Stack::new(),
             frames: Stack::new(),
+            prompts: Stack::new(),
         }
     }
 
@@ -303,6 +306,10 @@ impl Vm {
     }
 
     fn prompt(&mut self) {
+        let tag = self.stack.pop();
+
+        self.prompts.push(Prompt::new(tag));
+
         todo!()
     }
 
