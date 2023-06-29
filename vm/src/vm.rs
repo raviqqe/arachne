@@ -308,7 +308,8 @@ impl Vm {
     fn prompt(&mut self) {
         let tag = self.stack.pop();
 
-        self.prompts.push(Prompt::new(tag));
+        self.prompts
+            .push(Prompt::new(tag, self.frames.top().pointer()));
 
         todo!()
     }
