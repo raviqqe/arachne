@@ -11,6 +11,7 @@ pub enum CompileError {
     Other(Box<dyn Error>),
     Syntax(String),
     SymbolLength(String),
+    VariableNotDefined(String),
 }
 
 impl Error for CompileError {}
@@ -29,6 +30,9 @@ impl Display for CompileError {
             }
             Self::SymbolLength(symbol) => {
                 write!(formatter, "symbol too long: {}", symbol)
+            }
+            Self::VariableNotDefined(symbol) => {
+                write!(formatter, "variable not found: {}", symbol)
             }
         }
     }
