@@ -54,6 +54,7 @@ impl Vm {
                 Instruction::BRANCH => self.branch(codes),
                 Instruction::CALL => self.call(codes),
                 Instruction::CLOSE => self.close(codes),
+                Instruction::CONTROL0 => self.control0(),
                 Instruction::DIVIDE => self.divide(),
                 Instruction::DROP => self.drop(),
                 Instruction::DUMP => self.dump(),
@@ -74,6 +75,7 @@ impl Vm {
                 Instruction::NOT_EQUAL => self.not_equal(),
                 Instruction::OR => self.or(),
                 Instruction::PEEK => self.peek(codes),
+                Instruction::PROMPT => self.prompt(),
                 Instruction::RETURN => self.r#return(),
                 Instruction::SET => self.set(),
                 Instruction::SUBTRACT => self.subtract(),
@@ -298,6 +300,14 @@ impl Vm {
         self.program_counter = frame.return_address() as usize;
 
         self.stack.push(value);
+    }
+
+    fn prompt(&mut self) {
+        todo!()
+    }
+
+    fn control0(&mut self) {
+        todo!()
     }
 
     #[inline(always)]
