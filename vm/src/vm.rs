@@ -310,8 +310,6 @@ impl Vm {
 
         self.prompts
             .push(Prompt::new(tag, self.frames.top().pointer()));
-
-        todo!()
     }
 
     fn control0(&mut self) {
