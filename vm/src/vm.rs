@@ -167,10 +167,9 @@ impl Vm {
     fn call(&mut self, codes: &[u8]) {
         let arity = self.read_u8(codes) as usize;
 
-        self.frames.push(Frame::new(
-            (self.stack.len() - arity - 1) as u32,
-            self.program_counter as u32,
-        ));
+        self.stack
+            .push(((self.stack.len() - arity - 1) as u32).into());
+        self.stack.push((self.program_counter as u32).into());
 
         self.call_function(arity)
     }
