@@ -34,7 +34,6 @@ macro_rules! comparison_operation {
 pub struct Vm {
     program_counter: usize,
     stack: Stack<Value, { 1 << 11 }>,
-    frames: Stack<Frame, { 1 << 8 }>,
 }
 
 impl Vm {
@@ -42,7 +41,6 @@ impl Vm {
         Self {
             program_counter: 0,
             stack: Stack::new(),
-            frames: Stack::new(),
         }
     }
 
