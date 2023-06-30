@@ -32,6 +32,7 @@ macro_rules! comparison_operation {
 #[derive(Debug)]
 pub struct Vm {
     program_counter: usize,
+    frame_pointer: usize,
     stack: Stack<Value, { 1 << 11 }>,
 }
 
@@ -39,6 +40,7 @@ impl Vm {
     pub fn new() -> Self {
         Self {
             program_counter: 0,
+            frame_pointer: 0,
             stack: Stack::new(),
         }
     }
