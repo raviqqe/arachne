@@ -435,6 +435,27 @@ mod tests {
                 .await
             );
         }
+
+        #[tokio::test]
+        async fn compile_tail_call_in_if() {
+            insta::assert_display_snapshot!(
+                compile([
+                    [
+                        "let-rec".into(),
+                        "f".into(),
+                        [
+                            "fn".into(),
+                            [].into(),
+                            ["if".into(), 1.0.into(), 42.0.into(), ["f".into()].into()].into()
+                        ]
+                        .into()
+                    ]
+                    .into(),
+                    ["f".into()].into(),
+                ])
+                .await
+            );
+        }
     }
 
     mod function {
