@@ -42,6 +42,7 @@ pub fn format_instructions(codes: &[u8]) -> Result<String, FormatError> {
                     }
                 }
                 Instruction::Peek => InstructionIr::Peek(decode_u8(codes, &mut index)),
+                Instruction::Prompt => InstructionIr::Prompt,
                 Instruction::Get => InstructionIr::Get,
                 Instruction::Set => InstructionIr::Set,
                 Instruction::Length => InstructionIr::Length,
@@ -60,6 +61,7 @@ pub fn format_instructions(codes: &[u8]) -> Result<String, FormatError> {
                     arity: decode_u8(codes, &mut index),
                     environment_size: decode_u8(codes, &mut index),
                 },
+                Instruction::Control0 => InstructionIr::Control0,
                 Instruction::Environment => {
                     InstructionIr::Environment(decode_u8(codes, &mut index))
                 }

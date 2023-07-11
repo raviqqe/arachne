@@ -134,6 +134,8 @@ impl<'a> Compiler<'a> {
                             "not" => Some(Instruction::Not),
                             "and" => Some(Instruction::And),
                             "or" => Some(Instruction::Or),
+                            "prompt" => Some(Instruction::Prompt),
+                            "control0" => Some(Instruction::Control0),
                             _ => None,
                         } {
                             self.compile_arguments(array, block)?;
