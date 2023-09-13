@@ -215,7 +215,9 @@ impl<'a> Compiler<'a> {
         drop(codes);
 
         let arguments = array.get_usize(1);
-        let Some(arguments) = arguments.as_array() else { return Err(CompileError::Syntax(array.to_string())) };
+        let Some(arguments) = arguments.as_array() else {
+            return Err(CompileError::Syntax(array.to_string()));
+        };
         let arity = u8::try_from(arguments.len_usize())?;
 
         let function = {
