@@ -69,7 +69,9 @@ impl Parser {
         string.push(character);
 
         loop {
-            let Some(character) = self.read_character(lines).await? else { return Ok(string.into()) };
+            let Some(character) = self.read_character(lines).await? else {
+                return Ok(string.into());
+            };
 
             if SPECIAL_CHARACTERS.contains(character) {
                 self.buffer.push_front(character);

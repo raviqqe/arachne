@@ -62,7 +62,9 @@ impl Array {
     }
 
     pub fn get(&self, index: Value) -> &Value {
-        let Ok(index) = Float64::try_from(index) else { return &STATIC_NIL; };
+        let Ok(index) = Float64::try_from(index) else {
+            return &STATIC_NIL;
+        };
         let index = index.to_f64();
 
         if index < 0.0 {
@@ -87,7 +89,9 @@ impl Array {
     }
 
     pub fn set(self, index: Value, value: Value) -> Self {
-        let Ok(index) = Float64::try_from(index) else { return Self::new(0); };
+        let Ok(index) = Float64::try_from(index) else {
+            return Self::new(0);
+        };
         let index = index.to_f64();
 
         if index < 0.0 {
