@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 num-derive = "0.4.1"
-num-traits = "0.2.16"
+num-traits = "0.2.17"
 runtime = { package = "arachne-runtime", path = "../runtime" }
 
 [dev-dependencies]
