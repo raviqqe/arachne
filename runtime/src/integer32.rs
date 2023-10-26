@@ -32,7 +32,7 @@ impl Integer32 {
 
 impl PartialOrd for Integer32 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.to_i32().partial_cmp(&other.to_i32())
+        Some(self.cmp(other))
     }
 }
 
