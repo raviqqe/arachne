@@ -34,7 +34,7 @@ impl Symbol {
 
 impl PartialOrd for Symbol {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.as_str().partial_cmp(other.as_str())
+        Some(self.cmp(other))
     }
 }
 
@@ -58,9 +58,7 @@ impl Display for Symbol {
 
 impl From<String> for Symbol {
     fn from(symbol: String) -> Self {
-        let entry = CACHE
-            .entry(Box::pin(symbol))
-            .or_insert_with(Default::default);
+        let entry = CACHE.entry(Box::pin(symbol)).or_default();
 
         Self(entry.key().deref() as *const String as u64 | SYMBOL_MASK)
     }
