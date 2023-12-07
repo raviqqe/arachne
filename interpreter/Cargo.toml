@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 async-stream = "0.3.5"
 futures = "0.3.29"
-once_cell = "1.18.0"
+once_cell = "1.19.0"
 compiler = { package = "arachne-compiler", path = "../compiler" }
 runtime = { package = "arachne-runtime", path = "../runtime" }
 vm = { package = "arachne-vm", path = "../vm" }
