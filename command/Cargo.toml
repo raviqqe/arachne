@@ -7,7 +7,7 @@ edition = "2021"
 interpreter = { package = "arachne-interpreter", path = "../interpreter" }
 parse = { package = "arachne-parse", path = "../parse" }
 vm = { package = "arachne-vm", path = "../vm" }
-async-recursion = "1.0.5"
+async-recursion = "1.1.0"
 async-stream = "0.3.5"
 clap = { version = "4.5.3", features = ["cargo"] }
 futures = "0.3.30"
