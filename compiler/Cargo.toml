@@ -10,6 +10,6 @@ runtime = { package = "arachne-runtime", path = "../runtime" }
 vm = { package = "arachne-vm", path = "../vm" }
 
 [dev-dependencies]
-insta = "1.38.0"
+insta = "1.39.0"
 pretty_assertions = "1.4.0"
 tokio = { version = "1.37.0", features = ["full"] }
