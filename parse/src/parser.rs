@@ -42,6 +42,7 @@ impl Parser {
         }
     }
 
+    #[allow(clippy::multiple_bound_locations)]
     #[async_recursion(?Send)]
     async fn parse_parentheses<E: Error + 'static>(
         &mut self,
