@@ -2,6 +2,7 @@
   "words": [
     "arity",
     "bytecodes",
+    "clippy",
     "dashmap",
     "dealloc",
     "deque",
@@ -10,6 +11,7 @@
     "minilisp",
     "mlir",
     "realloc",
-    "repr"
+    "repr",
+    "rustfmt"
   ]
 }
