@@ -12,7 +12,8 @@ use std::sync::LazyLock;
 
 // TODO Inline functions.
 
-static CACHE: LazyLock<DashMap<Pin<Box<str>>, ()>> = LazyLock::new(Default::default);
+#[allow(clippy::box_collection)]
+static CACHE: LazyLock<DashMap<Pin<Box<String>>, ()>> = LazyLock::new(Default::default);
 
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct Symbol(u64);
