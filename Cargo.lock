@@ -103,7 +103,6 @@ dependencies = [
  "arachne-vm",
  "async-stream",
  "futures",
- "once_cell",
  "pretty_assertions",
 ]
 
