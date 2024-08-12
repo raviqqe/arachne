@@ -28,7 +28,10 @@ impl Symbol {
     }
 
     pub fn as_str(&self) -> &str {
-        unsafe { &*((self.0 & !SYMBOL_MASK) as *const u8 as *const String) }
+        unsafe {
+            &*((nonbox::unbox(f64::from_bits(self.0)).unwrap() & !SYMBOL_MASK) as *const u8
+                as *const String)
+        }
     }
 }
 
@@ -60,7 +63,7 @@ impl From<String> for Symbol {
     fn from(symbol: String) -> Self {
         let entry = CACHE.entry(Box::pin(symbol)).or_default();
 
-        Self(entry.key().deref() as *const String as u64 | SYMBOL_MASK)
+        Self(nonbox::r#box(entry.key().deref() as *const String as u64 | SYMBOL_MASK).to_bits())
     }
 }
 
