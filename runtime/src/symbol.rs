@@ -8,12 +8,11 @@ use core::{
     pin::Pin,
 };
 use dashmap::DashMap;
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
 // TODO Inline functions.
 
-#[allow(clippy::box_collection)]
-static CACHE: Lazy<DashMap<Pin<Box<String>>, ()>> = Lazy::new(Default::default);
+static CACHE: LazyLock<DashMap<Pin<Box<str>>, ()>> = LazyLock::new(Default::default);
 
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct Symbol(u64);
