@@ -125,7 +125,6 @@ version = "0.1.0"
 dependencies = [
  "dashmap",
  "nonbox",
- "once_cell",
  "pretty_assertions",
 ]
 
