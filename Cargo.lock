@@ -464,9 +464,9 @@ dependencies = [
 
 [[package]]
 name = "mio"
-version = "1.0.1"
+version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4569e456d394deccd22ce1c1913e6ea0e54519f577285001215d33557431afe4"
+checksum = "80e04d1dcff3aae0704555fe5fee3bcfaf3d1fdf8a7e521d5b9d2b42acb52cec"
 dependencies = [
  "hermit-abi",
  "libc",
@@ -476,9 +476,9 @@ dependencies = [
 
 [[package]]
 name = "nonbox"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a547899bee60b2dcac77efb1a258312e429a9c4cf4deb2665540ef02bc9f8ac4"
+checksum = "4ded4b9b75601ba51fa88e7f34d5e26925bb69f49091b7ee3fbfce80b37a2e83"
 
 [[package]]
 name = "num-derive"
