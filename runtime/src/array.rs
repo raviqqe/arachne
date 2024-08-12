@@ -195,8 +195,6 @@ impl Array {
     }
 
     fn as_ptr(&self) -> *mut u8 {
-        #[cfg(test)]
-        std::println!("{:b}", self.0);
         (nonbox::unbox(f64::from_bits(self.0)).unwrap() & !ARRAY_MASK) as *mut u8
     }
 
