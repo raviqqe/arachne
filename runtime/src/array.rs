@@ -33,9 +33,11 @@ impl Array {
             return Self(0);
         }
 
-        Self(Self::mask_ptr(unsafe {
-            alloc_zeroed(Self::layout(capacity))
-        }))
+        Self::from_ptr(unsafe { alloc_zeroed(Self::layout(capacity)) })
+    }
+
+    fn from_ptr(ptr: *const u8) -> Self {
+        Self(Self::mask_ptr(ptr))
     }
 
     fn mask_ptr(ptr: *const u8) -> u64 {
@@ -43,7 +45,7 @@ impl Array {
 
         debug_assert!(ptr & ARRAY_MASK == 0);
 
-        nonbox::r#box(ptr | ARRAY_MASK).to_bits()
+        nonbox::box_u64(ptr | ARRAY_MASK)
     }
 
     /// # Safety
@@ -160,9 +162,7 @@ impl Array {
 
     fn deep_clone(&self, len: usize) -> Self {
         let len = self.header().len.max(len);
-        let mut other = Self(
-            nonbox::r#box(unsafe { alloc_zeroed(Self::layout(len)) } as u64 | ARRAY_MASK).to_bits(),
-        );
+        let mut other = Self::from_ptr(unsafe { alloc_zeroed(Self::layout(len)) });
 
         unsafe { &mut *other.header_mut() }.len = len;
 
