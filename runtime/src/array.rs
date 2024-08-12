@@ -33,9 +33,12 @@ impl Array {
             return Self(0);
         }
 
-        Self(Self::mask_ptr(unsafe {
-            alloc_zeroed(Self::layout(capacity))
-        }))
+        Self(
+            nonbox::r#box(Self::mask_ptr(unsafe {
+                alloc_zeroed(Self::layout(capacity))
+            }))
+            .to_bits(),
+        )
     }
 
     fn mask_ptr(ptr: *const u8) -> u64 {
@@ -160,7 +163,9 @@ impl Array {
 
     fn deep_clone(&self, len: usize) -> Self {
         let len = self.header().len.max(len);
-        let mut other = Self(unsafe { alloc_zeroed(Self::layout(len)) } as u64 | ARRAY_MASK);
+        let mut other = Self(
+            nonbox::r#box(unsafe { alloc_zeroed(Self::layout(len)) } as u64 | ARRAY_MASK).to_bits(),
+        );
 
         unsafe { &mut *other.header_mut() }.len = len;
 
@@ -190,7 +195,9 @@ impl Array {
     }
 
     fn as_ptr(&self) -> *mut u8 {
-        (self.0 & !ARRAY_MASK) as usize as *mut u8
+        #[cfg(test)]
+        std::println!("{:b}", self.0);
+        (nonbox::unbox(f64::from_bits(self.0)).unwrap() & !ARRAY_MASK) as *mut u8
     }
 
     fn layout(capacity: usize) -> Layout {
