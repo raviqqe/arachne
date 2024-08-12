@@ -9,41 +9,33 @@ use core::{
     fmt::{self, Display, Formatter},
     mem::forget,
 };
+use nonbox::unbox;
 
 pub const NIL: Value = Value(0);
-const EXPONENT_MASK: u64 = 0x7ff0 << 48;
-const TYPE_SUB_MASK: usize = 0b111;
-const INTEGER32_SUB_MASK: usize = 0b001;
-const SYMBOL_SUB_MASK: usize = 0b011;
-const CLOSURE_SUB_MASK: usize = 0b010;
-const ARRAY_SUB_MASK: usize = 0b100;
+
 const TYPE_MASK_OFFSET: usize = 48;
 
-const fn build_mask(sub_mask: usize) -> u64 {
-    ((sub_mask as u64) << TYPE_MASK_OFFSET) | EXPONENT_MASK
-}
-
-pub(crate) const ARRAY_MASK: u64 = build_mask(ARRAY_SUB_MASK);
-pub(crate) const CLOSURE_MASK: u64 = build_mask(CLOSURE_SUB_MASK);
-pub(crate) const SYMBOL_MASK: u64 = build_mask(SYMBOL_SUB_MASK);
-pub(crate) const INTEGER32_MASK: u64 = build_mask(INTEGER32_SUB_MASK);
+pub const INTEGER32_MASK: usize = 0b001;
+pub const SYMBOL_MASK: usize = 0b011;
+pub const CLOSURE_MASK: usize = 0b010;
+pub const ARRAY_MASK: usize = 0b100;
 
 #[derive(Debug)]
 pub struct Value(u64);
 
 impl Value {
     #[inline(always)]
-    pub const fn r#type(&self) -> Type {
-        if self.0 & EXPONENT_MASK != EXPONENT_MASK {
-            return Type::Float64;
-        }
-
-        match ((self.0 >> TYPE_MASK_OFFSET) as usize) & TYPE_SUB_MASK {
-            INTEGER32_SUB_MASK => Type::Integer32,
-            SYMBOL_SUB_MASK => Type::Symbol,
-            CLOSURE_SUB_MASK => Type::Closure,
-            ARRAY_SUB_MASK => Type::Array,
-            _ => Type::Float64,
+    pub fn r#type(&self) -> Type {
+        if let Some(value) = unbox(f64::from_bits(self.0)) {
+            match (value >> TYPE_MASK_OFFSET) as usize {
+                INTEGER32_MASK => Type::Integer32,
+                SYMBOL_MASK => Type::Symbol,
+                CLOSURE_MASK => Type::Closure,
+                ARRAY_MASK => Type::Array,
+                _ => Type::Float64,
+            }
+        } else {
+            Type::Float64
         }
     }
 
