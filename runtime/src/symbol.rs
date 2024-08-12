@@ -60,7 +60,7 @@ impl From<String> for Symbol {
     fn from(symbol: String) -> Self {
         let entry = CACHE.entry(Box::pin(symbol)).or_default();
 
-        Self(entry.key().deref() as *const String as u64 | SYMBOL_MASK)
+        Self(nonbox::r#box(entry.key().deref() as *const String as u64 | SYMBOL_MASK).to_bits())
     }
 }
 
