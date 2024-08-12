@@ -109,7 +109,7 @@ impl Closure {
 
     #[inline]
     fn as_ptr(&self) -> *mut u8 {
-        (self.0 & !CLOSURE_MASK) as *mut _
+        (nonbox::unbox(f64::from_bits(self.0)).unwrap() & !CLOSURE_MASK) as *mut _
     }
 }
 
