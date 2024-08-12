@@ -33,12 +33,9 @@ impl Array {
             return Self(0);
         }
 
-        Self(
-            nonbox::r#box(Self::mask_ptr(unsafe {
-                alloc_zeroed(Self::layout(capacity))
-            }))
-            .to_bits(),
-        )
+        Self(Self::mask_ptr(unsafe {
+            alloc_zeroed(Self::layout(capacity))
+        }))
     }
 
     fn mask_ptr(ptr: *const u8) -> u64 {
@@ -46,7 +43,7 @@ impl Array {
 
         debug_assert!(ptr & ARRAY_MASK == 0);
 
-        ptr | ARRAY_MASK
+        nonbox::r#box(ptr | ARRAY_MASK).to_bits()
     }
 
     /// # Safety
