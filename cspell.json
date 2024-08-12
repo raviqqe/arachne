@@ -10,6 +10,7 @@
     "melior",
     "minilisp",
     "mlir",
+    "nonbox",
     "realloc",
     "repr",
     "rustfmt"
