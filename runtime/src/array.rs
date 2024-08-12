@@ -192,7 +192,7 @@ impl Array {
     }
 
     fn as_ptr(&self) -> *mut u8 {
-        (nonbox::unbox(f64::from_bits(self.0)).unwrap() & !ARRAY_MASK) as *mut u8
+        (nonbox::unbox_u64(self.0).unwrap() & !ARRAY_MASK) as *mut u8
     }
 
     fn layout(capacity: usize) -> Layout {
