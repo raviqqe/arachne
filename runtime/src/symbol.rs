@@ -29,7 +29,8 @@ impl Symbol {
 
     pub fn as_str(&self) -> &str {
         unsafe {
-            &*((nonbox::f64::u64::unbox_unsigned(self.0).unwrap() & !SYMBOL_MASK) as *const u8 as *const String)
+            &*((nonbox::f64::u64::unbox_unsigned(self.0).unwrap() & !SYMBOL_MASK) as *const u8
+                as *const String)
         }
     }
 }
