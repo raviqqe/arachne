@@ -26,7 +26,7 @@ impl Closure {
         let (layout, _) = Layout::new::<Header>()
             .extend(Layout::array::<Value>(environment_size as usize).unwrap())
             .unwrap();
-        let this = Self(nonbox::box_u64(
+        let this = Self(nonbox::f64::u64::box_unsigned(
             unsafe { alloc(layout) } as u64 | CLOSURE_MASK,
         ));
 
@@ -111,7 +111,7 @@ impl Closure {
 
     #[inline]
     fn as_ptr(&self) -> *mut u8 {
-        (nonbox::unbox_u64(self.0).unwrap() & !CLOSURE_MASK) as *mut _
+        (nonbox::f64::u64::unbox_unsigned(self.0).unwrap() & !CLOSURE_MASK) as *mut _
     }
 }
 

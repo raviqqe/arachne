@@ -62,7 +62,7 @@ impl From<i32> for Integer32 {
 
 impl From<u32> for Integer32 {
     fn from(number: u32) -> Self {
-        Self(nonbox::box_u64(number as u64 | INTEGER32_MASK))
+        Self(nonbox::f64::u64::box_unsigned(number as u64 | INTEGER32_MASK))
     }
 }
 

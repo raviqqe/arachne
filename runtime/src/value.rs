@@ -30,7 +30,7 @@ pub struct Value(u64);
 impl Value {
     #[inline(always)]
     pub fn r#type(&self) -> Type {
-        if let Some(value) = nonbox::unbox_u64(self.0) {
+        if let Some(value) = nonbox::f64::u64::unbox_unsigned(self.0) {
             match value >> TYPE_MASK_OFFSET {
                 INTEGER32_SUB_MASK => Type::Integer32,
                 SYMBOL_SUB_MASK => Type::Symbol,
