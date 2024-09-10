@@ -12,7 +12,7 @@ use core::{
 
 pub const NIL: Value = Value(0);
 
-const TYPE_MASK_OFFSET: usize = 48;
+const TYPE_MASK_OFFSET: usize = 47;
 
 const INTEGER32_SUB_MASK: u64 = 0b001;
 const SYMBOL_SUB_MASK: u64 = 0b011;
