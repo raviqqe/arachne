@@ -10,6 +10,7 @@ pub enum Instruction {
     Branch,
     Call,
     Close,
+    Control0,
     Divide,
     Drop,
     Dump,
@@ -30,6 +31,7 @@ pub enum Instruction {
     NotEqual,
     Or,
     Peek,
+    Prompt,
     Return,
     Set,
     Subtract,
@@ -43,6 +45,7 @@ impl Instruction {
     pub const BRANCH: u8 = Self::Branch as _;
     pub const CALL: u8 = Self::Call as _;
     pub const CLOSE: u8 = Self::Close as _;
+    pub const CONTROL0: u8 = Self::Control0 as _;
     pub const DIVIDE: u8 = Self::Divide as _;
     pub const DROP: u8 = Self::Drop as _;
     pub const DUMP: u8 = Self::Dump as _;
@@ -63,6 +66,7 @@ impl Instruction {
     pub const NOT_EQUAL: u8 = Self::NotEqual as _;
     pub const OR: u8 = Self::Or as _;
     pub const PEEK: u8 = Self::Peek as _;
+    pub const PROMPT: u8 = Self::Prompt as _;
     pub const RETURN: u8 = Self::Return as _;
     pub const SET: u8 = Self::Set as _;
     pub const SUBTRACT: u8 = Self::Subtract as _;
