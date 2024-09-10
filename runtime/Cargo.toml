@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 dashmap = "6.1.0"
-nonbox = "0.2.2"
+nonbox = "0.3.0"
 
 [dev-dependencies]
 pretty_assertions = "1.4.0"
