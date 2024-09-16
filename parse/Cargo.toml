@@ -10,5 +10,5 @@ async-stream = "0.3.5"
 futures = "0.3.30"
 
 [dev-dependencies]
-pretty_assertions = "1.4.0"
+pretty_assertions = "1.4.1"
 tokio = { features = ["full"], version = "1.40.0" }

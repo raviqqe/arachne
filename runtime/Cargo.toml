@@ -8,4 +8,4 @@ dashmap = "6.1.0"
 nonbox = "0.3.0"
 
 [dev-dependencies]
-pretty_assertions = "1.4.0"
+pretty_assertions = "1.4.1"
