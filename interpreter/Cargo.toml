@@ -11,4 +11,4 @@ runtime = { package = "arachne-runtime", path = "../runtime" }
 vm = { package = "arachne-vm", path = "../vm" }
 
 [dev-dependencies]
-pretty_assertions = "1.4.0"
+pretty_assertions = "1.4.1"
