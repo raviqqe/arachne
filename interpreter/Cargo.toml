@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-async-stream = "0.3.5"
+async-stream = "0.3.6"
 futures = "0.3.30"
 compiler = { package = "arachne-compiler", path = "../compiler" }
 runtime = { package = "arachne-runtime", path = "../runtime" }
