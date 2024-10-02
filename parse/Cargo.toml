@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 runtime = { package = "arachne-runtime", path = "../runtime" }
 async-recursion = "1.1.1"
-async-stream = "0.3.5"
+async-stream = "0.3.6"
 futures = "0.3.30"
 
 [dev-dependencies]
