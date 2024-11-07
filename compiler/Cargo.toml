@@ -12,4 +12,4 @@ vm = { package = "arachne-vm", path = "../vm" }
 [dev-dependencies]
 insta = "1.41.1"
 pretty_assertions = "1.4.1"
-tokio = { version = "1.41.0", features = ["full"] }
+tokio = { version = "1.41.1", features = ["full"] }
