@@ -1,6 +1,7 @@
 use crate::{
     decode::{decode_bytes, decode_f64, decode_u16, decode_u32, decode_u8, decode_u8_option},
     frame::Frame,
+    prompt::Prompt,
     stack::Stack,
     Instruction,
 };
@@ -35,6 +36,7 @@ pub struct Vm {
     program_counter: usize,
     stack: Stack<Value, { 1 << 11 }>,
     frames: Stack<Frame, { 1 << 8 }>,
+    prompts: Stack<Prompt, { 1 << 8 }>,
 }
 
 impl Vm {
@@ -43,6 +45,7 @@ impl Vm {
             program_counter: 0,
             stack: Stack::new(),
             frames: Stack::new(),
+            prompts: Stack::new(),
         }
     }
 
@@ -54,6 +57,7 @@ impl Vm {
                 Instruction::BRANCH => self.branch(codes),
                 Instruction::CALL => self.call(codes),
                 Instruction::CLOSE => self.close(codes),
+                Instruction::CONTROL0 => self.control0(),
                 Instruction::DIVIDE => self.divide(),
                 Instruction::DROP => self.drop(),
                 Instruction::DUMP => self.dump(),
@@ -74,6 +78,7 @@ impl Vm {
                 Instruction::NOT_EQUAL => self.not_equal(),
                 Instruction::OR => self.or(),
                 Instruction::PEEK => self.peek(codes),
+                Instruction::PROMPT => self.prompt(),
                 Instruction::RETURN => self.r#return(),
                 Instruction::SET => self.set(),
                 Instruction::SUBTRACT => self.subtract(),
@@ -298,6 +303,15 @@ impl Vm {
         self.program_counter = frame.return_address() as usize;
 
         self.stack.push(value);
+    }
+
+    fn prompt(&mut self) {
+        self.prompts
+            .push(Prompt::new(self.stack.pop(), self.frames.top().pointer()));
+    }
+
+    fn control0(&mut self) {
+        todo!()
     }
 
     #[inline(always)]
