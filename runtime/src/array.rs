@@ -45,7 +45,7 @@ impl Array {
 
         debug_assert!(ptr & ARRAY_MASK == 0);
 
-        nonbox::f64::u64::box_unsigned(ptr | ARRAY_MASK)
+        nonbox::f64::box_unsigned(ptr | ARRAY_MASK)
     }
 
     /// # Safety
@@ -192,7 +192,7 @@ impl Array {
     }
 
     fn as_ptr(&self) -> *mut u8 {
-        (nonbox::f64::u64::unbox_unsigned(self.0).unwrap() & !ARRAY_MASK) as *mut u8
+        (nonbox::f64::unbox_unsigned(self.0).unwrap() & !ARRAY_MASK) as *mut u8
     }
 
     fn layout(capacity: usize) -> Layout {
