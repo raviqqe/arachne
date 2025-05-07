@@ -1,6 +1,7 @@
 mod decode;
 mod frame;
 mod instruction;
+mod prompt;
 mod stack;
 mod vm;
 
