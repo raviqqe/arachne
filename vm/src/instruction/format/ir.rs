@@ -61,10 +61,7 @@ impl Display for InstructionIr {
                 pointer,
                 arity,
                 environment_size,
-            } => write!(
-                formatter,
-                "close {pointer:x} {arity} {environment_size}"
-            ),
+            } => write!(formatter, "close {pointer:x} {arity} {environment_size}"),
             Self::Divide => write!(formatter, "divide"),
             Self::Drop => write!(formatter, "drop"),
             Self::Dump => write!(formatter, "dump"),
