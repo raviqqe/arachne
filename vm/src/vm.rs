@@ -161,7 +161,7 @@ impl Vm {
     fn dump(&mut self) {
         let value = self.stack.pop();
 
-        println!("{}", value);
+        println!("{value}");
 
         self.stack.push(value);
     }

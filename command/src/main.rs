@@ -11,7 +11,7 @@ use tokio_stream::wrappers::LinesStream;
 #[tokio::main]
 async fn main() {
     if let Err(error) = run().await {
-        eprintln!("{}", error);
+        eprintln!("{error}");
         exit(1);
     }
 }

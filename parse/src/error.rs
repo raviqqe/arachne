@@ -26,7 +26,7 @@ impl Display for ParseError {
                 write!(formatter, "unexpected end of file")
             }
             Self::Other(error) => {
-                write!(formatter, "{}", error)
+                write!(formatter, "{error}")
             }
         }
     }

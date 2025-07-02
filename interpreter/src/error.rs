@@ -11,7 +11,7 @@ pub enum InterpretError {
 impl Display for InterpretError {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         match self {
-            Self::Other(error) => write!(formatter, "{}", error),
+            Self::Other(error) => write!(formatter, "{error}"),
         }
     }
 }
