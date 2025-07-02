@@ -104,10 +104,10 @@ impl Display for FormatError {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         match self {
             Self::InvalidInstruction(instruction) => {
-                write!(formatter, "invalid instruction: {:x}", instruction)
+                write!(formatter, "invalid instruction: {instruction:x}")
             }
             Self::Utf8(error) => {
-                write!(formatter, "{}", error)
+                write!(formatter, "{error}")
             }
         }
     }

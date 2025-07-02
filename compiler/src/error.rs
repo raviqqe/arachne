@@ -23,16 +23,16 @@ impl Display for CompileError {
                 write!(formatter, "closure cannot be compiled")
             }
             Self::Other(error) => {
-                write!(formatter, "{}", error)
+                write!(formatter, "{error}")
             }
             Self::Syntax(literal) => {
-                write!(formatter, "invalid syntax: {}", literal)
+                write!(formatter, "invalid syntax: {literal}")
             }
             Self::SymbolLength(symbol) => {
-                write!(formatter, "symbol too long: {}", symbol)
+                write!(formatter, "symbol too long: {symbol}")
             }
             Self::VariableNotDefined(symbol) => {
-                write!(formatter, "variable not found: {}", symbol)
+                write!(formatter, "variable not found: {symbol}")
             }
         }
     }
