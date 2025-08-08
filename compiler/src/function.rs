@@ -11,11 +11,11 @@ impl Function {
         Self::default()
     }
 
-    pub fn free_variables(&self) -> Ref<Vec<Symbol>> {
+    pub fn free_variables(&self) -> Ref<'_, Vec<Symbol>> {
         self.free_variables.borrow()
     }
 
-    pub fn free_variables_mut(&self) -> RefMut<Vec<Symbol>> {
+    pub fn free_variables_mut(&self) -> RefMut<'_, Vec<Symbol>> {
         self.free_variables.borrow_mut()
     }
 }

@@ -114,7 +114,7 @@ impl Value {
     }
 
     #[inline(always)]
-    pub fn as_typed(&self) -> Option<TypedValueRef> {
+    pub fn as_typed(&self) -> Option<TypedValueRef<'_>> {
         if self.is_nil() {
             None
         } else {
