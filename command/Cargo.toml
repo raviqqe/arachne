@@ -9,7 +9,7 @@ parse = { package = "arachne-parse", path = "../parse" }
 vm = { package = "arachne-vm", path = "../vm" }
 async-recursion = "1.1.1"
 async-stream = "0.3.6"
-clap = { version = "4.5.55", features = ["cargo"] }
+clap = { version = "4.5.56", features = ["cargo"] }
 futures = "0.3.31"
 tokio = { version = "1", features = ["full"] }
 tokio-stream = { version = "0.1", features = ["full"] }
