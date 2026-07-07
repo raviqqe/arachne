@@ -513,9 +513,9 @@ dependencies = [
 
 [[package]]
 name = "nonbox"
-version = "0.5.17"
+version = "0.5.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "549c4772ecc2f30e951a81f115151c1ec293537c7e638236e68f34d257af94a1"
+checksum = "4e513b0974b8652b6d383df4f6000d76ecfccad40bfe424c21c9fa9f92f6cdc0"
 
 [[package]]
 name = "num-derive"
