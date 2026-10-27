@@ -3,7 +3,7 @@
 set -e
 
 run() {
-  hyperfine --sort command -w 2 "$@"
+  hyperfine -w 2 "$@"
 }
 
 cd $(dirname $0)/..
