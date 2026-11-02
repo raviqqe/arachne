@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
       - uses: ruby/setup-ruby@7f797815d8adceb1c412e7abefdd1ab4abc47a5f # v1.335.0
-      - uses: homebrew/actions/setup-homebrew@d482da0e602890d3160aade42e72c8556103bf04 # main
+      - uses: homebrew/actions/setup-homebrew@c262868c096d909fc278daa87ed9772967331ea3 # main
       - run: brew install valgrind
       - run: sudo apt update --fix-missing
       - run: sudo apt install libc6-dbg
