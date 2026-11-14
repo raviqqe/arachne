@@ -1,5 +1,4 @@
 use std::{
-    convert::Infallible,
     error::Error,
     fmt,
     fmt::{Display, Formatter},
@@ -41,11 +40,5 @@ impl From<io::Error> for ParseError {
 impl From<FromUtf8Error> for ParseError {
     fn from(error: FromUtf8Error) -> Self {
         Self::Other(error.into())
-    }
-}
-
-impl From<Infallible> for ParseError {
-    fn from(error: Infallible) -> Self {
-        match error {}
     }
 }
