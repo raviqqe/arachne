@@ -46,6 +46,6 @@ impl From<FromUtf8Error> for ParseError {
 
 impl From<Infallible> for ParseError {
     fn from(error: Infallible) -> Self {
-        Self::Other(error.into())
+        match error {}
     }
 }
