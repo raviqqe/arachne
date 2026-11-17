@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-python@v7.1.0
         with:
           python-version: "3.11"
-      - uses: homebrew/actions/setup-homebrew@2026.11.09.1
+      - uses: homebrew/actions/setup-homebrew@2026.11.14.1
       - run: brew install chezscheme
       - run: |
           old=${{ github.base_ref }}

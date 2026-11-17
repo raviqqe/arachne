@@ -6,7 +6,7 @@ workflows:
     '.github/workflows/bench.yaml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-python@v7.1.0'
-        - 'homebrew/actions@2026.11.09.1'
+        - 'homebrew/actions@2026.11.14.1'
         - 'swatinem/rust-cache@v2.9.3'
     '.github/workflows/dependabot.yaml': []
     '.github/workflows/lint.yaml':
@@ -16,7 +16,7 @@ workflows:
         - 'swatinem/rust-cache@v2.9.3'
     '.github/workflows/test.yaml':
         - 'actions/checkout@v7.0.1'
-        - 'homebrew/actions@2026.11.09.1'
+        - 'homebrew/actions@2026.11.14.1'
         - 'ruby/setup-ruby@v1.338.0'
         - 'swatinem/rust-cache@v2.9.3'
 dependencies:
@@ -30,9 +30,9 @@ dependencies:
         commit: 'sha1-6d4fd22b20465ccc0f7354476588e8df7c9ca0e0'
         owner_id: 44036562
         repo_id: 192625525
-    'homebrew/actions@2026.11.09.1':
-        ref: '2026.11.09.1'
-        commit: 'sha1-63a2d4d8d4193eab3e62b1b782ff3ab8408f5b29'
+    'homebrew/actions@2026.11.14.1':
+        ref: '2026.11.14.1'
+        commit: 'sha1-ceec4e8419bb3c97ce96e9dda7738499ed5f869d'
         owner_id: 1503512
         repo_id: 202511568
     'lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411':
