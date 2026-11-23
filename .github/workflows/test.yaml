@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: Swatinem/rust-cache@v2.9.3
-      - uses: ruby/setup-ruby@v1.338.0
+      - uses: ruby/setup-ruby@v1.343.0
       - uses: homebrew/actions/setup-homebrew@2026.11.23.1
       - run: brew install valgrind
       - run: sudo apt update --fix-missing
