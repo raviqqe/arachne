@@ -17,7 +17,7 @@ workflows:
     '.github/workflows/test.yaml':
         - 'actions/checkout@v7.0.1'
         - 'homebrew/actions@2026.11.23.1'
-        - 'ruby/setup-ruby@v1.343.0'
+        - 'ruby/setup-ruby@v1.344.0'
         - 'swatinem/rust-cache@v2.9.3'
 dependencies:
     'actions/checkout@v7.0.1':
@@ -47,9 +47,9 @@ dependencies:
         repo_id: 629874716
         uses:
             - 'lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411'
-    'ruby/setup-ruby@v1.343.0':
-        ref: 'v1.343.0'
-        commit: 'sha1-be3c7df29b3349ec6bcfc6b4792f1cf9f5237d18'
+    'ruby/setup-ruby@v1.344.0':
+        ref: 'v1.344.0'
+        commit: 'sha1-78c62f2208e480ce3d5ae4dfd9b9e181acf48b63'
         owner_id: 210414
         repo_id: 231208785
     'streetsidesoftware/cspell-action@v9.2.0':
